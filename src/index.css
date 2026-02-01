@@ -1,80 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* FinanceAI Design System - Fintech SaaS */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    /* Core Colors - Fintech Blue Theme */
-    --background: 210 25% 98%;
-    --foreground: 220 50% 12%;
+    /* Money Impact Theme (Blue/Green/White/Black) */
+    --background: 0 0% 100%;
+    /* Pure White */
+    --foreground: 222 47% 11%;
+    /* Deep Charcoal/Navy Black */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 50% 12%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 50% 12%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary - Deep Navy Blue */
-    --primary: 220 70% 18%;
+    /* Primary - Trustworthy Blue */
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Light Blue */
-    --secondary: 210 100% 96%;
-    --secondary-foreground: 220 70% 18%;
+    /* Secondary - Very Light Blue/Gray */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11%;
 
     /* Muted */
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 20% 45%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    /* Accent - Vibrant Blue */
-    --accent: 210 100% 50%;
+    /* Accent - Financial Blue */
+    --accent: 199 89% 48%;
     --accent-foreground: 0 0% 100%;
 
-    /* Success - Green */
-    --success: 160 84% 39%;
-    --success-foreground: 0 0% 100%;
+    /* Success - Money Green */
+    --success: 142 76% 36%;
+    --success-foreground: 355.7 100% 97.3%;
 
-    /* Warning - Amber */
+    /* Warning - Professional Gold/Amber */
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Destructive - Red */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    /* Destructive - High Alert Red */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 210 100% 50%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 53%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Custom gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(220, 70%, 18%) 0%, hsl(210, 100%, 35%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(210, 25%, 98%) 0%, hsl(210, 40%, 95%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(210, 20%, 98%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(210, 100%, 50%) 0%, hsl(200, 100%, 45%) 100%);
+    /* Custom gradients (Financial Growth Vibe) */
+    --gradient-primary: linear-gradient(135deg, hsl(221, 83%, 53%) 0%, hsl(142, 76%, 36%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(210, 40%, 98%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(210, 20%, 99%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(142, 76%, 36%) 100%);
     --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(220 50% 12% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(220 50% 12% / 0.07), 0 2px 4px -2px hsl(220 50% 12% / 0.05);
-    --shadow-lg: 0 10px 15px -3px hsl(220 50% 12% / 0.08), 0 4px 6px -4px hsl(220 50% 12% / 0.05);
-    --shadow-xl: 0 20px 25px -5px hsl(220 50% 12% / 0.1), 0 8px 10px -6px hsl(220 50% 12% / 0.08);
-    --shadow-glow: 0 0 40px hsl(210 100% 50% / 0.15);
-    --shadow-card: 0 1px 3px hsl(220 50% 12% / 0.04), 0 6px 16px hsl(220 50% 12% / 0.06);
+    /* Shadows (High Contrast & Professional) */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-glow: 0 0 30px hsla(142, 76%, 36%, 0.2);
+    --shadow-card: 0 1px 3px rgb(0 0 0 / 0.05), 0 6px 16px rgb(0 0 0 / 0.05);
 
     /* Sidebar */
-    --sidebar-background: 220 70% 18%;
-    --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 210 100% 50%;
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 60% 25%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 50% 25%;
-    --sidebar-ring: 210 100% 50%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 224.3 76.3% 48%;
   }
 
   .dark {
@@ -130,12 +133,18 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-semibold tracking-tight;
   }
 }
 
 @layer components {
+
   /* Glass effect */
   .glass {
     @apply backdrop-blur-xl bg-white/80 border border-white/20;
@@ -147,19 +156,33 @@
     background-image: var(--gradient-primary);
   }
 
-  /* Card hover effect */
-  .card-hover {
-    @apply transition-all duration-300 ease-out;
+  /* Navbar link underline effect */
+  .nav-link {
+    @apply relative py-1;
   }
-  
-  .card-hover:hover {
-    @apply -translate-y-1;
-    box-shadow: var(--shadow-xl);
+
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-accent transition-all duration-300 ease-in-out;
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
   }
 
   /* Glow effect */
   .glow {
     box-shadow: var(--shadow-glow);
+  }
+
+  /* Improved Button Hovers */
+  .button-hero-hover:hover {
+    @apply brightness-110 scale-[1.02] shadow-lg;
+    box-shadow: 0 10px 20px -5px hsla(var(--primary), 0.3);
+  }
+
+  .button-ghost-hover:hover {
+    @apply bg-accent/10 text-accent font-semibold;
   }
 
   /* Animated gradient background */
@@ -170,9 +193,17 @@
   }
 
   @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   /* Fade in animation */
@@ -185,6 +216,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -201,6 +233,7 @@
       opacity: 0;
       transform: translateY(30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -213,8 +246,15 @@
   }
 
   @keyframes pulseSubtle {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(210 100% 50% / 0.4); }
-    50% { box-shadow: 0 0 0 8px hsl(210 100% 50% / 0); }
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 hsl(210 100% 50% / 0.4);
+    }
+
+    50% {
+      box-shadow: 0 0 0 8px hsl(210 100% 50% / 0);
+    }
   }
 
   /* Floating animation */
@@ -223,8 +263,67 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Reveal interaction system */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* Reveal delays */
+  .delay-100 {
+    transition-delay: 100ms;
+  }
+
+  .delay-200 {
+    transition-delay: 200ms;
+  }
+
+  .delay-300 {
+    transition-delay: 300ms;
+  }
+
+  .delay-400 {
+    transition-delay: 400ms;
+  }
+
+  .delay-500 {
+    transition-delay: 500ms;
+  }
+
+  /* Advanced Hover */
+  .hover-lift {
+    @apply transition-all duration-500 border-transparent;
+    transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    @apply -translate-y-2 scale-[1.02] border-primary/30;
+    box-shadow: 0 20px 40px -10px hsla(var(--primary), 0.1), 0 0 20px -5px hsla(var(--success), 0.2);
+    background-color: hsl(var(--card) / 0.8);
+  }
+
+  /* Floating decoration */
+  .blob {
+    @apply absolute blur-3xl rounded-full opacity-20 pointer-events-none;
+    z-index: -1;
   }
 
   /* Stats counter style */
@@ -235,9 +334,31 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* Keyframes for new animations */
+  @keyframes blob-bounce {
+
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+
+  .animate-blob {
+    animation: blob-bounce 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
 
 @layer utilities {
+
   /* Custom scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;

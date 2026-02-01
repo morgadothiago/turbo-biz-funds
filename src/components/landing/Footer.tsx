@@ -30,8 +30,12 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-primary text-primary-foreground">
-      <div className="container mx-auto px-4 py-16">
+    <footer className="relative bg-[#0A0A0A] text-white pt-24 pb-12 overflow-hidden border-t border-white/10">
+      {/* Background gradients */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           {/* Logo and description */}
           <div className="col-span-2">

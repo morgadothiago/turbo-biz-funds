@@ -1,6 +1,8 @@
 import { Clock, TrendingUp, Shield, Smartphone, Brain, BarChart3, Bell, Coins } from "lucide-react";
+import { useReveal } from "@/hooks/use-reveal";
 
 const Benefits = () => {
+  const titleRef = useReveal();
   const benefits = [
     {
       icon: Clock,
@@ -19,8 +21,8 @@ const Benefits = () => {
     },
     {
       icon: Smartphone,
-      title: "Controle pelo WhatsApp",
-      description: "Consulte dados, receba relatórios e tome decisões direto do seu celular.",
+      title: "Registre tudo no WhatsApp",
+      description: "Envie áudios ou fotos de notas fiscais e nossa IA cadastra a despesa automaticamente.",
     },
     {
       icon: Shield,
@@ -44,6 +46,7 @@ const Benefits = () => {
     },
   ];
 
+
   return (
     <section id="beneficios" className="py-20 bg-gradient-to-b from-background to-primary/5">
       <div className="container mx-auto px-4">
@@ -62,22 +65,26 @@ const Benefits = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {benefits.map((benefit, index) => (
-            <div
-              key={index}
-              className="group bg-card rounded-2xl p-6 border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
-                <benefit.icon className="w-6 h-6 text-accent" />
+          {benefits.map((benefit, index) => {
+            const cardRef = useReveal(index * 100);
+            return (
+              <div
+                key={index}
+                ref={cardRef}
+                className="group bg-card rounded-2xl p-6 border border-border shadow-sm hover-lift"
+              >
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
+                  <benefit.icon className="w-6 h-6 text-accent" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  {benefit.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {benefit.description}
+                </p>
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                {benefit.title}
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {benefit.description}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* AI Capabilities Section */}

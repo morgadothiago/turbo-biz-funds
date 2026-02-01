@@ -1,7 +1,10 @@
 import { Brain, MessageCircle, Zap, BarChart3, ArrowRight } from "lucide-react";
+import { useReveal } from "@/hooks/use-reveal";
 
 const HowItWorks = () => {
+  const titleRef = useReveal();
   const steps = [
+
     {
       number: "01",
       icon: Zap,
@@ -19,8 +22,8 @@ const HowItWorks = () => {
     {
       number: "03",
       icon: MessageCircle,
-      title: "Receba pelo WhatsApp",
-      description: "Alertas, relatórios e respostas direto no seu WhatsApp. Pergunte qualquer coisa sobre suas finanças.",
+      title: "Envie e Gerencie",
+      description: "Mande uma foto da conta ou um áudio dizendo 'Gastei R$ 50 no almoço'. A IA categoriza e, salva para você.",
       color: "success",
     },
     {
@@ -57,9 +60,14 @@ const HowItWorks = () => {
   };
 
   return (
-    <section id="como-funciona" className="py-20 bg-gradient-to-b from-secondary/30 to-background">
-      <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-16">
+    <section id="como-funciona" className="py-24 bg-gradient-to-b from-blue-50/50 to-white relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="blob w-96 h-96 bg-accent/5 -top-20 -left-20 animate-blob" />
+      <div className="blob w-80 h-80 bg-primary/5 top-1/2 right-0 animate-blob" style={{ animationDelay: '-12s' }} />
+
+      <div className="container mx-auto px-4 relative z-10">
+        <div ref={titleRef} className="max-w-3xl mx-auto text-center mb-16">
+
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
             Como Funciona
           </span>
@@ -77,10 +85,12 @@ const HowItWorks = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {steps.map((step, index) => {
               const colors = getColorClasses(step.color);
+              const cardRef = useReveal(index * 150);
               return (
                 <div
                   key={index}
-                  className="group relative bg-card rounded-2xl p-8 border border-border hover:shadow-xl transition-all duration-300"
+                  ref={cardRef}
+                  className="group relative bg-card rounded-2xl p-8 border border-border hover-lift"
                 >
                   {/* Step number */}
                   <div className={`absolute top-4 right-4 text-5xl font-bold ${colors.number}`}>
@@ -93,7 +103,7 @@ const HowItWorks = () => {
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-xl font-semibold text-foreground mb-3">
+                  <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
                     {step.title}
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
@@ -102,7 +112,7 @@ const HowItWorks = () => {
 
                   {/* Arrow for connection (except last) */}
                   {index < steps.length - 1 && (
-                    <div className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 z-10">
+                    <div className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 z-10 opacity-20">
                       <ArrowRight className={`w-6 h-6 ${colors.text}`} />
                     </div>
                   )}

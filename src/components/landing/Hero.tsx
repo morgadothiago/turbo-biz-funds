@@ -6,11 +6,13 @@ const Hero = () => {
   return (
     <section className="relative min-h-screen pt-24 pb-16 overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary/50 via-background to-background" />
-      
-      {/* Decorative elements */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-accent/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 via-background to-background" />
+
+      {/* Animated decorative blobs */}
+      <div className="blob w-72 h-72 bg-primary/30 top-minus-10 left-minus-10 animate-blob" style={{ top: '-5%', left: '-5%' }} />
+      <div className="blob w-96 h-96 bg-success/20 bottom-10 right-minus-10 animate-blob" style={{ bottom: '10%', right: '-10%', animationDelay: '-5s' }} />
+      <div className="blob w-64 h-64 bg-accent/20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-blob" style={{ animationDelay: '-10s' }} />
+
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-5xl mx-auto text-center">
@@ -22,14 +24,14 @@ const Hero = () => {
 
           {/* Headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-            Gerencie suas finanças com{" "}
-            <span className="gradient-text">IA e WhatsApp</span>
+            Gerencie suas finanças pelo{" "}
+            <span className="gradient-text">WhatsApp com IA</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-            Automatize sua gestão financeira, receba previsões inteligentes e controle
-            tudo pelo WhatsApp. Ideal para pequenas e médias empresas que querem crescer.
+            Envie áudios, fotos de notas e textos para registrar gastos instantaneamente.
+            Automatize sua gestão financeira e receba relatórios inteligentes direto no seu celular.
           </p>
 
           {/* CTAs */}
@@ -49,7 +51,7 @@ const Hero = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl mx-auto mb-16 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
             {[
-              { value: "5.000+", label: "Empresas" },
+              { value: "5.000+", label: "Pessoas" },
               { value: "R$ 50M+", label: "Gerenciados" },
               { value: "98%", label: "Satisfação" },
               { value: "24/7", label: "Disponível" },
@@ -84,7 +86,7 @@ const Hero = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     {[
                       { label: "Saldo Atual", value: "R$ 127.450,00", icon: TrendingUp, color: "text-success" },
-                      { label: "Receitas", value: "R$ 89.320,00", icon: TrendingUp, color: "text-accent" },
+                      { label: "Receitas", value: "R$ 89.320,00", icon: TrendingUp, color: "text-primary" },
                       { label: "Despesas", value: "R$ 45.780,00", icon: TrendingUp, color: "text-warning" },
                     ].map((card, index) => (
                       <div key={index} className="bg-card rounded-xl p-4 shadow-sm border border-border/50">
@@ -98,9 +100,9 @@ const Hero = () => {
                   </div>
 
                   {/* WhatsApp Integration Preview */}
-                  <div className="flex items-center gap-4 bg-success/10 rounded-xl p-4 border border-success/20">
-                    <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-success" />
+                  <div className="flex items-center gap-4 bg-primary/5 rounded-xl p-4 border border-primary/10">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <MessageCircle className="w-6 h-6 text-primary" />
                     </div>
                     <div className="flex-1 text-left">
                       <div className="text-sm font-medium text-foreground">WhatsApp Conectado</div>
@@ -108,32 +110,12 @@ const Hero = () => {
                         Envie "saldo" para ver seu balanço atual
                       </div>
                     </div>
-                    <Shield className="w-5 h-5 text-success" />
+                    <Shield className="w-5 h-5 text-primary" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Floating elements */}
-            <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6 bg-card rounded-xl p-3 shadow-lg border border-border/50 animate-float hidden md:block">
-              <div className="flex items-center gap-3">
-                <Brain className="w-8 h-8 text-accent" />
-                <div className="text-left">
-                  <div className="text-xs text-muted-foreground">IA detectou</div>
-                  <div className="text-sm font-semibold text-foreground">Economia de R$ 3.200</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 bg-card rounded-xl p-3 shadow-lg border border-border/50 animate-float hidden md:block" style={{ animationDelay: "0.5s" }}>
-              <div className="flex items-center gap-3">
-                <MessageCircle className="w-8 h-8 text-success" />
-                <div className="text-left">
-                  <div className="text-xs text-muted-foreground">Via WhatsApp</div>
-                  <div className="text-sm font-semibold text-foreground">Relatório enviado ✓</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

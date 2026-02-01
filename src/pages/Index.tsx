@@ -1,5 +1,6 @@
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
+import WhatsAppConnect from "@/components/landing/WhatsAppConnect";
 import Problem from "@/components/landing/Problem";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Benefits from "@/components/landing/Benefits";
@@ -15,6 +16,7 @@ const Index = () => {
       <Navbar />
       <Hero />
       <Problem />
+      <WhatsAppConnect />
       <HowItWorks />
       <Benefits />
       <Pricing />
