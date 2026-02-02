@@ -4,18 +4,14 @@ import { ArrowRight, Play, MessageCircle, Brain, TrendingUp, Shield } from "luci
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen pt-24 pb-16 overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 via-background to-background" />
-
-      {/* Animated decorative blobs */}
-      <div className="blob w-72 h-72 bg-primary/30 top-minus-10 left-minus-10 animate-blob" style={{ top: '-5%', left: '-5%' }} />
-      <div className="blob w-96 h-96 bg-success/20 bottom-10 right-minus-10 animate-blob" style={{ bottom: '10%', right: '-10%', animationDelay: '-5s' }} />
-      <div className="blob w-64 h-64 bg-accent/20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-blob" style={{ animationDelay: '-10s' }} />
+    <section className="relative min-h-screen pt-24 pb-16 overflow-hidden flex items-center bg-transparent">
 
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-5xl mx-auto text-center">
+        <div className="max-w-5xl mx-auto text-center relative">
+          {/* Subtle central glow for text */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-primary/5 blur-[100px] -z-10" />
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-8 animate-fade-in">
             <Brain className="w-4 h-4" />

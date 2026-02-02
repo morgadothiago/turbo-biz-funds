@@ -9,10 +9,12 @@ import Testimonials from "@/components/landing/Testimonials";
 import FAQ from "@/components/landing/FAQ";
 import CTA from "@/components/landing/CTA";
 import Footer from "@/components/landing/Footer";
+import BackgroundOrbs from "@/components/landing/BackgroundOrbs";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      <BackgroundOrbs isGlobal={true} />
       <Navbar />
       <Hero />
       <Problem />
