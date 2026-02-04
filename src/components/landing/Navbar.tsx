@@ -8,9 +8,9 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Como Funciona", href: "#como-funciona" },
-    { name: "Benefícios", href: "#beneficios" },
-    { name: "Planos", href: "#planos" },
-    { name: "FAQ", href: "#faq" },
+    { name: "Depoimentos", href: "#depoimentos" },
+    { name: "Preços", href: "#planos" },
+    { name: "Dúvidas", href: "#faq" },
   ];
 
   return (
@@ -23,7 +23,7 @@ const Navbar = () => {
               <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold text-foreground">
-              Finance<span className="text-accent">AI</span>
+              Organiza<span className="text-primary">AI</span>
             </span>
           </Link>
 
@@ -46,7 +46,7 @@ const Navbar = () => {
               <Link to="/login">Entrar</Link>
             </Button>
             <Button variant="hero" asChild>
-              <Link to="/cadastro">Começar Grátis</Link>
+              <Link to="/cadastro">Testar por R$ 9,90</Link>
             </Button>
           </div>
 
@@ -79,7 +79,7 @@ const Navbar = () => {
                   <Link to="/login">Entrar</Link>
                 </Button>
                 <Button variant="hero" asChild className="w-full">
-                  <Link to="/cadastro">Começar Grátis</Link>
+                  <Link to="/cadastro">Testar por R$ 9,90</Link>
                 </Button>
               </div>
             </div>

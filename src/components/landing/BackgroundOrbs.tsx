@@ -1,16 +1,16 @@
-import { Brain, Bot, Cpu, Sparkles, Zap, TrendingUp, MessageCircle, DollarSign } from 'lucide-react';
+import { Wallet, PiggyBank, Receipt, Sparkles, Calculator, TrendingUp, MessageCircle, CreditCard, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const models = [
-    { name: 'Claude', icon: Bot, color: 'text-orange-500', pos: 'top-[10%] left-[5%]', delay: '0s' },
-    { name: 'WhatsApp', icon: MessageCircle, color: 'text-green-500', pos: 'top-[15%] right-[8%]', delay: '2s' },
-    { name: 'Gemini', icon: Brain, color: 'text-blue-500', pos: 'bottom-[40%] right-[12%]', delay: '1.5s' },
-    { name: 'Finanças', icon: DollarSign, color: 'text-emerald-500', pos: 'top-[45%] right-[2%]', delay: '3s' },
-    { name: 'Copilot', icon: Cpu, color: 'text-indigo-500', pos: 'bottom-[15%] left-[5%]', delay: '4s' },
-    { name: 'Grok', icon: Zap, color: 'text-primary', pos: 'bottom-[45%] left-[2%]', delay: '1s' },
-    { name: 'Llama', icon: Bot, color: 'text-purple-500', pos: 'top-[5%] left-[45%]', delay: '2.5s' },
-    { name: 'Lucro', icon: TrendingUp, color: 'text-blue-500', pos: 'bottom-[10%] left-[48%]', delay: '5.2s' },
-    { name: 'ChatGPT', icon: Sparkles, color: 'text-emerald-500', pos: 'top-[40%] left-[40%]', delay: '0.5s', invisible: true },
+    { name: 'WhatsApp', icon: MessageCircle, color: 'text-[#25D366]', pos: 'top-[10%] left-[5%]', delay: '0s' },
+    { name: 'Carteira', icon: Wallet, color: 'text-primary', pos: 'top-[15%] right-[8%]', delay: '2s' },
+    { name: 'Economia', icon: PiggyBank, color: 'text-accent', pos: 'bottom-[40%] right-[12%]', delay: '1.5s' },
+    { name: 'Cartão', icon: CreditCard, color: 'text-success', pos: 'top-[45%] right-[2%]', delay: '3s' },
+    { name: 'Cálculo', icon: Calculator, color: 'text-primary', pos: 'bottom-[15%] left-[5%]', delay: '4s' },
+    { name: 'Recibo', icon: Receipt, color: 'text-accent', pos: 'bottom-[45%] left-[2%]', delay: '1s' },
+    { name: 'Meta', icon: Target, color: 'text-success', pos: 'top-[5%] left-[45%]', delay: '2.5s' },
+    { name: 'Lucro', icon: TrendingUp, color: 'text-primary', pos: 'bottom-[10%] left-[48%]', delay: '5.2s' },
+    { name: 'IA', icon: Sparkles, color: 'text-accent', pos: 'top-[40%] left-[40%]', delay: '0.5s', invisible: true },
 ];
 
 const BackgroundOrbs = ({ isGlobal = false }: { isGlobal?: boolean }) => {
@@ -20,8 +20,8 @@ const BackgroundOrbs = ({ isGlobal = false }: { isGlobal?: boolean }) => {
             isGlobal ? "fixed inset-0" : "absolute inset-0"
         )}>
             {/* Central Glow Effect - responsive sizes for mobile */}
-            <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-br from-primary/5 via-success/5 to-transparent blur-[80px] md:blur-[120px] opacity-40" />
-            <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-tr from-success/5 via-primary/5 to-transparent blur-[80px] md:blur-[120px] opacity-40" />
+            <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-br from-primary/5 via-accent/5 to-transparent blur-[80px] md:blur-[120px] opacity-40" />
+            <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-tr from-accent/5 via-primary/5 to-transparent blur-[80px] md:blur-[120px] opacity-40" />
 
             {/* Floating Icons Loop - hidden on small mobile for performance */}
             <div className="hidden sm:block">

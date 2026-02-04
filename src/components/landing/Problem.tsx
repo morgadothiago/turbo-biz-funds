@@ -1,49 +1,54 @@
-import { AlertTriangle, Clock, Calculator, TrendingDown } from "lucide-react";
+import { Table2, Brain, CreditCard, HelpCircle } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Problem = () => {
   const sectionRef = useReveal();
   const problems = [
     {
-      icon: Clock,
-      title: "Horas perdidas com planilhas",
-      description: "Você passa horas preenchendo planilhas complexas que ninguém atualiza corretamente.",
+      icon: Table2,
+      title: "Cansaço de planilhas",
+      quote: '"Não aguento mais abrir o Excel"',
+      description: "Você quer apenas saber quanto pode gastar, não virar contador.",
     },
     {
-      icon: Calculator,
-      title: "Falta de controle financeiro",
-      description: "Não sabe exatamente quanto sua empresa tem em caixa ou se vai conseguir pagar as contas.",
+      icon: Brain,
+      title: "Falta de constância",
+      quote: '"Sempre esqueço de anotar os gastos"',
+      description: "Até tenta, mas no fim do mês não lembra de metade das compras.",
     },
     {
-      icon: TrendingDown,
-      title: "Decisões no escuro",
-      description: "Toma decisões importantes sem dados confiáveis ou previsões de fluxo de caixa.",
+      icon: CreditCard,
+      title: "Medo da fatura",
+      quote: '"Fatura do cartão sempre uma surpresa"',
+      description: "Chega a fatura e você pensa: gastei tudo isso?",
     },
     {
-      icon: AlertTriangle,
-      title: "Surpresas desagradáveis",
-      description: "Descobre problemas financeiros tarde demais, quando já não há tempo para corrigir.",
+      icon: HelpCircle,
+      title: "Viver no escuro",
+      quote: '"Nunca sei se vai sobrar dinheiro"',
+      description: "Vive sem saber pra onde seu dinheiro está indo.",
     },
   ];
 
   return (
-    <section className="py-24 bg-gradient-to-b from-white to-blue-50/30 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-b from-white to-primary/5 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="blob w-96 h-96 bg-primary/20 -top-20 -right-20 animate-blob" />
-      <div className="blob w-72 h-72 bg-destructive/10 -bottom-20 -left-20 animate-blob" style={{ animationDelay: '-8s' }} />
+      <div className="blob w-96 h-96 bg-primary/10 -top-20 -right-20 animate-blob" />
+      <div className="blob w-72 h-72 bg-accent/10 -bottom-20 -left-20 animate-blob" style={{ animationDelay: '-8s' }} />
 
       <div className="container mx-auto px-4 relative z-10">
         <div ref={sectionRef} className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-destructive/10 text-destructive text-sm font-medium mb-4">
-            O Problema
+          <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
+            A gente entende
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Gestão financeira não deveria ser{" "}
-            <span className="text-destructive">tão difícil</span>
+            A gente sabe como é...
           </h2>
           <p className="text-lg text-muted-foreground">
-            A maioria das pequenas e médias empresas ainda gerencia suas finanças
-            de forma manual, perdendo tempo e dinheiro todos os dias.
+            Você não precisa de mais uma ferramenta complicada.
+            Precisa de algo que funcione no seu dia a dia, sem esforço.
           </p>
         </div>
 
@@ -57,16 +62,19 @@ const Problem = () => {
                 ref={cardRef}
                 className="group relative bg-card rounded-2xl p-8 border border-border shadow-sm hover-lift"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
 
                 <div className="relative flex items-start gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center flex-shrink-0 group-hover:bg-destructive/20 group-hover:scale-110 transition-all duration-300">
-                    <problem.icon className="w-7 h-7 text-destructive transition-transform duration-300" />
+                  <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
+                    <problem.icon className="w-7 h-7 text-accent transition-transform duration-300" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-destructive transition-colors">
+                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-accent transition-colors">
                       {problem.title}
                     </h3>
+                    <p className="text-lg italic text-foreground/80 mb-2">
+                      {problem.quote}
+                    </p>
                     <p className="text-muted-foreground leading-relaxed">
                       {problem.description}
                     </p>
@@ -78,11 +86,16 @@ const Problem = () => {
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-lg text-muted-foreground">
-            <span className="font-semibold text-foreground">E se existisse uma forma mais inteligente?</span>
+          <p className="text-lg text-muted-foreground mb-6">
+            <span className="font-semibold text-foreground">Se identificou?</span>
             <br />
-            Uma ferramenta que automatiza tudo e ainda te avisa antes dos problemas acontecerem.
+            A gente criou algo pra você nunca mais passar por isso.
           </p>
+          <Button variant="hero" size="lg" asChild>
+            <Link to="/cadastro">
+              Deixa com a gente
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

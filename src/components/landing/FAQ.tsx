@@ -4,56 +4,59 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useReveal } from "@/hooks/use-reveal";
 
 const FAQ = () => {
+  const headerRef = useReveal();
+
   const faqs = [
     {
-      question: "Como funciona a integração com WhatsApp?",
-      answer: "Após conectar sua conta do WhatsApp Business, você pode enviar comandos simples como 'saldo', 'vendas hoje' ou 'contas a pagar' e receber respostas instantâneas. Também é possível receber alertas automáticos e relatórios semanais diretamente no seu WhatsApp.",
+      question: "Preciso baixar algum aplicativo?",
+      answer: "Não! Tudo funciona pelo WhatsApp que você já usa no dia a dia. O dashboard fica no navegador do celular ou computador — sem nada para instalar. É só conectar e começar a usar.",
     },
     {
-      question: "A IA realmente entende perguntas em linguagem natural?",
-      answer: "Sim! Nossa IA foi treinada especificamente para entender perguntas sobre finanças empresariais em português. Você pode perguntar coisas como 'Vou ter dinheiro para pagar os impostos este mês?' ou 'Como posso reduzir meus custos?' e receber respostas contextualizadas com base nos seus dados reais.",
+      question: "Como funciona na prática?",
+      answer: "Super simples: você manda uma mensagem no WhatsApp dizendo 'gastei 50 no mercado', ou manda a foto do comprovante, ou até um áudio. A IA entende, categoriza e salva pra você. Depois é só acessar o dashboard ou perguntar 'quanto gastei esse mês?' no próprio WhatsApp.",
+    },
+    {
+      question: "Funciona com conta conjunta / casal?",
+      answer: "Sim! Você pode convidar outra pessoa para acessar o mesmo dashboard. Ideal para casais ou famílias que querem organizar as finanças juntos. Cada um pode lançar gastos pelo próprio WhatsApp.",
+    },
+    {
+      question: "Serve para empresa?",
+      answer: "Não, nosso foco é 100% em finanças pessoais. Criamos uma experiência pensada para pessoas que querem organização simples, não para empresas que precisam de contabilidade ou ERP.",
+    },
+    {
+      question: "E se eu esquecer de anotar um gasto?",
+      answer: "Sem problema! Você pode adicionar gastos retroativos a qualquer momento, é só informar a data. A IA também te manda lembrete se ficar muito tempo sem registrar nada — mas de um jeito gentil, sem pressão.",
     },
     {
       question: "Meus dados estão seguros?",
-      answer: "Absolutamente. Utilizamos criptografia de ponta a ponta (256-bit AES), servidores seguros na AWS Brasil, e seguimos as melhores práticas de segurança do mercado financeiro. Seus dados nunca são compartilhados com terceiros e você pode exportar ou deletar tudo a qualquer momento.",
+      answer: "Sim! Usamos criptografia de ponta a ponta e servidores seguros. Seus dados financeiros nunca são compartilhados com terceiros. Você pode exportar ou deletar tudo a qualquer momento.",
     },
     {
-      question: "Posso gerenciar mais de uma empresa?",
-      answer: "Sim! No plano Free você gerencia 1 empresa, no Pro até 3 empresas, e no Business não há limite. Cada empresa tem seus dados separados e você pode alternar entre elas facilmente. Também é possível ter uma visão consolidada de todas.",
-    },
-    {
-      question: "Como funcionam as previsões de fluxo de caixa?",
-      answer: "Nossa IA analisa seu histórico de receitas e despesas, padrões sazonais, contas a pagar e receber, e projeta seu fluxo de caixa para 30, 60 e 90 dias. A precisão melhora quanto mais dados históricos você tem. Você recebe alertas se a previsão indicar possíveis problemas de caixa.",
-    },
-    {
-      question: "Preciso saber de contabilidade para usar?",
-      answer: "Não! O FinanceAI foi feito para empresários, não para contadores. A interface é simples e intuitiva, e a IA traduz conceitos financeiros complexos para linguagem que qualquer pessoa entende. Se você sabe usar WhatsApp, você sabe usar o FinanceAI.",
-    },
-    {
-      question: "Posso integrar com meu banco ou sistema de vendas?",
-      answer: "Estamos trabalhando em integrações com os principais bancos brasileiros e sistemas de vendas. Por enquanto, você pode importar extratos via CSV/Excel ou cadastrar lançamentos manualmente. A integração via API já está disponível no plano Business.",
+      question: "Por que não tem plano gratuito?",
+      answer: "Acreditamos que quem investe R$ 9,90 para testar leva a sério a própria organização financeira. Isso nos permite oferecer suporte de qualidade e manter o produto sem anúncios ou venda de dados.",
     },
     {
       question: "E se eu não gostar? Posso cancelar?",
-      answer: "Oferecemos garantia de 14 dias em todos os planos pagos. Se você não ficar satisfeito por qualquer motivo, devolvemos 100% do seu dinheiro sem fazer perguntas. Além disso, você pode cancelar sua assinatura a qualquer momento, sem multa ou burocracia.",
+      answer: "Claro! Se não gostar do teste de 15 dias, é só falar com a gente que devolvemos seu dinheiro. Nos planos mensais, você cancela quando quiser pelo próprio WhatsApp, sem multa ou burocracia.",
     },
   ];
 
   return (
-    <section id="faq" className="py-20 bg-gradient-to-b from-secondary/30 to-background">
+    <section id="faq" className="py-24 bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
-            FAQ
+        <div ref={headerRef} className="max-w-3xl mx-auto text-center mb-16">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+            Dúvidas
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
             Perguntas{" "}
             <span className="gradient-text">frequentes</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Tire suas dúvidas sobre o FinanceAI
+            Tudo que você precisa saber antes de começar
           </p>
         </div>
 
@@ -63,17 +66,32 @@ const FAQ = () => {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-card rounded-xl border border-border px-6 data-[state=open]:shadow-md transition-all"
+                className="bg-card rounded-xl border border-border px-6 data-[state=open]:shadow-md data-[state=open]:border-primary/20 transition-all"
               >
-                <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline py-5">
+                <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline hover:text-primary py-5 transition-colors">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-5">
+                <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
             ))}
           </Accordion>
+        </div>
+
+        {/* Contact CTA */}
+        <div className="mt-12 text-center">
+          <p className="text-muted-foreground">
+            Ainda tem dúvidas?{" "}
+            <a
+              href="https://wa.me/5511999999999"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary font-medium hover:underline"
+            >
+              Fale com a gente no WhatsApp
+            </a>
+          </p>
         </div>
       </div>
     </section>
