@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -6,43 +7,44 @@ import {
 } from "@/components/ui/accordion";
 import { useReveal } from "@/hooks/use-reveal";
 
-const FAQ = () => {
-  const headerRef = useReveal();
+// Static FAQ data moved outside component
+const FAQS = [
+  {
+    question: "Preciso baixar algum aplicativo?",
+    answer: "Não! Tudo funciona pelo WhatsApp que você já usa no dia a dia. O dashboard fica no navegador do celular ou computador — sem nada para instalar. É só conectar e começar a usar.",
+  },
+  {
+    question: "Como funciona na prática?",
+    answer: "Super simples: você manda uma mensagem no WhatsApp dizendo 'gastei 50 no mercado', ou manda a foto do comprovante, ou até um áudio. A IA entende, categoriza e salva pra você. Depois é só acessar o dashboard ou perguntar 'quanto gastei esse mês?' no próprio WhatsApp.",
+  },
+  {
+    question: "Funciona com conta conjunta / casal?",
+    answer: "Sim! Você pode convidar outra pessoa para acessar o mesmo dashboard. Ideal para casais ou famílias que querem organizar as finanças juntos. Cada um pode lançar gastos pelo próprio WhatsApp.",
+  },
+  {
+    question: "Serve para empresa?",
+    answer: "Não, nosso foco é 100% em finanças pessoais. Criamos uma experiência pensada para pessoas que querem organização simples, não para empresas que precisam de contabilidade ou ERP.",
+  },
+  {
+    question: "E se eu esquecer de anotar um gasto?",
+    answer: "Sem problema! Você pode adicionar gastos retroativos a qualquer momento, é só informar a data. A IA também te manda lembrete se ficar muito tempo sem registrar nada — mas de um jeito gentil, sem pressão.",
+  },
+  {
+    question: "Meus dados estão seguros?",
+    answer: "Sim! Usamos criptografia de ponta a ponta e servidores seguros. Seus dados financeiros nunca são compartilhados com terceiros. Você pode exportar ou deletar tudo a qualquer momento.",
+  },
+  {
+    question: "Por que não tem plano gratuito?",
+    answer: "Acreditamos que quem investe R$ 9,90 para testar leva a sério a própria organização financeira. Isso nos permite oferecer suporte de qualidade e manter o produto sem anúncios ou venda de dados.",
+  },
+  {
+    question: "E se eu não gostar? Posso cancelar?",
+    answer: "Claro! Se não gostar do teste de 15 dias, é só falar com a gente que devolvemos seu dinheiro. Nos planos mensais, você cancela quando quiser pelo próprio WhatsApp, sem multa ou burocracia.",
+  },
+] as const;
 
-  const faqs = [
-    {
-      question: "Preciso baixar algum aplicativo?",
-      answer: "Não! Tudo funciona pelo WhatsApp que você já usa no dia a dia. O dashboard fica no navegador do celular ou computador — sem nada para instalar. É só conectar e começar a usar.",
-    },
-    {
-      question: "Como funciona na prática?",
-      answer: "Super simples: você manda uma mensagem no WhatsApp dizendo 'gastei 50 no mercado', ou manda a foto do comprovante, ou até um áudio. A IA entende, categoriza e salva pra você. Depois é só acessar o dashboard ou perguntar 'quanto gastei esse mês?' no próprio WhatsApp.",
-    },
-    {
-      question: "Funciona com conta conjunta / casal?",
-      answer: "Sim! Você pode convidar outra pessoa para acessar o mesmo dashboard. Ideal para casais ou famílias que querem organizar as finanças juntos. Cada um pode lançar gastos pelo próprio WhatsApp.",
-    },
-    {
-      question: "Serve para empresa?",
-      answer: "Não, nosso foco é 100% em finanças pessoais. Criamos uma experiência pensada para pessoas que querem organização simples, não para empresas que precisam de contabilidade ou ERP.",
-    },
-    {
-      question: "E se eu esquecer de anotar um gasto?",
-      answer: "Sem problema! Você pode adicionar gastos retroativos a qualquer momento, é só informar a data. A IA também te manda lembrete se ficar muito tempo sem registrar nada — mas de um jeito gentil, sem pressão.",
-    },
-    {
-      question: "Meus dados estão seguros?",
-      answer: "Sim! Usamos criptografia de ponta a ponta e servidores seguros. Seus dados financeiros nunca são compartilhados com terceiros. Você pode exportar ou deletar tudo a qualquer momento.",
-    },
-    {
-      question: "Por que não tem plano gratuito?",
-      answer: "Acreditamos que quem investe R$ 9,90 para testar leva a sério a própria organização financeira. Isso nos permite oferecer suporte de qualidade e manter o produto sem anúncios ou venda de dados.",
-    },
-    {
-      question: "E se eu não gostar? Posso cancelar?",
-      answer: "Claro! Se não gostar do teste de 15 dias, é só falar com a gente que devolvemos seu dinheiro. Nos planos mensais, você cancela quando quiser pelo próprio WhatsApp, sem multa ou burocracia.",
-    },
-  ];
+const FAQ = memo(() => {
+  const headerRef = useReveal();
 
   return (
     <section id="faq" className="py-24 bg-gradient-to-b from-muted/30 to-background">
@@ -62,7 +64,7 @@ const FAQ = () => {
 
         <div className="max-w-3xl mx-auto">
           <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
+            {FAQS.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
@@ -96,6 +98,8 @@ const FAQ = () => {
       </div>
     </section>
   );
-};
+});
+
+FAQ.displayName = "FAQ";
 
 export default FAQ;

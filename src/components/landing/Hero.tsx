@@ -1,8 +1,17 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Sparkles, Users, Star, Clock } from "lucide-react";
 
-const Hero = () => {
+// Static data moved outside component to prevent recreation on each render
+const HERO_STATS = [
+  { value: "3.000+", label: "Usuários felizes", icon: Users },
+  { value: "500k+", label: "Gastos registrados", icon: Sparkles },
+  { value: "4.9", label: "Avaliação média", icon: Star },
+  { value: "< 5min", label: "Para começar", icon: Clock },
+] as const;
+
+const Hero = memo(() => {
   return (
     <section className="relative min-h-screen pt-24 pb-16 overflow-hidden flex items-center bg-transparent">
       <div className="container mx-auto px-4 relative z-10">
@@ -17,20 +26,20 @@ const Hero = () => {
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in-up [animation-delay:0.1s]">
             Cansou de planilhas?{" "}
             <span className="gradient-text">Organize suas contas pelo WhatsApp</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 animate-fade-in-up [animation-delay:0.2s]">
             Você vive sua vida, a gente organiza seu dinheiro.
             Mande áudio, foto ou texto — a IA categoriza tudo automaticamente.
             <span className="font-medium text-foreground"> Sem planilhas, sem estresse.</span>
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up [animation-delay:0.3s]">
             <Button variant="hero" size="xl" asChild className="w-full sm:w-auto">
               <Link to="/cadastro">
                 Testar por 15 dias — R$ 9,90
@@ -44,13 +53,8 @@ const Hero = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl mx-auto mb-16 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-            {[
-              { value: "3.000+", label: "Usuários felizes", icon: Users },
-              { value: "500k+", label: "Gastos registrados", icon: Sparkles },
-              { value: "4.9", label: "Avaliação média", icon: Star },
-              { value: "< 5min", label: "Para começar", icon: Clock },
-            ].map((stat, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl mx-auto mb-16 animate-fade-in-up [animation-delay:0.4s]">
+            {HERO_STATS.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="stat-value flex items-center justify-center gap-2">
                   <stat.icon className="w-5 h-5 md:w-6 md:h-6" />
@@ -62,13 +66,13 @@ const Hero = () => {
           </div>
 
           {/* Video Demo Placeholder */}
-          <div className="relative animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
+          <div className="relative animate-fade-in-up [animation-delay:0.5s]">
             <div className="relative bg-gradient-to-b from-primary/5 to-accent/10 rounded-2xl p-2 md:p-3 shadow-xl border border-border/50">
               <div className="bg-card rounded-xl overflow-hidden shadow-card">
                 {/* Video Container */}
                 <div className="aspect-video bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center relative group cursor-pointer">
                   {/* Play Button */}
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:bg-primary group-hover:scale-110 transition-transform duration-300">
                     <Play className="w-8 h-8 md:w-10 md:h-10 text-white ml-1" fill="white" />
                   </div>
 
@@ -90,7 +94,7 @@ const Hero = () => {
             </div>
 
             {/* Floating cards */}
-            <div className="hidden md:block absolute -left-8 top-1/4 bg-card rounded-xl p-3 shadow-lg border border-border/50 animate-float" style={{ animationDelay: "0s" }}>
+            <div className="hidden md:block absolute -left-8 top-1/4 bg-card rounded-xl p-3 shadow-lg border border-border/50 animate-float">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -104,7 +108,7 @@ const Hero = () => {
               </div>
             </div>
 
-            <div className="hidden md:block absolute -right-8 top-1/3 bg-card rounded-xl p-3 shadow-lg border border-border/50 animate-float" style={{ animationDelay: "1s" }}>
+            <div className="hidden md:block absolute -right-8 top-1/3 bg-card rounded-xl p-3 shadow-lg border border-border/50 animate-float [animation-delay:1s]">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Sparkles className="w-4 h-4 text-primary" />
@@ -120,6 +124,8 @@ const Hero = () => {
       </div>
     </section>
   );
-};
+});
+
+Hero.displayName = "Hero";
 
 export default Hero;

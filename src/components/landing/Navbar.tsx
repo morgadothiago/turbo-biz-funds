@@ -1,17 +1,26 @@
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Sparkles } from "lucide-react";
 
-const Navbar = () => {
+// Static navigation links
+const NAV_LINKS = [
+  { name: "Como Funciona", href: "#como-funciona" },
+  { name: "Depoimentos", href: "#depoimentos" },
+  { name: "Preços", href: "#planos" },
+  { name: "Dúvidas", href: "#faq" },
+] as const;
+
+const Navbar = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navLinks = [
-    { name: "Como Funciona", href: "#como-funciona" },
-    { name: "Depoimentos", href: "#depoimentos" },
-    { name: "Preços", href: "#planos" },
-    { name: "Dúvidas", href: "#faq" },
-  ];
+  const toggleMenu = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-xl border-b border-white/5 supports-[backdrop-filter]:bg-background/60">
@@ -29,7 +38,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
@@ -53,7 +62,7 @@ const Navbar = () => {
           {/* Mobile Menu Button */}
           <button
             className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={toggleMenu}
             aria-label="Toggle menu"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -64,12 +73,12 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-2">
-              {navLinks.map((link) => (
+              {NAV_LINKS.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
                   className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeMenu}
                 >
                   {link.name}
                 </a>
@@ -88,6 +97,8 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
+});
+
+Navbar.displayName = "Navbar";
 
 export default Navbar;
