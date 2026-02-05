@@ -35,11 +35,13 @@ export default defineConfig(({ mode }) => ({
               id.includes("node_modules/@remix-run/")) {
             return "router";
           }
-          // Recharts (heavy, admin only)
-          if (id.includes("node_modules/recharts") ||
-              id.includes("node_modules/d3-")) {
-            return "charts";
-          }
+          // Recharts - commented out to avoid initialization order issues
+          // The d3/recharts libraries have circular dependencies that break
+          // when split into separate chunks
+          // if (id.includes("node_modules/recharts") ||
+          //     id.includes("node_modules/d3-")) {
+          //   return "charts";
+          // }
           // Radix UI components
           if (id.includes("node_modules/@radix-ui/")) {
             return "radix-ui";
