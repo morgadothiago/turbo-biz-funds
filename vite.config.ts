@@ -48,10 +48,10 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("node_modules/@tanstack/")) {
             return "tanstack";
           }
-          // Lucide icons
-          if (id.includes("node_modules/lucide-react/")) {
-            return "icons";
-          }
+          // Lucide icons - inline to avoid initialization order issues
+          // if (id.includes("node_modules/lucide-react/")) {
+          //   return "icons";
+          // }
           // Other UI libraries
           if (id.includes("node_modules/sonner/") ||
               id.includes("node_modules/vaul/") ||
