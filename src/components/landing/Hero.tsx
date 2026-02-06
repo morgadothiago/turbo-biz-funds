@@ -13,87 +13,86 @@ const HERO_STATS = [
 
 const Hero = memo(() => {
   return (
-    <section className="relative min-h-screen pt-24 pb-16 overflow-hidden flex items-center bg-transparent">
+    <section className="relative min-h-[90vh] pt-20 pb-12 md:min-h-screen md:pt-24 md:pb-16 flex items-center bg-transparent">
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-5xl mx-auto text-center relative">
-          {/* Subtle central glow for text */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-primary/5 blur-[100px] -z-10" />
+          {/* Subtle glow - desktop only, no blur on mobile */}
+          <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-primary/5 blur-[80px] -z-10" />
 
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8 animate-fade-in">
+          {/* Badge - sem animação em mobile */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6 md:mb-8 animate-fade-in">
             <Sparkles className="w-4 h-4" />
             Chega de Planilhas
           </div>
 
-          {/* Headline */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6 animate-fade-in-up [animation-delay:0.1s]">
+          {/* Headline - animação mais rápida em mobile */}
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-4 md:mb-6 animate-fade-in-up [animation-delay:0.1s]">
             Cansou de planilhas?{" "}
             <span className="gradient-text">Organize suas contas pelo WhatsApp</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 animate-fade-in-up [animation-delay:0.2s]">
+          <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 md:mb-10 animate-fade-in-up [animation-delay:0.2s]">
             Você vive sua vida, a gente organiza seu dinheiro.
             Mande áudio, foto ou texto — a IA categoriza tudo automaticamente.
             <span className="font-medium text-foreground"> Sem planilhas, sem estresse.</span>
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up [animation-delay:0.3s]">
-            <Button variant="hero" size="xl" asChild className="w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 mb-12 md:mb-16 animate-fade-in-up [animation-delay:0.3s]">
+            <Button variant="hero" size="lg" asChild className="w-full sm:w-auto md:size-xl">
               <Link to="/cadastro">
                 Testar por 15 dias — R$ 9,90
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="outline" size="xl" className="w-full sm:w-auto gap-2">
+            <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2 md:size-xl">
               <Play className="w-5 h-5" />
               Ver como funciona
             </Button>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-4xl mx-auto mb-16 animate-fade-in-up [animation-delay:0.4s]">
+          {/* Stats - grid 2 cols em mobile */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-4xl mx-auto mb-12 md:mb-16 animate-fade-in-up [animation-delay:0.4s]">
             {HERO_STATS.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="stat-value flex items-center justify-center gap-2">
-                  <stat.icon className="w-5 h-5 md:w-6 md:h-6" />
+                <div className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight flex items-center justify-center gap-1 md:gap-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                  <stat.icon className="w-4 h-4 md:w-6 md:h-6 text-primary" />
                   {stat.value}
                 </div>
-                <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
+                <div className="text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</div>
               </div>
             ))}
           </div>
 
-          {/* Video Demo Placeholder */}
+          {/* Video Demo - simplified for mobile */}
           <div className="relative animate-fade-in-up [animation-delay:0.5s]">
-            <div className="relative bg-gradient-to-b from-primary/5 to-accent/10 rounded-2xl p-2 md:p-3 shadow-xl border border-border/50">
-              <div className="bg-card rounded-xl overflow-hidden shadow-card">
-                {/* Video Container */}
+            <div className="relative bg-gradient-to-b from-primary/5 to-accent/10 rounded-xl md:rounded-2xl p-1.5 md:p-3 shadow-lg md:shadow-xl border border-border/50">
+              <div className="bg-card rounded-lg md:rounded-xl overflow-hidden shadow-card">
                 <div className="aspect-video bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center relative group cursor-pointer">
-                  {/* Play Button */}
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:bg-primary group-hover:scale-110 transition-transform duration-300">
-                    <Play className="w-8 h-8 md:w-10 md:h-10 text-white ml-1" fill="white" />
+                  {/* Play Button - smaller on mobile */}
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:bg-primary group-hover:scale-110 transition-transform duration-300">
+                    <Play className="w-6 h-6 md:w-10 md:h-10 text-white ml-0.5" fill="white" />
                   </div>
 
                   {/* Video Caption */}
-                  <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
-                    <div className="bg-background/95 rounded-lg px-4 py-3 text-center">
-                      <p className="text-sm md:text-base text-foreground font-medium">
+                  <div className="absolute bottom-3 left-3 right-3 md:bottom-6 md:left-6 md:right-6">
+                    <div className="bg-background/95 rounded-md md:rounded-lg px-3 py-2 md:px-4 md:py-3 text-center">
+                      <p className="text-xs md:text-base text-foreground font-medium">
                         📱 Manda mensagem → 🤖 IA organiza → 📊 Você visualiza
                       </p>
                     </div>
                   </div>
 
-                  {/* Decorative elements */}
-                  <div className="absolute top-4 right-4 bg-accent/90 text-white text-xs font-medium px-3 py-1 rounded-full">
-                    30 segundos
+                  {/* Badge */}
+                  <div className="absolute top-3 right-3 md:top-4 md:right-4 bg-accent/90 text-white text-[10px] md:text-xs font-medium px-2 py-0.5 md:px-3 md:py-1 rounded-full">
+                    30 seg
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Floating cards */}
+            {/* Floating cards - desktop only */}
             <div className="hidden md:block absolute -left-8 top-1/4 bg-card rounded-xl p-3 shadow-lg border border-border/50 animate-float">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center">

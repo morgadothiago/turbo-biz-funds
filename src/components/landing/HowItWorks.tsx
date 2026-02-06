@@ -132,10 +132,10 @@ const HowItWorks = memo(() => {
   const dashboardRef = useReveal(300);
 
   return (
-    <section id="como-funciona" className="py-24 bg-gradient-to-b from-primary/5 to-white relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="blob w-96 h-96 bg-accent/5 -top-20 -left-20 animate-blob" />
-      <div className="blob w-80 h-80 bg-primary/5 top-1/2 right-0 animate-blob [animation-delay:-12s]" />
+    <section id="como-funciona" className="py-16 md:py-24 bg-gradient-to-b from-primary/5 to-white relative overflow-hidden">
+      {/* Background decoration - desktop only */}
+      <div className="hidden md:block blob w-96 h-96 bg-accent/5 -top-20 -left-20 animate-blob" />
+      <div className="hidden md:block blob w-80 h-80 bg-primary/5 top-1/2 right-0 animate-blob [animation-delay:-12s]" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div ref={titleRef} className="max-w-3xl mx-auto text-center mb-16">

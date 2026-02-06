@@ -127,9 +127,18 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
+    /* Optimize scrolling performance */
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
@@ -303,15 +312,21 @@
   }
 
   /* Disable heavy animations on mobile for performance */
-  @media (max-width: 640px) {
-    .animate-blob {
-      animation: none !important;
-    }
-    .animate-float, .animate-float-slow {
+  @media (max-width: 768px) {
+    .animate-blob,
+    .animate-float,
+    .animate-float-slow,
+    .animate-orbit,
+    .animate-spin-slow {
       animation: none !important;
     }
     .blob {
       display: none !important;
+    }
+    /* Reduce motion for all animated elements on mobile */
+    .animate-fade-in,
+    .animate-fade-in-up {
+      animation-duration: 0.3s !important;
     }
   }
 
