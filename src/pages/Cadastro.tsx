@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles, Mail, Lock, User, Building, ArrowRight, Check } from "lucide-react";
+import { Sparkles, Mail, Lock, User, ArrowRight, Check } from "lucide-react";
 
 const Cadastro = () => {
   const [step, setStep] = useState(1);
@@ -12,7 +12,6 @@ const Cadastro = () => {
     name: "",
     email: "",
     password: "",
-    companyName: "",
     plan: "free",
   });
 
@@ -130,21 +129,7 @@ const Cadastro = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="company">Nome da empresa</Label>
-                  <div className="relative">
-                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input
-                      id="company"
-                      type="text"
-                      placeholder="Nome da sua empresa"
-                      value={formData.companyName}
-                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
+
               </>
             ) : (
               <RadioGroup
