@@ -78,7 +78,7 @@ const Hero = memo(() => {
 
                   {/* Video Caption */}
                   <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6">
-                    <div className="bg-background/90 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
+                    <div className="bg-background/95 rounded-lg px-4 py-3 text-center">
                       <p className="text-sm md:text-base text-foreground font-medium">
                         📱 Manda mensagem → 🤖 IA organiza → 📊 Você visualiza
                       </p>

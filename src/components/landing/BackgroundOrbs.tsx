@@ -24,7 +24,7 @@ const FloatingIcon = memo(({ model }: { model: typeof MODELS[number] }) => (
     )}
     style={{ animationDelay: model.delay }}
   >
-    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/40 backdrop-blur-md border border-white/30 shadow-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
+    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-white/40 md:backdrop-blur-md border border-white/30 shadow-lg flex items-center justify-center hover:scale-110 transition-transform duration-300">
       <model.icon className={cn("w-6 h-6 md:w-8 md:h-8", model.color)} />
     </div>
   </div>
@@ -38,9 +38,9 @@ const BackgroundOrbs = memo(({ isGlobal = false }: { isGlobal?: boolean }) => {
       "overflow-hidden pointer-events-none z-0",
       isGlobal ? "fixed inset-0" : "absolute inset-0"
     )}>
-      {/* Central Glow Effect - responsive sizes for mobile */}
-      <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-br from-primary/5 via-accent/5 to-transparent blur-[80px] md:blur-[120px] opacity-40" />
-      <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-tr from-accent/5 via-primary/5 to-transparent blur-[80px] md:blur-[120px] opacity-40" />
+      {/* Central Glow Effect - simplified on mobile for performance */}
+      <div className="absolute top-1/4 left-1/4 w-[200px] h-[200px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-br from-primary/5 via-accent/5 to-transparent blur-[40px] md:blur-[120px] opacity-40" />
+      <div className="absolute bottom-1/4 right-1/4 w-[200px] h-[200px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-tr from-accent/5 via-primary/5 to-transparent blur-[40px] md:blur-[120px] opacity-40" />
 
       {/* Floating Icons Loop - hidden on small mobile for performance */}
       <div className="hidden sm:block">
