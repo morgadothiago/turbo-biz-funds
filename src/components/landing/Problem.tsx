@@ -1,36 +1,70 @@
+import { memo } from "react";
 import { Table2, Brain, CreditCard, HelpCircle } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-const Problem = () => {
+const PROBLEMS = [
+  {
+    icon: Table2,
+    title: "Cansaço de planilhas",
+    quote: '"Não aguento mais abrir o Excel"',
+    description: "Você quer apenas saber quanto pode gastar, não virar contador.",
+  },
+  {
+    icon: Brain,
+    title: "Falta de constância",
+    quote: '"Sempre esqueço de anotar os gastos"',
+    description: "Até tenta, mas no fim do mês não lembra de metade das compras.",
+  },
+  {
+    icon: CreditCard,
+    title: "Medo da fatura",
+    quote: '"Fatura do cartão sempre uma surpresa"',
+    description: "Chega a fatura e você pensa: gastei tudo isso?",
+  },
+  {
+    icon: HelpCircle,
+    title: "Viver no escuro",
+    quote: '"Nunca sei se vai sobrar dinheiro"',
+    description: "Vive sem saber pra onde seu dinheiro está indo.",
+  },
+] as const;
+
+const ProblemCard = memo(({ problem, index }: { problem: typeof PROBLEMS[number]; index: number }) => {
+  const cardRef = useReveal(index * 150);
+
+  return (
+    <div
+      ref={cardRef}
+      className="group relative bg-card rounded-2xl p-8 border border-border shadow-sm hover-lift"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+
+      <div className="relative flex items-start gap-5">
+        <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
+          <problem.icon className="w-7 h-7 text-accent transition-transform duration-300" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-accent transition-colors">
+            {problem.title}
+          </h3>
+          <p className="text-lg italic text-foreground/80 mb-2">
+            {problem.quote}
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            {problem.description}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+ProblemCard.displayName = "ProblemCard";
+
+const Problem = memo(() => {
   const sectionRef = useReveal();
-  const problems = [
-    {
-      icon: Table2,
-      title: "Cansaço de planilhas",
-      quote: '"Não aguento mais abrir o Excel"',
-      description: "Você quer apenas saber quanto pode gastar, não virar contador.",
-    },
-    {
-      icon: Brain,
-      title: "Falta de constância",
-      quote: '"Sempre esqueço de anotar os gastos"',
-      description: "Até tenta, mas no fim do mês não lembra de metade das compras.",
-    },
-    {
-      icon: CreditCard,
-      title: "Medo da fatura",
-      quote: '"Fatura do cartão sempre uma surpresa"',
-      description: "Chega a fatura e você pensa: gastei tudo isso?",
-    },
-    {
-      icon: HelpCircle,
-      title: "Viver no escuro",
-      quote: '"Nunca sei se vai sobrar dinheiro"',
-      description: "Vive sem saber pra onde seu dinheiro está indo.",
-    },
-  ];
 
   return (
     <section className="py-24 bg-gradient-to-b from-white to-primary/5 relative overflow-hidden">
@@ -52,37 +86,10 @@ const Problem = () => {
           </p>
         </div>
 
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {problems.map((problem, index) => {
-            const cardRef = useReveal(index * 150);
-            return (
-              <div
-                key={index}
-                ref={cardRef}
-                className="group relative bg-card rounded-2xl p-8 border border-border shadow-sm hover-lift"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-
-                <div className="relative flex items-start gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 group-hover:scale-110 transition-all duration-300">
-                    <problem.icon className="w-7 h-7 text-accent transition-transform duration-300" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-accent transition-colors">
-                      {problem.title}
-                    </h3>
-                    <p className="text-lg italic text-foreground/80 mb-2">
-                      {problem.quote}
-                    </p>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {problem.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {PROBLEMS.map((problem, index) => (
+            <ProblemCard key={index} problem={problem} index={index} />
+          ))}
         </div>
 
         <div className="mt-12 text-center">
@@ -100,6 +107,8 @@ const Problem = () => {
       </div>
     </section>
   );
-};
+});
+
+Problem.displayName = "Problem";
 
 export default Problem;
