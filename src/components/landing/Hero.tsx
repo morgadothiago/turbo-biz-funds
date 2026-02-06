@@ -41,8 +41,8 @@ const Hero = memo(() => {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 mb-12 md:mb-16 animate-fade-in-up [animation-delay:0.3s]">
             <Button variant="hero" size="lg" asChild className="w-full sm:w-auto md:size-xl">
-              <Link to="/cadastro">
-                Testar por 15 dias — R$ 9,90
+              <Link to="/login">
+                Comece agora
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>

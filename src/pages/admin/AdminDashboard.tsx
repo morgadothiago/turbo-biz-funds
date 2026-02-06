@@ -1,7 +1,6 @@
 import { memo } from "react";
 import { 
   Users, 
-  Building2, 
   DollarSign, 
   TrendingUp,
   ArrowUpRight,
@@ -9,7 +8,8 @@ import {
   Activity,
   CreditCard,
   UserPlus,
-  AlertCircle
+  AlertCircle,
+  Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -48,20 +48,20 @@ const STATS_CARDS = [
     bgColor: "bg-success/10"
   },
   {
-    title: "Total de Empresas",
-    value: "234",
-    change: "+8",
+    title: "Total de Clientes",
+    value: "1.234",
+    change: "+45",
     trend: "up" as const,
-    icon: Building2,
+    icon: Users,
     color: "text-primary",
     bgColor: "bg-primary/10"
   },
   {
-    title: "Usuários Ativos",
-    value: "1.429",
-    change: "+23",
+    title: "Clientes Ativos",
+    value: "1.089",
+    change: "+67",
     trend: "up" as const,
-    icon: Users,
+    icon: Sparkles,
     color: "text-accent",
     bgColor: "bg-accent/10"
   },
@@ -77,12 +77,12 @@ const STATS_CARDS = [
 ];
 
 const REVENUE_DATA = [
-  { month: "Jan", receita: 32000, empresas: 180 },
-  { month: "Fev", receita: 35000, empresas: 195 },
-  { month: "Mar", receita: 38500, empresas: 208 },
-  { month: "Abr", receita: 41200, empresas: 215 },
-  { month: "Mai", receita: 44800, empresas: 225 },
-  { month: "Jun", receita: 47890, empresas: 234 },
+  { month: "Jan", receita: 32000, clientes: 980 },
+  { month: "Fev", receita: 35000, clientes: 1050 },
+  { month: "Mar", receita: 38500, clientes: 1120 },
+  { month: "Abr", receita: 41200, clientes: 1150 },
+  { month: "Mai", receita: 44800, clientes: 1190 },
+  { month: "Jun", receita: 47890, clientes: 1234 },
 ];
 
 const PLAN_DISTRIBUTION = [
@@ -91,20 +91,20 @@ const PLAN_DISTRIBUTION = [
   { name: "Business", value: 47, color: "#10b981" },
 ];
 
-const RECENT_COMPANIES = [
-  { name: "Tech Solutions LTDA", email: "contato@techsolutions.com", plan: "Pro", status: "Ativo", date: "Hoje" },
-  { name: "Inovação Digital ME", email: "admin@inovdigital.com", plan: "Business", status: "Ativo", date: "Hoje" },
-  { name: "Startup Hub", email: "hello@startuphub.io", plan: "Free", status: "Trial", date: "Ontem" },
-  { name: "Finance Corp", email: "suporte@financecorp.com", plan: "Pro", status: "Ativo", date: "Ontem" },
-  { name: "E-commerce Plus", email: "vendas@ecommerceplus.com", plan: "Business", status: "Pendente", date: "2 dias" },
+const RECENT_CLIENTS = [
+  { name: "João Silva", email: "joao.silva@email.com", plan: "Pro", status: "Ativo", date: "Hoje" },
+  { name: "Maria Santos", email: "maria.santos@email.com", plan: "Business", status: "Ativo", date: "Hoje" },
+  { name: "Pedro Costa", email: "pedro.costa@email.com", plan: "Free", status: "Trial", date: "Ontem" },
+  { name: "Ana Oliveira", email: "ana.oliveira@email.com", plan: "Pro", status: "Ativo", date: "Ontem" },
+  { name: "Carlos Mendes", email: "carlos.mendes@email.com", plan: "Business", status: "Pendente", date: "2 dias" },
 ];
 
 const RECENT_ACTIVITY = [
-  { type: "signup" as const, message: "Nova empresa: Tech Solutions LTDA", time: "5 min" },
+  { type: "signup" as const, message: "Novo cliente: João Silva", time: "5 min" },
   { type: "payment" as const, message: "Pagamento recebido: R$ 199,00", time: "1h" },
-  { type: "upgrade" as const, message: "Upgrade de plano: Startup Hub (Free → Pro)", time: "2h" },
+  { type: "upgrade" as const, message: "Upgrade de plano: Maria Santos (Free → Pro)", time: "2h" },
   { type: "support" as const, message: "Novo ticket de suporte #1234", time: "3h" },
-  { type: "signup" as const, message: "Nova empresa: Digital Marketing Co", time: "4h" },
+  { type: "signup" as const, message: "Novo cliente: Ana Oliveira", time: "4h" },
 ];
 
 function AdminDashboard() {
@@ -186,7 +186,7 @@ function AdminDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Distribuição de Planos</CardTitle>
-              <CardDescription>Empresas por tipo de plano</CardDescription>
+              <CardDescription>Clientes por tipo de plano</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
@@ -195,7 +195,7 @@ function AdminDashboard() {
                     <XAxis type="number" className="text-xs" />
                     <YAxis type="category" dataKey="name" className="text-xs" width={70} />
                     <Tooltip 
-                      formatter={(value: number) => [`${value} empresas`, "Total"]}
+                      formatter={(value: number) => [`${value} clientes`, "Total"]}
                       contentStyle={{ 
                         backgroundColor: 'hsl(var(--card))', 
                         border: '1px solid hsl(var(--border))',
@@ -212,53 +212,53 @@ function AdminDashboard() {
 
         {/* Tables Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Companies */}
+          {/* Recent Clients */}
           <Card className="lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-lg">Empresas Recentes</CardTitle>
+                <CardTitle className="text-lg">Clientes Recentes</CardTitle>
                 <CardDescription>Últimos cadastros na plataforma</CardDescription>
               </div>
-              <Button variant="outline" size="sm">Ver todas</Button>
+              <Button variant="outline" size="sm">Ver todos</Button>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Empresa</TableHead>
+                    <TableHead>Cliente</TableHead>
                     <TableHead>Plano</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Data</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {RECENT_COMPANIES.map((company) => (
-                    <TableRow key={company.email}>
+                  {RECENT_CLIENTS.map((client) => (
+                    <TableRow key={client.email}>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9">
                             <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                              {company.name.substring(0, 2).toUpperCase()}
+                              {client.name.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-medium">{company.name}</p>
-                            <p className="text-xs text-muted-foreground">{company.email}</p>
+                            <p className="font-medium">{client.name}</p>
+                            <p className="text-xs text-muted-foreground">{client.email}</p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={company.plan === "Business" ? "default" : company.plan === "Pro" ? "secondary" : "outline"}>
-                          {company.plan}
+                        <Badge variant={client.plan === "Business" ? "default" : client.plan === "Pro" ? "secondary" : "outline"}>
+                          {client.plan}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={company.status === "Ativo" ? "default" : company.status === "Trial" ? "secondary" : "outline"} className={company.status === "Ativo" ? "bg-success/10 text-success hover:bg-success/20" : ""}>
-                          {company.status}
+                        <Badge variant={client.status === "Ativo" ? "default" : client.status === "Trial" ? "secondary" : "outline"} className={client.status === "Ativo" ? "bg-success/10 text-success hover:bg-success/20" : ""}>
+                          {client.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">
-                        {company.date}
+                        {client.date}
                       </TableCell>
                     </TableRow>
                   ))}

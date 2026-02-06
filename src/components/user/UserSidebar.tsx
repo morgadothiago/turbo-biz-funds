@@ -1,11 +1,12 @@
 import { 
   LayoutDashboard, 
-  Users, 
-  CreditCard, 
+  Receipt, 
+  PieChart, 
+  Target, 
   Settings,
   LogOut,
-  Bell,
-  HelpCircle,
+  MessageCircle,
+  CreditCard,
   LucideIcon,
   Sparkles
 } from "lucide-react";
@@ -38,15 +39,16 @@ interface MenuItem {
 }
 
 const mainMenuItems: MenuItem[] = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
-  { title: "Clientes", url: "/admin/clientes", icon: Users },
-  { title: "Planos", url: "/admin/planos", icon: CreditCard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Transações", url: "/dashboard/transacoes", icon: Receipt },
+  { title: "Categorias", url: "/dashboard/categorias", icon: PieChart },
+  { title: "Metas", url: "/dashboard/metas", icon: Target },
+  { title: "Cartões", url: "/dashboard/cartoes", icon: CreditCard },
 ];
 
 const secondaryMenuItems: MenuItem[] = [
-  { title: "Notificações", url: "/admin/notificacoes", icon: Bell },
-  { title: "Configurações", url: "/admin/configuracoes", icon: Settings },
-  { title: "Suporte", url: "/admin/suporte", icon: HelpCircle },
+  { title: "WhatsApp", url: "/dashboard/whatsapp", icon: MessageCircle },
+  { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];
 
 function MenuItemLink({ item, end = false, isCollapsed = false }: { item: MenuItem; end?: boolean; isCollapsed?: boolean }) {
@@ -63,14 +65,13 @@ function MenuItemLink({ item, end = false, isCollapsed = false }: { item: MenuIt
         end={end}
         className={cn(
           "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 mx-auto",
-          "hover:bg-white/5",
-          isActive && "bg-[#25D366]/15 font-semibold"
+          isActive && "bg-[#25D366]/15 font-semibold shadow-sm"
         )}
         title={item.title}
       >
         <Icon className={cn(
-          "h-5 w-5 transition-colors duration-200",
-          isActive ? "text-[#25D366]" : "text-[#F6F4EF]/70"
+          "h-5 w-5",
+          isActive ? "text-[#25D366]" : "text-white"
         )} />
       </NavLink>
     );
@@ -81,24 +82,21 @@ function MenuItemLink({ item, end = false, isCollapsed = false }: { item: MenuIt
       to={item.url} 
       end={end}
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-        "hover:bg-white/5",
-        isActive && "bg-[#25D366]/15 font-semibold"
+        "flex items-center gap-3 px-3 py-2.5 rounded-lg",
+        isActive && "bg-[#25D366]/15 font-semibold shadow-sm"
       )}
     >
       <div className={cn(
-        "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
-        "bg-white/5",
+        "flex items-center justify-center w-8 h-8 rounded-lg",
         isActive && "bg-[#25D366]/20"
       )}>
         <Icon className={cn(
-          "h-4 w-4 transition-colors duration-200",
-          isActive ? "text-[#25D366]" : "text-[#F6F4EF]/70"
+          "h-4 w-4",
+          isActive ? "text-[#25D366]" : "text-white"
         )} />
       </div>
       <span className={cn(
-        "transition-colors duration-200",
-        isActive ? "text-[#25D366]" : "text-[#F6F4EF]/90"
+        isActive ? "text-[#25D366]" : "text-white"
       )}>
         {item.title}
       </span>
@@ -109,7 +107,7 @@ function MenuItemLink({ item, end = false, isCollapsed = false }: { item: MenuIt
   );
 }
 
-export function AdminSidebar() {
+export function UserSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const { logout, user } = useAuth();
@@ -122,7 +120,7 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-[#25D366]/10 bg-[#1a3d35]">
+    <Sidebar collapsible="icon" className="border-r border-border/50">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center shadow-lg shadow-[#25D366]/20">
@@ -133,25 +131,25 @@ export function AdminSidebar() {
               <h2 className="font-bold text-lg text-[#F6F4EF]">
                 Organiza<span className="text-[#25D366]">AI</span>
               </h2>
-              <p className="text-xs text-[#F6F4EF]/60">Painel Admin</p>
+              <p className="text-xs text-[#F6F4EF]/70">Minhas Finanças</p>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <Separator className="mx-4 w-auto bg-[#25D366]/20" />
+      <Separator className="mx-4 w-auto" />
 
       <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-[#F6F4EF]/50 font-medium">
-            Principal
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground/70">
+            Menu Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild tooltip={item.title}>
-                    <MenuItemLink item={item} end={item.url === "/admin"} isCollapsed={isCollapsed} />
+                    <MenuItemLink item={item} end={item.url === "/dashboard"} isCollapsed={isCollapsed} />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -160,8 +158,8 @@ export function AdminSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-6">
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-[#F6F4EF]/50 font-medium">
-            Sistema
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-[#F6F4EF]/70">
+            Integrações
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -178,26 +176,21 @@ export function AdminSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 mt-auto">
-        <Separator className="mb-4 bg-[#25D366]/20" />
+        <Separator className="mb-4" />
         <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 border-2 border-[#25D366]/30">
-            <AvatarFallback className="bg-[#25D366]/20 text-[#25D366] font-medium">
-              {user?.name?.split(" ").map(n => n[0]).join("").substring(0, 2) || "AD"}
+          <Avatar className="h-9 w-9">
+            <AvatarFallback className="bg-accent/10 text-accent font-medium">
+              {user?.name?.split(" ").map(n => n[0]).join("").substring(0, 2) || "US"}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[#F6F4EF] truncate">{user?.name || "Admin"}</p>
-              <p className="text-xs text-[#F6F4EF]/60 truncate">{user?.email || "admin@financeai.com"}</p>
+              <p className="text-sm font-medium truncate">{user?.name || "Usuário"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
           )}
           {!isCollapsed && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-[#F6F4EF]/70 hover:text-[#F6F4EF] hover:bg-white/5" 
-              onClick={handleLogout}
-            >
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
             </Button>
           )}

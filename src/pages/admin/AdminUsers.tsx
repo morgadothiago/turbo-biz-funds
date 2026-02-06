@@ -55,20 +55,20 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const mockUsers = [
-  { id: "1", name: "João Silva", email: "joao@techsolutions.com", role: "admin", company: "Tech Solutions LTDA", status: "Ativo", lastLogin: "Há 5 min", createdAt: "10/01/2025" },
-  { id: "2", name: "Maria Santos", email: "maria@inovdigital.com", role: "owner", company: "Inovação Digital ME", status: "Ativo", lastLogin: "Há 1 hora", createdAt: "15/01/2025" },
-  { id: "3", name: "Pedro Costa", email: "pedro@startuphub.io", role: "employee", company: "Startup Hub", status: "Pendente", lastLogin: "Há 2 dias", createdAt: "20/01/2025" },
-  { id: "4", name: "Ana Oliveira", email: "ana@financecorp.com", role: "owner", company: "Finance Corp", status: "Ativo", lastLogin: "Há 30 min", createdAt: "05/01/2025" },
-  { id: "5", name: "Carlos Mendes", email: "carlos@ecommerceplus.com", role: "employee", company: "E-commerce Plus", status: "Bloqueado", lastLogin: "Há 1 semana", createdAt: "12/01/2025" },
-  { id: "6", name: "Fernanda Lima", email: "fernanda@digitalmkt.com", role: "owner", company: "Digital Marketing Co", status: "Ativo", lastLogin: "Hoje", createdAt: "18/01/2025" },
-  { id: "7", name: "Roberto Alves", email: "roberto@consultoria.com", role: "admin", company: "Consultoria Pro", status: "Ativo", lastLogin: "Há 3 horas", createdAt: "08/01/2025" },
-  { id: "8", name: "Juliana Reis", email: "juliana@agenciacriativa.com", role: "employee", company: "Agência Criativa", status: "Ativo", lastLogin: "Ontem", createdAt: "22/01/2025" },
+  { id: "1", name: "João Silva", email: "joao.silva@email.com", role: "user", plan: "Pro", status: "Ativo", lastLogin: "Há 5 min", createdAt: "10/01/2025" },
+  { id: "2", name: "Maria Santos", email: "maria.santos@email.com", role: "user", plan: "Business", status: "Ativo", lastLogin: "Há 1 hora", createdAt: "15/01/2025" },
+  { id: "3", name: "Pedro Costa", email: "pedro.costa@email.com", role: "user", plan: "Free", status: "Pendente", lastLogin: "Há 2 dias", createdAt: "20/01/2025" },
+  { id: "4", name: "Ana Oliveira", email: "ana.oliveira@email.com", role: "user", plan: "Pro", status: "Ativo", lastLogin: "Há 30 min", createdAt: "05/01/2025" },
+  { id: "5", name: "Carlos Mendes", email: "carlos.mendes@email.com", role: "user", plan: "Free", status: "Bloqueado", lastLogin: "Há 1 semana", createdAt: "12/01/2025" },
+  { id: "6", name: "Fernanda Lima", email: "fernanda.lima@email.com", role: "user", plan: "Business", status: "Ativo", lastLogin: "Hoje", createdAt: "18/01/2025" },
+  { id: "7", name: "Roberto Alves", email: "roberto.alves@email.com", role: "user", plan: "Pro", status: "Ativo", lastLogin: "Há 3 horas", createdAt: "08/01/2025" },
+  { id: "8", name: "Juliana Reis", email: "juliana.reis@email.com", role: "user", plan: "Free", status: "Ativo", lastLogin: "Ontem", createdAt: "22/01/2025" },
 ];
 
-const roleLabels: Record<string, { label: string; color: string }> = {
-  admin: { label: "Admin", color: "bg-destructive/10 text-destructive" },
-  owner: { label: "Proprietário", color: "bg-primary/10 text-primary" },
-  employee: { label: "Funcionário", color: "bg-muted text-muted-foreground" },
+const planLabels: Record<string, { label: string; color: string }> = {
+  Free: { label: "Free", color: "bg-muted text-muted-foreground" },
+  Pro: { label: "Pro", color: "bg-primary/10 text-primary" },
+  Business: { label: "Business", color: "bg-accent/10 text-accent" },
 };
 
 const statusLabels: Record<string, { color: string }> = {
@@ -79,17 +79,16 @@ const statusLabels: Record<string, { color: string }> = {
 
 export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [selectedPlan, setSelectedPlan] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const filteredUsers = mockUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          user.company.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = selectedRole === "all" || user.role === selectedRole;
+                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPlan = selectedPlan === "all" || user.plan === selectedPlan;
     const matchesStatus = selectedStatus === "all" || user.status === selectedStatus;
-    return matchesSearch && matchesRole && matchesStatus;
+    return matchesSearch && matchesPlan && matchesStatus;
   });
 
   const toggleUserSelection = (userId: string) => {
@@ -111,8 +110,8 @@ export default function AdminUsers() {
   return (
     <div className="flex flex-col h-full">
       <AdminHeader 
-        title="Gestão de Usuários" 
-        subtitle="Gerencie todos os usuários da plataforma"
+        title="Gestão de Clientes" 
+        subtitle="Gerencie todos os clientes da plataforma"
       />
       
       <div className="flex-1 overflow-auto p-6 space-y-6">
@@ -152,21 +151,21 @@ export default function AdminUsers() {
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Buscar por nome, email ou empresa..."
+                    placeholder="Buscar por nome ou email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9"
                   />
                 </div>
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <Select value={selectedPlan} onValueChange={setSelectedPlan}>
                   <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Papel" />
+                    <SelectValue placeholder="Plano" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos os papéis</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="owner">Proprietário</SelectItem>
-                    <SelectItem value="employee">Funcionário</SelectItem>
+                    <SelectItem value="all">Todos os planos</SelectItem>
+                    <SelectItem value="Free">Free</SelectItem>
+                    <SelectItem value="Pro">Pro</SelectItem>
+                    <SelectItem value="Business">Business</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -243,8 +242,7 @@ export default function AdminUsers() {
                     />
                   </TableHead>
                   <TableHead>Usuário</TableHead>
-                  <TableHead>Empresa</TableHead>
-                  <TableHead>Papel</TableHead>
+                  <TableHead>Plano</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Último acesso</TableHead>
                   <TableHead>Criado em</TableHead>
@@ -273,12 +271,11 @@ export default function AdminUsers() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{user.company}</TableCell>
-                    <TableCell>
-                      <Badge className={roleLabels[user.role].color}>
-                        {roleLabels[user.role].label}
-                      </Badge>
-                    </TableCell>
+                     <TableCell>
+                       <Badge className={planLabels[user.plan].color}>
+                         {planLabels[user.plan].label}
+                       </Badge>
+                     </TableCell>
                     <TableCell>
                       <Badge className={statusLabels[user.status].color}>
                         {user.status}

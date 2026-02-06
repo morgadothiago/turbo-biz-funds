@@ -1,5 +1,10 @@
 import { useEffect, useRef } from 'react';
 
+// Extend HTMLDivElement to include our custom property
+type RevealElement = HTMLDivElement & {
+  _revealCleanup?: () => void;
+};
+
 // Global singleton observer - shared across all useReveal instances
 let globalObserver: IntersectionObserver | null = null;
 const observedElements = new Map<Element, { delay: number; callback: () => void }>();
@@ -29,7 +34,7 @@ function getGlobalObserver(): IntersectionObserver {
 }
 
 export const useReveal = (delay = 0) => {
-    const ref = useRef<HTMLDivElement>(null);
+    const ref = useRef<RevealElement>(null);
 
     useEffect(() => {
         const el = ref.current;
@@ -57,7 +62,7 @@ export const useReveal = (delay = 0) => {
                 cleanup();
             }, 3000);
 
-            (el as any)._revealCleanup = () => {
+            el._revealCleanup = () => {
                 clearTimeout(fallback);
                 cleanup();
             };
@@ -65,8 +70,8 @@ export const useReveal = (delay = 0) => {
 
         return () => {
             cancelAnimationFrame(raf);
-            if ((el as any)._revealCleanup) {
-                (el as any)._revealCleanup();
+            if (el._revealCleanup) {
+                el._revealCleanup();
             }
         };
     }, [delay]);

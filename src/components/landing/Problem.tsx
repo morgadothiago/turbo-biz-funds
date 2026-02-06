@@ -1,8 +1,8 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Table2, Brain, CreditCard, HelpCircle } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { LeadCaptureModal } from "./LeadCaptureModal";
 
 const PROBLEMS = [
   {
@@ -65,6 +65,7 @@ ProblemCard.displayName = "ProblemCard";
 
 const Problem = memo(() => {
   const sectionRef = useReveal();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5 relative overflow-hidden">
@@ -98,13 +99,13 @@ const Problem = memo(() => {
             <br />
             A gente criou algo pra você nunca mais passar por isso.
           </p>
-          <Button variant="hero" size="lg" asChild>
-            <Link to="/cadastro">
-              Deixa com a gente
-            </Link>
+          <Button variant="hero" size="lg" onClick={() => setIsModalOpen(true)}>
+            Quero organizar minhas finanças
           </Button>
         </div>
       </div>
+
+      <LeadCaptureModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );
 });

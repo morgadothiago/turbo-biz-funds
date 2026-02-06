@@ -59,7 +59,7 @@ const plans = [
     color: "bg-muted",
     features: [
       { name: "Até 100 lançamentos/mês", included: true },
-      { name: "1 empresa", included: true },
+      { name: "1 conta", included: true },
       { name: "Relatórios básicos", included: true },
       { name: "Chat com IA (5 msgs/dia)", included: true },
       { name: "Integração WhatsApp", included: false },
@@ -69,7 +69,7 @@ const plans = [
   {
     id: "pro",
     name: "Pro",
-    description: "Para empresas em crescimento",
+    description: "Para quem quer mais controle",
     price: 99,
     billingPeriod: "mês",
     subscribers: 98,
@@ -79,7 +79,7 @@ const plans = [
     popular: true,
     features: [
       { name: "Lançamentos ilimitados", included: true },
-      { name: "Até 3 empresas", included: true },
+      { name: "Até 3 contas", included: true },
       { name: "Relatórios avançados", included: true },
       { name: "Chat com IA ilimitado", included: true },
       { name: "Integração WhatsApp", included: true },
@@ -89,7 +89,7 @@ const plans = [
   {
     id: "business",
     name: "Business",
-    description: "Para equipes e multi-empresas",
+    description: "Para famílias e pequenos grupos",
     price: 249,
     billingPeriod: "mês",
     subscribers: 47,
@@ -98,7 +98,7 @@ const plans = [
     color: "bg-success/10",
     features: [
       { name: "Tudo do Pro", included: true },
-      { name: "Empresas ilimitadas", included: true },
+      { name: "Contas ilimitadas", included: true },
       { name: "Usuários ilimitados", included: true },
       { name: "API personalizada", included: true },
       { name: "White-label", included: true },
@@ -108,12 +108,12 @@ const plans = [
 ];
 
 const subscriptions = [
-  { id: "1", company: "Tech Solutions LTDA", plan: "Pro", status: "Ativo", startDate: "10/01/2025", nextBilling: "10/02/2025", amount: 99 },
-  { id: "2", company: "Inovação Digital ME", plan: "Business", status: "Ativo", startDate: "15/01/2025", nextBilling: "15/02/2025", amount: 249 },
-  { id: "3", company: "Startup Hub", plan: "Free", status: "Trial", startDate: "20/01/2025", nextBilling: "-", amount: 0 },
-  { id: "4", company: "Finance Corp", plan: "Pro", status: "Ativo", startDate: "05/01/2025", nextBilling: "05/02/2025", amount: 99 },
-  { id: "5", company: "E-commerce Plus", plan: "Business", status: "Inadimplente", startDate: "12/01/2025", nextBilling: "12/02/2025", amount: 249 },
-  { id: "6", company: "Digital Marketing Co", plan: "Pro", status: "Ativo", startDate: "18/01/2025", nextBilling: "18/02/2025", amount: 99 },
+  { id: "1", client: "João Silva", plan: "Pro", status: "Ativo", startDate: "10/01/2025", nextBilling: "10/02/2025", amount: 99 },
+  { id: "2", client: "Maria Santos", plan: "Business", status: "Ativo", startDate: "15/01/2025", nextBilling: "15/02/2025", amount: 249 },
+  { id: "3", client: "Pedro Costa", plan: "Free", status: "Trial", startDate: "20/01/2025", nextBilling: "-", amount: 0 },
+  { id: "4", client: "Ana Oliveira", plan: "Pro", status: "Ativo", startDate: "05/01/2025", nextBilling: "05/02/2025", amount: 99 },
+  { id: "5", client: "Carlos Mendes", plan: "Business", status: "Inadimplente", startDate: "12/01/2025", nextBilling: "12/02/2025", amount: 249 },
+  { id: "6", client: "Fernanda Lima", plan: "Pro", status: "Ativo", startDate: "18/01/2025", nextBilling: "18/02/2025", amount: 99 },
 ];
 
 const statusColors: Record<string, string> = {
@@ -326,7 +326,7 @@ export default function AdminPlans() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Empresa</TableHead>
+                      <TableHead>Cliente</TableHead>
                       <TableHead>Plano</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Início</TableHead>
@@ -338,7 +338,7 @@ export default function AdminPlans() {
                   <TableBody>
                     {subscriptions.map((sub) => (
                       <TableRow key={sub.id}>
-                        <TableCell className="font-medium">{sub.company}</TableCell>
+                        <TableCell className="font-medium">{sub.client}</TableCell>
                         <TableCell>
                           <Badge variant="outline">{sub.plan}</Badge>
                         </TableCell>

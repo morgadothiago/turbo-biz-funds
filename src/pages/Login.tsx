@@ -1,17 +1,34 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Mail, Lock, ArrowRight } from "lucide-react";
+import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implementar login
+    
+    try {
+      await login(email, password);
+      toast.success("Login realizado com sucesso!");
+      
+      // Redireciona baseado na role
+      if (email === "admin@financeai.com") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast.error("Email ou senha inválidos");
+    }
   };
 
   return (
@@ -75,9 +92,18 @@ const Login = () => {
               </div>
             </div>
 
-            <Button variant="hero" size="lg" className="w-full" type="submit">
-              Entrar
-              <ArrowRight className="w-4 h-4" />
+            <Button variant="hero" size="lg" className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                <>
+                  Entrar
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </Button>
           </form>
 
@@ -110,6 +136,15 @@ const Login = () => {
             Criar conta grátis
           </Link>
         </p>
+
+        {/* Credenciais de teste */}
+        <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-dashed border-muted-foreground/30">
+          <p className="text-xs text-muted-foreground font-medium mb-2">Credenciais de teste:</p>
+          <div className="space-y-1 text-xs text-muted-foreground">
+            <p><span className="font-medium">Admin:</span> admin@financeai.com / admin123</p>
+            <p><span className="font-medium">Usuário:</span> usuario@financeai.com / user123</p>
+          </div>
+        </div>
       </div>
     </div>
   );
