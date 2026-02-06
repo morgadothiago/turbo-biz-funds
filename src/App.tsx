@@ -4,9 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
 
-// Lazy load pages for code splitting
-const Index = lazy(() => import("./pages/Index"));
+// Lazy load secondary pages (not needed on first load)
 const Login = lazy(() => import("./pages/Login"));
 const Cadastro = lazy(() => import("./pages/Cadastro"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -20,40 +20,28 @@ const AdminPlans = lazy(() => import("./pages/admin/AdminPlans"));
 
 const queryClient = new QueryClient();
 
-// Loading fallback component
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-muted-foreground text-sm">Carregando...</p>
-    </div>
-  </div>
-);
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/cadastro" element={<Cadastro />} />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Suspense fallback={null}><Login /></Suspense>} />
+          <Route path="/cadastro" element={<Suspense fallback={null}><Cadastro /></Suspense>} />
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="usuarios" element={<AdminUsers />} />
-              <Route path="empresas" element={<AdminCompanies />} />
-              <Route path="planos" element={<AdminPlans />} />
-            </Route>
+          {/* Admin Routes */}
+          <Route path="/admin" element={<Suspense fallback={null}><AdminLayout /></Suspense>}>
+            <Route index element={<Suspense fallback={null}><AdminDashboard /></Suspense>} />
+            <Route path="usuarios" element={<Suspense fallback={null}><AdminUsers /></Suspense>} />
+            <Route path="empresas" element={<Suspense fallback={null}><AdminCompanies /></Suspense>} />
+            <Route path="planos" element={<Suspense fallback={null}><AdminPlans /></Suspense>} />
+          </Route>
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
