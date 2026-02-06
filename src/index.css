@@ -274,21 +274,25 @@
     }
   }
 
-  /* Reveal interaction system */
+  /* Reveal interaction system - content visible by default, animation is a bonus */
   .reveal {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    opacity: 1;
+    transform: none;
   }
 
-  .reveal.active {
+  .reveal.animate {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  }
+
+  .reveal.animate.active {
     opacity: 1;
     transform: translateY(0);
   }
 
-  /* Reduce motion for users who prefer it and for better mobile perf */
   @media (prefers-reduced-motion: reduce) {
-    .reveal {
+    .reveal.animate {
       opacity: 1;
       transform: none;
       transition: none;
