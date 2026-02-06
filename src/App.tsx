@@ -1,25 +1,11 @@
 import { lazy, Suspense, Component } from "react";
 import type { ReactNode } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 
-// Lazy load secondary pages (not needed on first load)
-const Login = lazy(() => import("./pages/Login"));
-const Cadastro = lazy(() => import("./pages/Cadastro"));
+// Lazy load everything that the landing page doesn't need
+const AppShell = lazy(() => import("./AppShell"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-
-// Lazy load admin pages (heavy bundle with Recharts)
-const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
-const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
-const AdminCompanies = lazy(() => import("./pages/admin/AdminCompanies"));
-const AdminPlans = lazy(() => import("./pages/admin/AdminPlans"));
-
-const queryClient = new QueryClient();
 
 // Error boundary to prevent blank screens
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -50,30 +36,15 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Suspense fallback={null}><Login /></Suspense>} />
-            <Route path="/cadastro" element={<Suspense fallback={null}><Cadastro /></Suspense>} />
+    <BrowserRouter>
+      <Routes>
+        {/* Landing page - loads fast with zero heavy dependencies */}
+        <Route path="/" element={<Index />} />
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<Suspense fallback={null}><AdminLayout /></Suspense>}>
-              <Route index element={<Suspense fallback={null}><AdminDashboard /></Suspense>} />
-              <Route path="usuarios" element={<Suspense fallback={null}><AdminUsers /></Suspense>} />
-              <Route path="empresas" element={<Suspense fallback={null}><AdminCompanies /></Suspense>} />
-              <Route path="planos" element={<Suspense fallback={null}><AdminPlans /></Suspense>} />
-            </Route>
-
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<Suspense fallback={null}><NotFound /></Suspense>} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+        {/* All other routes - lazy loads providers (QueryClient, Toaster, etc.) */}
+        <Route path="/*" element={<Suspense fallback={null}><AppShell /></Suspense>} />
+      </Routes>
+    </BrowserRouter>
   </ErrorBoundary>
 );
 

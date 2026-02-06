@@ -1,13 +1,7 @@
-import { memo } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { memo, useState, useCallback } from "react";
+import { ChevronDown } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
 
-// Static FAQ data moved outside component
 const FAQS = [
   {
     question: "Preciso baixar algum aplicativo?",
@@ -43,6 +37,30 @@ const FAQS = [
   },
 ] as const;
 
+const FAQItem = memo(({ faq }: { faq: typeof FAQS[number] }) => {
+  const [open, setOpen] = useState(false);
+  const toggle = useCallback(() => setOpen(prev => !prev), []);
+
+  return (
+    <div className="bg-card rounded-xl border border-border px-6 transition-all data-[open=true]:shadow-md data-[open=true]:border-primary/20" data-open={open}>
+      <button
+        onClick={toggle}
+        className="w-full flex items-center justify-between text-left font-medium text-foreground hover:text-primary py-5 transition-colors"
+      >
+        <span>{faq.question}</span>
+        <ChevronDown className={`w-5 h-5 text-muted-foreground shrink-0 ml-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="text-muted-foreground pb-5 leading-relaxed">
+          {faq.answer}
+        </div>
+      )}
+    </div>
+  );
+});
+
+FAQItem.displayName = "FAQItem";
+
 const FAQ = memo(() => {
   const headerRef = useReveal();
 
@@ -62,23 +80,10 @@ const FAQ = memo(() => {
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto">
-          <Accordion type="single" collapsible className="space-y-4">
-            {FAQS.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="bg-card rounded-xl border border-border px-6 data-[state=open]:shadow-md data-[state=open]:border-primary/20 transition-all"
-              >
-                <AccordionTrigger className="text-left font-medium text-foreground hover:no-underline hover:text-primary py-5 transition-colors">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+        <div className="max-w-3xl mx-auto space-y-4">
+          {FAQS.map((faq, index) => (
+            <FAQItem key={index} faq={faq} />
+          ))}
         </div>
 
         {/* Contact CTA */}
