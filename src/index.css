@@ -302,6 +302,19 @@
     }
   }
 
+  /* Disable heavy animations on mobile for performance */
+  @media (max-width: 640px) {
+    .animate-blob {
+      animation: none !important;
+    }
+    .animate-float, .animate-float-slow {
+      animation: none !important;
+    }
+    .blob {
+      display: none !important;
+    }
+  }
+
   /* Reveal delays */
   .delay-100 {
     transition-delay: 100ms;

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { 
   Users, 
   Building2, 
@@ -35,12 +36,13 @@ import {
   Bar
 } from "recharts";
 
-const statsCards = [
+// Dados estáticos memoizados para evitar recriação
+const STATS_CARDS = [
   {
     title: "Receita Mensal (MRR)",
     value: "R$ 47.890",
     change: "+12.5%",
-    trend: "up",
+    trend: "up" as const,
     icon: DollarSign,
     color: "text-success",
     bgColor: "bg-success/10"
@@ -49,7 +51,7 @@ const statsCards = [
     title: "Total de Empresas",
     value: "234",
     change: "+8",
-    trend: "up",
+    trend: "up" as const,
     icon: Building2,
     color: "text-primary",
     bgColor: "bg-primary/10"
@@ -58,7 +60,7 @@ const statsCards = [
     title: "Usuários Ativos",
     value: "1.429",
     change: "+23",
-    trend: "up",
+    trend: "up" as const,
     icon: Users,
     color: "text-accent",
     bgColor: "bg-accent/10"
@@ -67,14 +69,14 @@ const statsCards = [
     title: "Taxa de Conversão",
     value: "24.8%",
     change: "-2.1%",
-    trend: "down",
+    trend: "down" as const,
     icon: TrendingUp,
     color: "text-warning",
     bgColor: "bg-warning/10"
   }
 ];
 
-const revenueData = [
+const REVENUE_DATA = [
   { month: "Jan", receita: 32000, empresas: 180 },
   { month: "Fev", receita: 35000, empresas: 195 },
   { month: "Mar", receita: 38500, empresas: 208 },
@@ -83,13 +85,13 @@ const revenueData = [
   { month: "Jun", receita: 47890, empresas: 234 },
 ];
 
-const planDistribution = [
+const PLAN_DISTRIBUTION = [
   { name: "Free", value: 89, color: "#94a3b8" },
   { name: "Pro", value: 98, color: "#3b82f6" },
   { name: "Business", value: 47, color: "#10b981" },
 ];
 
-const recentCompanies = [
+const RECENT_COMPANIES = [
   { name: "Tech Solutions LTDA", email: "contato@techsolutions.com", plan: "Pro", status: "Ativo", date: "Hoje" },
   { name: "Inovação Digital ME", email: "admin@inovdigital.com", plan: "Business", status: "Ativo", date: "Hoje" },
   { name: "Startup Hub", email: "hello@startuphub.io", plan: "Free", status: "Trial", date: "Ontem" },
@@ -97,15 +99,15 @@ const recentCompanies = [
   { name: "E-commerce Plus", email: "vendas@ecommerceplus.com", plan: "Business", status: "Pendente", date: "2 dias" },
 ];
 
-const recentActivity = [
-  { type: "signup", message: "Nova empresa: Tech Solutions LTDA", time: "5 min" },
-  { type: "payment", message: "Pagamento recebido: R$ 199,00", time: "1h" },
-  { type: "upgrade", message: "Upgrade de plano: Startup Hub (Free → Pro)", time: "2h" },
-  { type: "support", message: "Novo ticket de suporte #1234", time: "3h" },
-  { type: "signup", message: "Nova empresa: Digital Marketing Co", time: "4h" },
+const RECENT_ACTIVITY = [
+  { type: "signup" as const, message: "Nova empresa: Tech Solutions LTDA", time: "5 min" },
+  { type: "payment" as const, message: "Pagamento recebido: R$ 199,00", time: "1h" },
+  { type: "upgrade" as const, message: "Upgrade de plano: Startup Hub (Free → Pro)", time: "2h" },
+  { type: "support" as const, message: "Novo ticket de suporte #1234", time: "3h" },
+  { type: "signup" as const, message: "Nova empresa: Digital Marketing Co", time: "4h" },
 ];
 
-export default function AdminDashboard() {
+function AdminDashboard() {
   return (
     <div className="flex flex-col h-full">
       <AdminHeader 
@@ -116,7 +118,7 @@ export default function AdminDashboard() {
       <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {statsCards.map((stat) => (
+          {STATS_CARDS.map((stat) => (
             <Card key={stat.title} className="relative overflow-hidden">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
@@ -155,7 +157,7 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={revenueData}>
+                  <LineChart data={REVENUE_DATA}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis dataKey="month" className="text-xs" />
                     <YAxis className="text-xs" tickFormatter={(value) => `R$${value/1000}k`} />
@@ -189,7 +191,7 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={planDistribution} layout="vertical">
+                  <BarChart data={PLAN_DISTRIBUTION} layout="vertical">
                     <XAxis type="number" className="text-xs" />
                     <YAxis type="category" dataKey="name" className="text-xs" width={70} />
                     <Tooltip 
@@ -230,7 +232,7 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentCompanies.map((company) => (
+                  {RECENT_COMPANIES.map((company) => (
                     <TableRow key={company.email}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -273,7 +275,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
+                {RECENT_ACTIVITY.map((activity, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className={`p-2 rounded-lg ${
                       activity.type === "signup" ? "bg-primary/10" :
@@ -300,3 +302,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+export default memo(AdminDashboard);

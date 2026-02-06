@@ -15,7 +15,17 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminCompanies = lazy(() => import("./pages/admin/AdminCompanies"));
 const AdminPlans = lazy(() => import("./pages/admin/AdminPlans"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutos
+      gcTime: 10 * 60 * 1000, // 10 minutos
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+  },
+});
 
 const AppShell = () => (
   <QueryClientProvider client={queryClient}>

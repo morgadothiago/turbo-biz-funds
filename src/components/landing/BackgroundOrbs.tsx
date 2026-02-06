@@ -38,20 +38,20 @@ const BackgroundOrbs = memo(({ isGlobal = false }: { isGlobal?: boolean }) => {
       "overflow-hidden pointer-events-none z-0",
       isGlobal ? "fixed inset-0" : "absolute inset-0"
     )}>
-      {/* Central Glow Effect - simplified on mobile for performance */}
-      <div className="absolute top-1/4 left-1/4 w-[200px] h-[200px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-br from-primary/5 via-accent/5 to-transparent blur-[40px] md:blur-[120px] opacity-40" />
-      <div className="absolute bottom-1/4 right-1/4 w-[200px] h-[200px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-tr from-accent/5 via-primary/5 to-transparent blur-[40px] md:blur-[120px] opacity-40" />
+      {/* Central Glow Effect - NO blur on mobile for performance */}
+      <div className="absolute top-1/4 left-1/4 w-[200px] h-[200px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-br from-primary/8 via-accent/5 to-transparent md:blur-[80px] opacity-30 md:opacity-40" />
+      <div className="absolute bottom-1/4 right-1/4 w-[200px] h-[200px] md:w-[500px] md:h-[500px] lg:w-[800px] lg:h-[800px] rounded-full bg-gradient-to-tr from-accent/8 via-primary/5 to-transparent md:blur-[80px] opacity-30 md:opacity-40" />
 
-      {/* Floating Icons Loop - hidden on small mobile for performance */}
-      <div className="hidden sm:block">
+      {/* Floating Icons Loop - hidden on mobile for performance */}
+      <div className="hidden md:block">
         {MODELS.map((model) => (
           <FloatingIcon key={model.name} model={model} />
         ))}
       </div>
 
-      {/* Subtle Grid Pattern Overlay */}
+      {/* Subtle Grid Pattern Overlay - desktop only */}
       <div
-        className="absolute inset-0 opacity-[0.02] hidden md:block"
+        className="absolute inset-0 opacity-[0.02] hidden lg:block"
         style={{ backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)', backgroundSize: '60px 60px' }}
       />
     </div>
