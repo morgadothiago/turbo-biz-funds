@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import BackgroundOrbs from "@/components/landing/BackgroundOrbs";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 // Lazy load components below the fold for better performance
 const Problem = lazy(() => import("@/components/landing/Problem"));
@@ -59,10 +60,11 @@ const LazySection = ({ children }: { children: React.ReactNode }) => {
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background relative">
-      <BackgroundOrbs isGlobal={true} />
-      <Navbar />
-      <Hero />
+    <ThemeProvider defaultTheme="system" storageKey="organizaai-theme">
+      <div className="min-h-screen bg-background relative">
+        <BackgroundOrbs isGlobal={true} />
+        <Navbar />
+        <Hero />
       
       {/* Lazy load sections below the fold */}
       <LazySection>
@@ -85,10 +87,11 @@ const Index = () => {
         <FAQ />
       </LazySection>
       
-      <LazySection>
-        <Footer />
-      </LazySection>
-    </div>
+        <LazySection>
+          <Footer />
+        </LazySection>
+      </div>
+    </ThemeProvider>
   );
 };
 

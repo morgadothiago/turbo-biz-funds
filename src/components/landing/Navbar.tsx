@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, Sparkles } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const NAV_LINKS = [
   { name: "Como Funciona", href: "#como-funciona" },
@@ -51,6 +52,7 @@ const Navbar = memo(() => {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             <Button variant="ghost" asChild>
               <Link to="/login">Entrar</Link>
             </Button>
