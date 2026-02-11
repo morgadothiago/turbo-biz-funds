@@ -39,10 +39,10 @@ export default defineConfig({
         "src/features/dashboard/data/index.ts",
       ],
       thresholds: {
-        lines: 85,
+        lines: 90,
         functions: 80,
-        branches: 75,
-        statements: 85,
+        branches: 77,
+        statements: 90,
       },
     },
     reporters: ["verbose"],
