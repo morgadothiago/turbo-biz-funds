@@ -23,29 +23,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<User> => {
     setIsLoading(true);
-    
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+
     const mockUsers = getMockUsers();
     const foundUser = mockUsers.find(
       (u) => u.email === email && u.password === password
     );
-    
+
     if (!foundUser) {
       setIsLoading(false);
       throw new Error("Email ou senha inválidos");
     }
-    
+
     const { password: _, ...userWithoutPassword } = foundUser;
     const token = generateToken(foundUser.id);
-    
+
     storage.setToken(token);
     storage.setUser(userWithoutPassword);
-    
+
     setUser(userWithoutPassword);
     setIsLoading(false);
+
+    return userWithoutPassword;
   }, []);
 
   const logout = useCallback(() => {

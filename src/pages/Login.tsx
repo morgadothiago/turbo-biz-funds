@@ -55,9 +55,13 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      const userData = await login(email, password);
       toast.success("Login realizado com sucesso!");
-      navigate("/dashboard");
+      if (userData.role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     } catch (error) {
       toast.error("Email ou senha inválidos");
     } finally {

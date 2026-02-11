@@ -14,7 +14,6 @@ export default defineConfig({
       reporter: ["text", "json", "html"],
       include: [
         "src/contexts/**",
-        "src/lib/**",
         "src/features/auth/schemas/**",
         "src/features/dashboard/data/**",
         "src/features/dashboard/hooks/**",
@@ -37,6 +36,7 @@ export default defineConfig({
         "src/features/auth/schemas/index.ts",
         "src/features/dashboard/hooks/index.ts",
         "src/features/dashboard/data/index.ts",
+        "src/lib/**",
       ],
       thresholds: {
         lines: 90,

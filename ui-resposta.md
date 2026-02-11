@@ -1,225 +1,94 @@
+# UI/UX - OrganizaAI Documentação Completa
+
+---
+
 # Visão Geral
 
-## Objetivo
-Criar uma interface profissional, minimalista e acolhedora para o OrganizaAI - um assistente financeiro pessoal que permite registrar gastos pelo WhatsApp com categorização automática via IA.
+## Objetivo da Tela
 
-## Problema Resolvido
-Usuários abandonam planilhas e apps financeiros tradicionais por serem complexos, exigirem muito esforço de entrada de dados e terem interfaces frias. O OrganizaAI resolve isso com uma experiência conversacional via WhatsApp e uma interface web limpa para visualização.
+OrganizaAI é um assistente financeiro pessoal que permite registrar gastos pelo WhatsApp com categorização automática via IA. O painel administrativo (admin) permite que administradores gerenciem clientes, assinaturas e planos da plataforma.
+
+## Problema do Usuário Resolvido
+
+- Administrador não consegue visualizar métricas整体 da plataforma
+- Dificuldade em gerenciar clientes e assinaturas
+- Falta de controle sobre planos e preços
+- Necessidade de visualizar receita e métricas de negócio
 
 ## Plataforma
-- Web responsiva (desktop e mobile)
-- Progressive Web App (PWA ready)
-- Suporte a dark mode
+
+- Web responsiva (desktop e tablet)
+- Suporte a dark mode completo
+- Layout administrativo com sidebar dedicado
 
 ---
 
 # Usuário e Contexto
 
 ## Perfil do Usuário
-- Usuário comum brasileiro que usa WhatsApp diariamente
-- Não é especialista em finanças
-- Quer simplicidade e resultados rápidos
-- Valoriza economia de tempo
-- Prefere interfaces limpas e intuitivas
+
+**Administrador:**
+- Pessoa responsável pelo gerenciamento da plataforma
+- Precisa de visão geral do negócio
+- Realiza operações de CRUD em clientes e planos
+- Precisa de acesso rápido a métricas importantes
 
 ## Contexto de Uso
-- **Desktop**: Visualização detalhada de relatórios, metas e planejamento
-- **Mobile**: Registro rápido via WhatsApp, consultas breves de saldo
-- **Desktop preferred**: Usuários tendem a usar mais o dashboard web para análise
+
+**Desktop/Tablet:**
+- Gerenciamento diário de clientes
+- Análise de métricas de receita
+- Configuração de planos e preços
+- Acompanhamento de assinaturas
 
 ---
 
 # Fluxo de UX
 
-## Landing Page (Index)
-1. Usuário acessa página inicial
-2. Vê proposta de valor principal (WhatsApp + IA)
-3. Pode ir para Login ou Cadastro
-4. Pode assistir vídeo demonstrativo
+## Fluxo Principal: Login Admin → Dashboard Admin
 
-## Autenticação (Login/Cadastro)
-1. Usuário acessa página de login
-2. Insere credenciais ou usa Google OAuth
-3. Sistema valida e autentica
-4. Redireciona para dashboard
+### Dashboard Admin
+1. Administrador acessa `/admin`
+2. Visualiza métricas principais (receita, clientes, assinaturas ativas)
+3. Acessa clientes, assinaturas ou planos pelo sidebar
+4. Realiza operações de gerenciamento
 
-## Dashboard Principal
-1. Usuário vê visão geral das finanças
-2. Pode navegar para seções específicas via sidebar
-3. Ações principais são claras e acessíveis
+### Gestão de Clientes
+1. Acessa página de clientes via sidebar
+2. Filtra por nome, plano ou status
+3. Visualiza lista de clientes
+4. Ações via dropdown: editar, bloquear, excluir
 
----
+### Gestão de Assinaturas
+1. Acessa página de assinaturas via sidebar
+2. Visualiza métricas de receita
+3. Filtra por cliente, plano ou status
+4. Ações: visualizar detalhes, alterar plano, pausar/cancelar
 
-# Design System
+### Gestão de Planos
+1. Acessa página de planos via sidebar
+2. Visualiza cards de cada plano
+3. Edita ou cria novos planos via dialog
+4. Visualiza assinaturas por plano
 
-## Cores
+## Estados Possíveis
 
-### Paleta Primária (Verde Acolhedora)
-```
-Primary: hsl(161, 34%, 37%)      #3F7F6B
-Primary Light: hsl(149, 29%, 56%)  #6FAF8E
-Success: hsl(149, 40%, 45%)       #Sucesso
-Warning: hsl(38, 92%, 50%)        #Alertas
-Destructive: hsl(0, 84%, 60%)    #Erros
-```
+### Loading
+- Skeleton screens em todas as páginas
+- Spinner em botões durante submit
 
-### Background
-```
-Light: hsl(43, 28%, 95%)   #F6F4EF (Bege Areia)
-Dark: hsl(161, 20%, 8%)     #Escuro Suave
-```
+### Vazio
+- Clientes: "Nenhum cliente encontrado"
+- Assinaturas: "Nenhuma assinatura"
+- Planos: "Nenhum plano configurado"
 
-### usage
-- **Primary**: Botões principais, CTAs, elementos de navegação
-- **Secondary**: Destaques secundários, tags, badges
-- **Success**: Valores positivos, metas atingidas
-- **Destructive**: Erros, valores negativos, alertas importantes
-- **Background**: Cor base da aplicação (bege, não branco hospitalar)
+### Erro
+- Toast de erro com mensagem clara
+- Opção de retry visível
 
-## Tipografia
-
-### Fontes
-- **Sans**: Inter (corpo, formulários, textos)
-- **Display**: Outfit (títulos, headlines)
-
-### Hierarchy
-```
-h1: 2.5rem (40px) - Bold
-h2: 2rem (32px) - Semibold
-h3: 1.5rem (24px) - Semibold
-h4: 1.25rem (20px) - Medium
-body: 1rem (16px) - Regular
-small: 0.875rem (14px) - Regular
-caption: 0.75rem (12px) - Regular
-```
-
-## Espaçamento (8pt Grid)
-```
-xs: 4px
-sm: 8px
-md: 16px
-lg: 24px
-xl: 32px
-2xl: 48px
-3xl: 64px
-```
-
-## Bordas e Shadows
-- **Radius**: 1rem (16px) para cards e botões grandes
-- **Radius**: 0.75rem (12px) para elementos menores
-- **Shadow**: Suave, difuso, sem bordas duras
-- **Border**: hsl(43, 20%, 88%) - sutil
-
----
-
-# Componentes de UI
-
-## Botões (Button)
-
-### Variantes
-| Variante | Descrição | Uso |
-|----------|-----------|-----|
-| `hero` | Gradient verde, maior, glow | CTAs principais |
-| `default` | Verde sólido | Ações primárias |
-| `outline` | Borda verde, fundo transparente | Ações secundárias |
-| `ghost` | Sem fundo, texto verde | Ações terciárias |
-| `destructive` | Vermelho | Excluir, danger actions |
-
-### Tamanhos
-| Tamanho | Height | Padding | Uso |
-|---------|--------|---------|-----|
-| `sm` | 36px | px-3 | Badges, botões pequenos |
-| `default` | 40px | px-4 | Botões padrão |
-| `lg` | 48px | px-6 | CTAs, formulários |
-| `xl` | 56px | px-8 | Hero sections |
-
-### Estados
-- **Hover**: brightness-110, subtle scale
-- **Active**: scale-98
-- **Disabled**: opacity-50, cursor-not-allowed
-- **Loading**: Spinner + texto indicador
-
-## Cards (Card)
-
-### Estrutura
-```
-┌─────────────────────────────────────┐
-│  Header (opcional)                  │
-│    ├─ Title                         │
-│    └─ Description                   │
-├─────────────────────────────────────┤
-│  Content                             │
-├─────────────────────────────────────┤
-│  Footer (opcional)                   │
-└─────────────────────────────────────┘
-```
-
-### Propriedades
-- Border radius: 1rem
-- Border: 1px solid hsl(43, 20%, 88%)
-- Shadow: subtle, card-like
-- Background: white ou hsl(0, 0%, 100%)
-
-## Inputs (Input)
-
-### Estados
-| Estado | Border | Icon | Feedback |
-|--------|--------|------|----------|
-| Default | hsl(43, 20%, 88%) | Cinza | None |
-| Focus | Primary | Primary | Ring glow |
-| Error | Destructive | Destructive | Mensagem |
-| Disabled | Muted | Muted | Opacity 50 |
-
-### Ícones
-- Posição: Absolute left, centered vertically
-- Tamanho: 5x5 (w-5 h-5)
-- Cor: text-muted-foreground
-
-## Sidebar
-
-### Desktop (Expanded)
-- Width: 280px
-- Background: hsl(161, 34%, 20%) (Verde escuro)
-- Text: hsl(43, 28%, 95%) (Off-white)
-- Active: hsl(149, 29%, 56%) highlight + bg-[#25D366]/15
-
-### Mobile (Collapsed)
-- Width: 72px (ícones apenas)
-- Expansível via Radix UI Sidebar
-
-### Logotipo
-- SVG com gradiente #25D366 to #128C7E
-- Tamanho: 40x40px
-
----
-
-# Layout e Estrutura
-
-## Grid System
-
-### Desktop (lg: 1024px+)
-- Container: max-w-7xl (1280px), centered
-- Grid columns: 12
-- Sidebar: 280px fixed
-- Main content: fluid
-
-### Tablet (md: 768px - 1023px)
-- Grid columns: 8
-- Sidebar: collapsible
-- Cards: 2 columns
-
-### Mobile (< 768px)
-- Grid columns: 4
-- Sidebar: drawer/modal
-- Cards: 1 column (stack)
-
-## Spacing Scale
-```
-Page padding: p-6 (mobile), p-8 (desktop)
-Section gap: space-y-8 (64px)
-Card gap: gap-4 (16px)
-Component internal: space-y-5 (20px)
-```
+### Sucesso
+- Toast de confirmação após operações
+- Feedback visual em ações completadas
 
 ---
 
@@ -228,61 +97,256 @@ Component internal: space-y-5 (20px)
 ## Prioridade de Elementos
 
 ### Nível 1 - Primary Focus
-- Headlines principais (h1)
-- CTAs (botões hero)
-- Valor principal do dashboard (saldo)
-- Métricas principais
+- Cards de estatísticas principais (receita, clientes ativos)
+- Tabela de dados principal
+- Botões de ação principal (Novo Cliente, Nova Assinatura)
 
 ### Nível 2 - Secondary Focus
-- Subtítulos (h2, h3)
-- Cards de informação
-- Elementos de navegação ativos
-- Valores financeiros
+- Filtros e busca
+- Badges de status
+- Paginação
 
 ### Nível 3 - Supporting
-- Labels, descrições
-- Metadata, datas
-- Textos secundários
-- Elementos de UI não interativos
+- Metadata de tabelas
+- Links secundários
+- Ícones de ações
 
 ## Ordem de Leitura
-1. Logo + Navigation
-2. Welcome message
-3. Stats cards (3-4 métricas principais)
-4. Charts (visualizações)
-5. Lists (transações recentes)
-6. CTAs secundários
-7. Footer/Sidebar
+
+1. Header com título e ações (top)
+2. Cards de estatísticas (linha horizontal)
+3. Filtros e busca
+4. Tabela de dados principal
+5. Paginação (rodapé)
+
+---
+
+# Layout e Estrutura
+
+## Grid System
+
+### Container
+- Max-width: 100% (admin usa toda largura disponível)
+- Padding: 24px (mobile: 16px)
+- Header flutuante com border-bottom
+
+### Columns
+- Mobile: 1 coluna
+- Tablet: 2 colunas
+- Desktop: 4 colunas (stats)
+
+## Espaçamentos (8pt Grid)
+
+| Escala | Pixels | Uso |
+|--------|--------|-----|
+| xs | 4px | Elementos inline |
+| sm | 8px | Gap entre elementos relacionados |
+| md | 16px | Card internal spacing |
+| lg | 24px | Section gap |
+| xl | 32px | Page section separation |
+
+## Responsividade
+
+### Breakpoints
+- sm: 640px
+- md: 768px
+- lg: 1024px
+
+### Mobile-First
+- Sidebar: Collapsible com trigger
+- Grid: 1 → 2 → 4 colunas
+- Headers: Flex-col em mobile, flex-row em tablet+
+
+## Estrutura de Layout Admin
+
+```
+Admin Layout
+├── Sidebar (collapsible="icon")
+│   ├── Logo
+│   ├── Navigation
+│   │   ├── Dashboard (/admin)
+│   │   ├── Clientes (/admin/clientes)
+│   │   ├── Assinaturas (/admin/assinaturas)
+│   │   └── Planos (/admin/planos)
+│   └── User Info + Logout
+└── Main Content Area
+    ├── Page Content (sem header extra)
+    │   ├── Stats Grid (4 cards)
+    │   ├── Filters Card
+    │   └── Data Table
+    └── Pagination (se necessário)
+```
+
+---
+
+# Componentes de UI
+
+## AdminDashboard
+
+```typescript
+interface StatCardProps {
+  stat: {
+    title: string;
+    value: string;
+    change: string;
+    trend: "up" | "down";
+    icon: LucideIcon;
+    color: string;
+    bgColor: string;
+  };
+}
+```
+
+**Responsabilidade:** Exibir métrica individual do admin
+**Layout:** Card com ícone, título, valor e variação
+
+## AdminUsers
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  plan: "Free" | "Pro" | "Business";
+  status: "Ativo" | "Pendente" | "Bloqueado" | "Trial";
+  lastLogin: string;
+  createdAt: string;
+}
+```
+
+**Responsabilidade:** Lista de clientes com filtros e ações
+**Componentes:**
+- Search input
+- Select filters (plano, status)
+- Table com avatar, badges, actions dropdown
+- Pagination
+- Dialog para novo cliente
+
+## AdminSubscriptions
+
+```typescript
+interface Subscription {
+  id: string;
+  user: { name: string; email: string; avatar: string };
+  plan: "Free" | "Pro" | "Business";
+  amount: number;
+  interval: string;
+  status: "ativa" | "trial" | "cancelada" | "atrasada" | "inativa";
+  nextBilling: string;
+  paymentMethod: string;
+}
+```
+
+**Responsabilidade:** Gerenciamento de assinaturas
+**Componentes:**
+- Stats cards (receita, ativas, trial, atrasadas)
+- Search e filtros
+- Table com status badges coloridos
+- Dropdown ações (visualizar, alterar plano, pausar, cancelar)
+
+## AdminPlans
+
+```typescript
+interface Plan {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  billingPeriod: string;
+  subscribers: number;
+  mrr: number;
+  icon: LucideIcon;
+  features: { name: string; included: boolean }[];
+  popular?: boolean;
+}
+```
+
+**Responsabilidade:** Gestão de planos
+**Componentes:**
+- Tabs (Planos / Assinaturas)
+- Plan cards com pricing e features
+- Dialog criar/editar plano
+- Table de assinaturas por plano
 
 ---
 
 # Estados Visuais
 
-## Loading
-- Skeletons para conteúdo sendo carregado
-- Spinners para ações em progresso
-- Progressive loading para listas
+## Cards Admin
 
-## Error
-- Border: hsl(0, 84%, 60%)
-- Text: hsl(0, 84%, 60%)
-- Icon: X circle ou warning
-- Toast notification para erros críticos
+### Default
+```
+bg-card/50 border-0 shadow-sm
+border-radius: lg (12px)
+transition: all 200ms ease
+```
 
-## Success
-- Toast: verde claro (#25D366)
-- Valor positivo: text-success
-- Metas atingidas: badge verde
+### Hover
+```
+bg-card/80
+shadow-md
+```
 
-## Empty State
-- Ilustração opcional
-- Texto explicativo
-- CTA para primeira ação
+## Badges Status
 
-## Empty List
-- "Nenhuma transação encontrada"
-- Sugestão de primeira ação
-- CTA opcional
+### Ativo (success)
+```
+bg-emerald-500/10 text-emerald-600 border-emerald-200
+dot indicator: w-1.5 h-1.5 rounded-full bg-emerald-500
+```
+
+### Trial (info)
+```
+bg-blue-500/10 text-blue-600 border-blue-200
+```
+
+### Pendente (warning)
+```
+bg-amber-500/10 text-amber-600 border-amber-200
+```
+
+### Bloqueado/Inadimplente (destructive)
+```
+bg-red-500/10 text-red-600 border-red-200
+```
+
+### Cancelada/Inativa (muted)
+```
+bg-slate-500/10 text-slate-600 border-slate-200
+```
+
+## Plan Badges
+
+### Free
+```
+bg-muted text-muted-foreground
+```
+
+### Pro
+```
+bg-blue-500/10 text-blue-600 border-blue-200
+```
+
+### Business
+```
+bg-violet-500/10 text-violet-600 border-violet-200
+```
+
+## Tables
+
+### Row Default
+```
+border-muted/50
+hover:bg-muted/30
+transition: bg 150ms ease
+```
+
+### Header
+```
+text-xs uppercase tracking-wider
+text-muted-foreground font-medium
+border-muted/50
+```
 
 ---
 
@@ -290,282 +354,346 @@ Component internal: space-y-5 (20px)
 
 ## Requisitos WCAG 2.1 AA
 
-### Contraste
-- Text on background: 4.5:1 mínimo
-- Large text (18px+): 3:1 mínimo
-- UI components: 3:1 mínimo
+### Contraste Mínimo
+```
+Textos principais: 4.5:1 mínimo
+Badges: 3:1 mínimo
+```
 
-### Foco
-- Outline: 2px solid hsl(161, 34%, 37%)
-- Offset: 2px
-- Visible em todos os elementos interativos
+### Foco Visível
+```
+outline: 2px solid var(--ring)
+outline-offset: 2px
+```
 
-### Labels
-- Todos os inputs com labels visíveis
-- aria-label em ícones sem texto
-- placeholder não substitui label
+### Labels e ARIA
+
+**Search:**
+```jsx
+<Input aria-label="Buscar por nome ou email" />
+```
+
+**Filters:**
+```jsx
+<Select aria-label="Filtrar por plano" />
+```
+
+**Actions:**
+```jsx
+<DropdownMenu>
+  <DropdownMenuTrigger aria-label="Ações do cliente" />
+```
+
+**Buttons:**
+```jsx
+<Button aria-label="Novo cliente" />
+<Button aria-label="Exportar dados" />
+```
 
 ### Navegação por Teclado
-- Tab ordem lógica
-- Enter/Space para ativar
-- Escape para fechar modais
-- Arrow keys em comboboxes
+```
+Tab: Próximo elemento focalizável
+Enter/Space: Ativa elementos
+Escape: Fecha modals, dropdowns
+Arrow keys: Navegação em selects
+```
 
 ### Redução de Movimento
-- Respeitar `prefers-reduced-motion`
-- Desabilitar animações heavy em mobile
-
----
-
-# UX Writing
-
-## Tom de Voz
-- Profissional mas acessível
-- Não técnico, claro para todos
-- Positivo, encorajador
-- Brasileiro, informal-friendly
-
-## Labels e Textos
-
-### Formulários
-| Campo | Label | Placeholder |
-|-------|-------|------------|
-| Email | Email | seu@email.com |
-| Password | Senha | Mínimo 6 caracteres |
-| Name | Nome completo | Seu nome |
-
-### Botões
-| Ação | Texto |
-|------|-------|
-| Submit | Entrar / Continuar / Criar conta |
-| Cancel | Cancelar |
-| Secondary | Ver como funciona |
-
-### Mensagens de Erro
-| Cenário | Mensagem |
-|---------|----------|
-| Email obrigatório | Email é obrigatório |
-| Email inválido | Por favor, insira um email válido |
-| Senha curta | A senha deve ter no mínimo 6 caracteres |
-| Credenciais inválidas | Email ou senha incorretos |
-
-### Feedbacks
-| Ação | Feedback |
-|------|----------|
-| Login sucesso | Login realizado com sucesso! |
-| Logout | Sessão encerrada |
-| Cadastro | Conta criada com sucesso! |
-
----
-
-# Especificações por Página
-
-## Landing Page (Index)
-
-### Hero Section
-- **Headline**: "Cansou de planilhas? Organize suas contas pelo WhatsApp"
-- **Subhead**: "Você vive sua vida, a gente organiza seu dinheiro"
-- **CTAs**: "Comece agora" (primary), "Ver como funciona" (outline)
-- **Stats**: 3.000+ usuários, 500k+ gastos, 4.9 avaliação
-
-### Vídeo Demo
-- Thumbnail com placeholder
-- Botão play centralizado
-- Caption: "📱 Manda → 🤖 IA → 📊 Você"
-
-### Conteúdo Secundário
-- How it works (3 passos)
-- Problema/Solução
-- Pricing (se disponível)
-- FAQ
-- Testimonials
-
-## Login Page
-
-### Layout
-- Centered card (max-w-md)
-- Logo no topo
-- Formulário com 2 campos
-- Link para recuperação de senha
-- Link para cadastro
-- OAuth Google
-
-### Validação
-- Email: required + formato
-- Password: required + mínimo 6 chars
-- Feedback visual imediato
-- Mensagens de erro em português
-
-## Cadastro Page
-
-### Wizard (2 passos)
-1. **Dados pessoais**: nome, email, senha, confirmar senha
-2. **Plano**: Free, Pro, Business (cards com pricing)
-
-### Progress Indicator
-- 2 steps visuais
-- Ativo: bg-accent
-- Inativo: bg-border
-
-### Plan Selection
-- Card com border highlight quando selecionado
-- Badge "Popular" no Pro
-- Checkmark quando selecionado
-
-## Dashboard (UserDashboard)
-
-### Welcome
-- "Olá, [Nome]! 👋"
-- Subtext contextual
-
-### Stats Grid
-- 4 cards: Saldo, Receitas, Despesas, Categorias
-- Ícone + valor + variação %
-- Variação com cor (verde=up, vermelho=down)
-
-### Charts
-- Linha: gastos por dia (mês)
-- Pizza: gastos por categoria
-
-### Lists
-- Transações recentes (últimas 5)
-- scrollable se necessário
-- Click para detalhes
-
-### Metas
-- Progress bars
-- Percentual de conclusão
-- Valor atual / alvo
-
-### WhatsApp CTA
-- Card com gradient WhatsApp (#25D366)
-- Texto explicativo
-- Botão "Conectar WhatsApp"
-
----
-
-# Regras e Restrições
-
-## NÃO FAZER
-- Usar cores sem significado semântico
-- Criar hierarquia visual confusa
-- Usar sombras duras ou pretas
-- Deixar inputs sem labels
-- Ignorar estados de loading
-- Expor informações sensíveis
-- Usar gradientes em texto de corpo
-- Criar animações que causam enjoo
-
-## Armadilhas a Evitar
-- Sobrecarga de informação em uma tela
-- Formulários longos sem progressão
-- Cores demais (máximo 5 cores principais)
--Ícones inconsistentes (mix de styles)
-- Mobile afterthought (design mobile-first)
-
----
-
-# Critérios de Sucesso
-
-## Visual
-- [ ] Hierarquia clara em 3 segundos
-- [ ] Cores consistentes em toda a app
-- [ ] Espaçamento遵循 8pt grid
-- [ ] Tipografia legível e consistente
-- [ ] Dark mode funcional
-
-## UX
-- [ ] Usuário sabe onde clicar em 5 segundos
-- [ ] Formulários completáveis em menos de 30 segundos
-- [ ] Feedback claro para cada ação
-- [ ] Navegação previsível
-- [ ] Loading states presentes
-
-## Acessibilidade
-- [ ] Contraste adequado
-- [ ] Foco visível
-- [ ] Navegação por teclado
-- [ ] Screen reader friendly
-- [ ] Reduced motion support
-
-## Performance
-- [ ] First contentful paint < 1.5s
-- [ ] Interactions em menos de 100ms
-- [ ] No layout shift (CLS < 0.1)
-- [ ] Imagens otimizadas
-
----
-
-# Documentação de Componentes
-
-## Arquitetura de Componentes
-
-### Atoms (UI Primitives)
-- Button, Input, Label, Card, Avatar, Badge, etc.
-- shadcn/ui base components
-- Located: `src/components/ui/`
-
-### Molecules (Feature UI)
-- StatCard, TransactionItem, GoalProgress
-- Located: `src/features/dashboard/components/`
-
-### Organisms (Page Sections)
-- Header, Sidebar, StatsGrid
-- Located: `src/components/[type]/`
-
-### Templates (Page Layouts)
-- UserLayout, AdminLayout, AuthLayout
-- Located: `src/layouts/`
-
-### Pages (Routes)
-- Login, Cadastro, Dashboard
-- Located: `src/pages/`
-
-## Convenções de Nomenclatura
-- PascalCase para componentes
-- camelCase para props
-- kebab-case para classes CSS
-- Arquivo: `ComponentName.tsx`
-
-## Props Interface
-```typescript
-interface ComponentNameProps {
-  // Required
-  title: string;
-  // Optional
-  variant?: "default" | "primary" | "secondary";
-  onClick?: () => void;
-  disabled?: boolean;
-  children?: React.ReactNode;
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 ```
 
 ---
 
-# Checklist de Implementação
+# UX Writing
 
-## Before Start
-- [ ] Instalar dependências: npm install
-- [ ] Verificar acesso a variáveis de ambiente
-- [ ] Configurar Git hooks (se disponível)
+## Títulos e Headers
 
-## During Development
-- [ ] Seguir estrutura de pastas
-- [ ] Usar design system colors
-- [ ] Implementar estados de loading
-- [ ] Testar responsividade
-- [ ] Verificar a11y com axe-devtools
+### Dashboard Admin
+```
+"Dashboard" - título principal
+"Visão geral da sua plataforma" - subtitle
+```
 
-## Before Commit
-- [ ] Lint: npm run lint
-- [ ] Typecheck: npm run typecheck
-- [ ] Testes: npm run test
-- [ ] Build: npm run build
+### Clientes
+```
+"Clientes" - título
+"Gerencie os clientes da plataforma" - subtitle
+```
 
-## QA Checklist
-- [ ] Dark mode funcionando
-- [ ] Formulários validados
-- [ ] Loading states visíveis
-- [ ] Error states claros
-- [ ] Mobile responsive
-- [ ] Keyboard navigation works
+### Assinaturas
+```
+"Assinaturas" - título
+"Gerencie as assinaturas da plataforma" - subtitle
+```
+
+### Planos
+```
+"Gestão de Planos" - título
+"Configure planos e gerencie assinaturas" - subtitle
+```
+
+## Labels
+
+### Buttons
+```
+"Novo cliente"
+"Nova assinatura"
+"Novo plano"
+"Exportar"
+"Salvar"
+"Cancelar"
+"Editar"
+"Excluir"
+"Bloquear"
+"Ativar"
+```
+
+### Filters
+```
+"Buscar por nome ou email..."
+"Plano" (select)
+"Status" (select)
+"Todos os planos"
+"Todos os status"
+```
+
+### Table Headers
+```
+Cliente
+Plano
+Status
+Último acesso
+Criado em
+Próxima cobrança
+Valor
+```
+
+## Empty States
+
+```
+Clientes: "Nenhum cliente encontrado"
+Assinaturas: "Nenhuma assinatura encontrada"
+Planos: "Nenhum plano configurado"
+```
+
+## Mensagens de Erro
+
+```
+"Email ou senha inválidos"
+"Não foi possível salvar as alterações"
+"Erro de conexão"
+```
+
+## Mensagens de Sucesso
+
+```
+"Cliente criado com sucesso!"
+"Assinatura atualizada!"
+"Plano salvo com sucesso!"
+"Operação realizada com sucesso!"
+```
+
+---
+
+# Regras e Restrições
+
+## O Que NÃO Fazer
+
+1. **Não usar cores fixas para status**
+   - Usar classes semânticas (success, warning, destructive)
+
+2. **Não exceder 6 colunas na tabela**
+   - Manter informações essenciais visíveis
+   - Usar tooltip para metadata adicional
+
+3. **Não mostrar mais de 10 linhas sem paginação**
+   - Usar paginação ou scroll infinito
+
+4. **Não bloquear ação sem confirmação**
+   - Usar dialog de confirmação para ações destrutivas
+
+5. **Não usar skeleton em elementos pequenos**
+   - Skeleton apenas para seções inteiras
+
+## Armadilhas a Evitar
+
+### Performance
+- Evitar re-render desnecessário de tabelas
+- Usar useMemo para filtros e ordenação
+
+### Mobile
+- Tabelas: permitir scroll horizontal
+- Dropdowns: garantir que não saiam da tela
+- Touch targets: mínimo 44x44px
+
+### Dark Mode
+- Não usar cores claras demais
+- Manter contraste adequado
+
+---
+
+# Critérios de Sucesso
+
+## Checklist de Implementação
+
+### Funcional
+- [ ] Filtros funcionam corretamente
+- [ ] Busca filtra por nome e email
+- [ ] Dropdown ações abre corretamente
+- [ ] Dialogs abrem e fecham
+- [ ] Paginação funciona
+
+### Visual
+- [ ] Alinhamento consistente
+- [ ] Espaçamento uniforme (8pt grid)
+- [ ] Badges coloridos corretamente
+- [ ] Responsividade fluida
+
+### Acessibilidade
+- [ ] Contraste passa WCAG AA
+- [ ] Foco visível em elementos interativos
+- [ ] Keyboard navigation completa
+- [ ] ARIA labels quando necessário
+
+---
+
+# Design System Admin
+
+## Cores Status
+
+```
+Success (ativa):  emerald-500
+Warning (trial):  blue-500
+Warning (pendente): amber-500
+Danger (bloqueado): red-500
+Muted (inativa):  slate-500
+```
+
+## Plan Colors
+
+```
+Free:      muted
+Pro:       blue-500
+Business:  violet-500
+```
+
+## Tipografia
+
+```
+Títulos página:    text-2xl font-bold tracking-tight
+Títulos seção:    text-lg font-semibold
+Texto corpo:      text-sm
+Metadata:         text-xs text-muted-foreground
+```
+
+---
+
+# Especificações por Página Admin
+
+## /admin (Dashboard)
+
+### Stats Grid (4 cards)
+1. Receita Mensal (MRR)
+2. Total de Clientes
+3. Clientes Ativos
+4. Taxa de Conversão
+
+### Charts
+- Área chart de receita mensal
+- Atividade recente (lista)
+
+### Recent Clients Table
+- Últimos 5 clientes cadastrados
+- Link para página de clientes
+
+---
+
+## /admin/clientes
+
+### Stats Cards (4 cards)
+1. Total
+2. Ativos
+3. Pendentes
+4. Bloqueados
+
+### Filters
+- Search input
+- Select plano
+- Select status
+
+### Actions Header
+- Exportar
+- Novo cliente (dialog)
+
+### Table Columns
+- Cliente (avatar + nome + email)
+- Plano
+- Status
+- Último acesso
+- Criado em
+- Ações (dropdown)
+
+---
+
+## /admin/assinaturas
+
+### Stats Cards (4 cards)
+1. Receita Mensal
+2. Assinaturas Ativas
+3. Em Trial
+4. Atrasadas
+
+### Filters
+- Search input
+- Select plano
+- Select status
+
+### Actions Header
+- Exportar
+- Nova assinatura (dialog)
+
+### Table Columns
+- Cliente
+- Plano
+- Valor
+- Status
+- Próxima cobrança
+- Ações (dropdown)
+
+---
+
+## /admin/planos
+
+### Stats Cards (3 cards)
+1. MRR Total
+2. Total Assinantes
+3. Ticket Médio
+
+### Tabs
+- Planos
+- Assinaturas
+
+### Plan Cards (Free, Pro, Business)
+- Nome e descrição
+- Preço
+- Métricas (assinantes, MRR)
+- Features list com check/cross
+- Badges (Popular)
+- Ações (editar, desativar)
+
+### Dialogs
+- Criar plano
+- Editar plano
+
+---
+
+**Última atualização:** 11 de Fevereiro de 2026
+**Versão:** 2.1.0
+**Status:** Completo para implementação admin
+**Autor:** Agente UI/UX

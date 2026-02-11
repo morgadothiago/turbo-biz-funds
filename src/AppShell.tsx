@@ -1,37 +1,37 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AuthLoading } from "@/components/AuthLoading";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
-const Login = lazy(() => import("./pages/Login"));
-const Cadastro = lazy(() => import("./pages/Cadastro"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const UserDashboard = lazy(() => import("./pages/UserDashboard"));
+const Login = lazy(() => import(/* webpackChunkName: "auth-login" */ "./pages/Login"));
+const Cadastro = lazy(() => import(/* webpackChunkName: "auth-cadastro" */ "./pages/Cadastro"));
+const NotFound = lazy(() => import(/* webpackChunkName: "pages-notfound" */ "./pages/NotFound"));
+const UserDashboard = lazy(() => import(/* webpackChunkName: "dashboard-user" */ "./pages/UserDashboard"));
 
-const UserLayout = lazy(() => import("./layouts/UserLayout"));
-const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
-const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminClients = lazy(() => import("./pages/admin/AdminUsers"));
-const AdminPlans = lazy(() => import("./pages/admin/AdminPlans"));
+const UserLayout = lazy(() => import(/* webpackChunkName: "layout-user" */ "./layouts/UserLayout"));
+const AdminLayout = lazy(() => import(/* webpackChunkName: "layout-admin" */ "./layouts/AdminLayout"));
+const AdminDashboard = lazy(() => import(/* webpackChunkName: "dashboard-admin" */ "./pages/admin/AdminDashboard"));
+const AdminClients = lazy(() => import(/* webpackChunkName: "pages-admin-clients" */ "./pages/admin/AdminUsers"));
+const AdminPlans = lazy(() => import(/* webpackChunkName: "pages-admin-plans" */ "./pages/admin/AdminPlans"));
+const AdminSubscriptions = lazy(() => import(/* webpackChunkName: "pages-admin-subscriptions" */ "./pages/admin/AdminSubscriptions"));
 
-// User sub-pages
-const TransactionsPage = lazy(() => import("./pages/Transactions"));
-const CategoriesPage = lazy(() => import("./pages/Categories"));
-const GoalsPage = lazy(() => import("./pages/Goals"));
-const CardsPage = lazy(() => import("./pages/Cards"));
-const WhatsAppPage = lazy(() => import("./pages/WhatsApp"));
-const SettingsPage = lazy(() => import("./pages/Settings"));
+const TransactionsPage = lazy(() => import(/* webpackChunkName: "pages-transactions" */ "./pages/Transactions"));
+const CategoriesPage = lazy(() => import(/* webpackChunkName: "pages-categories" */ "./pages/Categories"));
+const GoalsPage = lazy(() => import(/* webpackChunkName: "pages-goals" */ "./pages/Goals"));
+const CardsPage = lazy(() => import(/* webpackChunkName: "pages-cards" */ "./pages/Cards"));
+const WhatsAppPage = lazy(() => import(/* webpackChunkName: "pages-whatsapp" */ "./pages/WhatsApp"));
+const SettingsPage = lazy(() => import(/* webpackChunkName: "pages-settings" */ "./pages/Settings"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutos
-      gcTime: 10 * 60 * 1000, // 10 minutos
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
       retry: 1,
@@ -39,12 +39,46 @@ const queryClient = new QueryClient({
   },
 });
 
-// Componente para proteger rotas de admin
+const PageLoading = () => (
+  <div className="flex items-center justify-center py-12">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+
+const DashboardLoading = () => (
+  <div className="space-y-6 animate-pulse">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="h-32 bg-muted rounded-lg"></div>
+      ))}
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="h-80 bg-muted rounded-lg"></div>
+      <div className="h-80 bg-muted rounded-lg"></div>
+    </div>
+  </div>
+);
+
+const AuthLoadingPage = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p className="text-muted-foreground">Carregando...</p>
+    </div>
+  </div>
+);
+
+const AuthLoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <AuthLoadingPage />
+  </div>
+);
+
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <AuthLoading />;
+    return <AuthLoadingFallback />;
   }
 
   if (!isAuthenticated) {
@@ -58,12 +92,11 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Componente para proteger rotas de usuário
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <AuthLoading />;
+    return <AuthLoadingFallback />;
   }
 
   if (!isAuthenticated) {
@@ -73,16 +106,14 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Componente para rotas públicas (impede acesso se já estiver logado)
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <AuthLoading />;
+    return <AuthLoadingFallback />;
   }
 
   if (isAuthenticated) {
-    // Redireciona baseado na role
     if (user?.role === "admin") {
       return <Navigate to="/admin" replace />;
     }
@@ -93,8 +124,14 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<PageLoading />}>
       <Routes>
         <Route path="/login" element={
           <PublicRoute>
@@ -107,7 +144,6 @@ function AppRoutes() {
           </PublicRoute>
         } />
 
-        {/* Rotas do Usuário */}
         <Route 
           path="/dashboard" 
           element={
@@ -125,9 +161,8 @@ function AppRoutes() {
           <Route path="configuracoes" element={<SettingsPage />} />
         </Route>
 
-        {/* Rotas do Admin */}
-        <Route 
-          path="/admin" 
+        <Route
+          path="/admin"
           element={
             <AdminRoute>
               <AdminLayout />
@@ -136,6 +171,7 @@ function AppRoutes() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="clientes" element={<AdminClients />} />
+          <Route path="assinaturas" element={<AdminSubscriptions />} />
           <Route path="planos" element={<AdminPlans />} />
         </Route>
 

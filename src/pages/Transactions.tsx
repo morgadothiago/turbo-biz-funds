@@ -1,10 +1,14 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Receipt, Plus, Search, Filter, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/user/PageHeader";
+import {
+  PageHeaderSkeleton,
+  TransactionsListSkeleton
+} from "@/components/ui/page-skeletons";
 import { toast } from "sonner";
 
 const TRANSACTIONS = [
@@ -16,7 +20,30 @@ const TRANSACTIONS = [
   { id: 6, description: "Freelance Design", category: "Renda", date: "02/02/2026", amount: 850.00, type: "income", icon: "💻" },
 ];
 
+const TransactionsPageSkeleton = () => (
+  <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-pulse">
+    <PageHeaderSkeleton />
+    <div className="h-16 rounded-lg bg-muted" />
+    <TransactionsListSkeleton />
+  </div>
+);
+
 const TransactionsPage = memo(() => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [transactions, setTransactions] = useState(TRANSACTIONS);
+
+  const handleRefresh = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      toast.success("Transações atualizadas");
+    }, 1000);
+  };
+
+  if (isLoading) {
+    return <TransactionsPageSkeleton />;
+  }
+
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       <PageHeader
@@ -29,17 +56,17 @@ const TransactionsPage = memo(() => {
       />
 
       {/* Filters */}
-      <Card className="border border-gray-200 shadow-sm">
+      <Card className="border-border shadow-sm transition-shadow hover:shadow-md">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input 
-                placeholder="Buscar transações..." 
-                className="pl-10 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar transações..."
+                className="pl-10 bg-background border-input text-foreground placeholder:text-muted-foreground transition-all focus:ring-2 focus:ring-primary focus:ring-offset-2"
               />
             </div>
-            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 gap-2">
+            <Button variant="outline" className="gap-2 transition-all hover:bg-accent">
               <Filter className="w-4 h-4" />
               Filtros
             </Button>
@@ -48,27 +75,27 @@ const TransactionsPage = memo(() => {
       </Card>
 
       {/* Transactions List */}
-      <Card className="border border-gray-200 shadow-sm">
+      <Card className="border-border shadow-sm transition-shadow hover:shadow-md">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-6">
-            <Receipt className="w-5 h-5 text-[#25D366]" />
-            <h3 className="font-semibold text-gray-900">Histórico de Transações</h3>
+            <Receipt className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold text-foreground">Histórico de Transações</h3>
           </div>
-          
+
           <div className="space-y-3">
-            {TRANSACTIONS.map((transaction) => (
-              <div 
-                key={transaction.id} 
-                className="flex items-center justify-between p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-100"
+            {transactions.map((transaction) => (
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between p-4 rounded-lg bg-accent/50 hover:bg-accent transition-all duration-200 border border-border cursor-pointer hover:scale-[1.01]"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-xl">
+                  <div className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center text-xl transition-transform hover:scale-110">
                     {transaction.icon}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{transaction.description}</p>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Badge variant="outline" className="border-gray-300 text-gray-600 bg-white">
+                    <p className="font-medium text-foreground">{transaction.description}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Badge variant="outline" className="bg-background">
                         {transaction.category}
                       </Badge>
                       <span>{transaction.date}</span>
@@ -76,13 +103,13 @@ const TransactionsPage = memo(() => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`font-semibold ${transaction.type === "income" ? "text-green-600" : "text-red-500"}`}>
-                    {transaction.type === "income" ? "+" : ""}R$ {transaction.amount.toFixed(2)}
+                  <span className={`font-semibold ${transaction.type === "income" ? "text-success" : "text-foreground"}`}>
+                    {transaction.type === "income" ? "+" : ""}R$ {Math.abs(transaction.amount).toFixed(2)}
                   </span>
                   {transaction.type === "income" ? (
-                    <ArrowUpRight className="w-4 h-4 text-green-600" />
+                    <ArrowUpRight className="w-4 h-4 text-success" />
                   ) : (
-                    <ArrowDownRight className="w-4 h-4 text-red-500" />
+                    <ArrowDownRight className="w-4 h-4 text-muted-foreground" />
                   )}
                 </div>
               </div>

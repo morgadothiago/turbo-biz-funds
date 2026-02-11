@@ -9,13 +9,13 @@ import compression from "vite-plugin-compression";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 5173,
     hmr: {
       overlay: false,
     },
   },
   plugins: [
-    react(), 
+    react(),
     mode === "development" && componentTagger(),
     mode === "production" && compression({
       algorithm: "brotliCompress",
@@ -42,16 +42,62 @@ export default defineConfig(({ mode }) => ({
     reportCompressedSize: true,
     target: 'es2020',
     cssMinify: true,
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-router': ['react-router-dom'],
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-query': ['@tanstack/react-query'],
           'vendor-charts': ['recharts'],
-          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'vendor-ui': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-progress',
+          ],
+          'vendor-motion': ['framer-motion'],
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'auth': [
+            './src/contexts/AuthContext.tsx',
+            './src/pages/Login.tsx',
+            './src/pages/Cadastro.tsx',
+          ],
+          'dashboard': [
+            './src/pages/UserDashboard.tsx',
+            './src/features/dashboard/hooks/use-dashboard-data.ts',
+          ],
+          'pages': [
+            './src/pages/Transactions.tsx',
+            './src/pages/Categories.tsx',
+            './src/pages/Goals.tsx',
+          ],
+        },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        compact: true,
+        generatedCode: {
+          constBindings: true,
+          objectShorthand: true,
         },
       },
+      treeshake: {
+        moduleSideEffects: 'no-external',
+        propertyReadSideEffects: false,
+        unknownGlobalSideEffects: false,
+      },
     },
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      'recharts',
+      'framer-motion',
+    ],
+    exclude: ['@radix-ui/react-dialog'],
   },
 }));

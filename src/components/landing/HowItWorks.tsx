@@ -159,11 +159,11 @@ const HowItWorks = memo(() => {
         </div>
 
         <div className="mt-12 max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-[#25D366]/10 to-[#25D366]/5 rounded-2xl p-6 md:p-8 border border-[#25D366]/20">
+          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-6 md:p-8 border border-primary/20">
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="flex-shrink-0">
-                <div className="w-16 h-16 rounded-full bg-[#25D366]/20 flex items-center justify-center">
-                  <MessageCircle className="w-8 h-8 text-[#25D366]" />
+                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                  <MessageCircle className="w-8 h-8 text-primary" />
                 </div>
               </div>
               <div className="flex-1 text-center md:text-left">
@@ -177,7 +177,7 @@ const HowItWorks = memo(() => {
                   {WHATSAPP_COMMANDS.map((command) => (
                     <span
                       key={command}
-                      className="px-3 py-1.5 bg-[#25D366]/20 text-[#128C7E] rounded-full text-sm font-medium"
+                      className="px-3 py-1.5 bg-primary/20 text-primary rounded-full text-sm font-medium"
                     >
                       "{command}"
                     </span>

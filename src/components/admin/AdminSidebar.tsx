@@ -1,13 +1,14 @@
-import { 
-  LayoutDashboard, 
-  Users, 
-  CreditCard, 
+import {
+  LayoutDashboard,
+  Users,
+  CreditCard,
   Settings,
   LogOut,
   Bell,
   HelpCircle,
   LucideIcon,
-  Sparkles
+  Sparkles,
+  Receipt
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -40,6 +41,7 @@ interface MenuItem {
 const mainMenuItems: MenuItem[] = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Clientes", url: "/admin/clientes", icon: Users },
+  { title: "Assinaturas", url: "/admin/assinaturas", icon: Receipt },
   { title: "Planos", url: "/admin/planos", icon: CreditCard },
 ];
 
@@ -58,52 +60,52 @@ function MenuItemLink({ item, end = false, isCollapsed = false }: { item: MenuIt
 
   if (isCollapsed) {
     return (
-      <NavLink 
-        to={item.url} 
+      <NavLink
+        to={item.url}
         end={end}
         className={cn(
           "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 mx-auto",
           "hover:bg-white/5",
-          isActive && "bg-[#25D366]/15 font-semibold"
+          isActive && "bg-primary/15 font-semibold"
         )}
         title={item.title}
       >
         <Icon className={cn(
           "h-5 w-5 transition-colors duration-200",
-          isActive ? "text-[#25D366]" : "text-[#F6F4EF]/70"
+          isActive ? "text-primary" : "text-sidebar-foreground/70"
         )} />
       </NavLink>
     );
   }
 
   return (
-    <NavLink 
-      to={item.url} 
+    <NavLink
+      to={item.url}
       end={end}
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
         "hover:bg-white/5",
-        isActive && "bg-[#25D366]/15 font-semibold"
+        isActive && "bg-primary/15 font-semibold"
       )}
     >
       <div className={cn(
         "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
         "bg-white/5",
-        isActive && "bg-[#25D366]/20"
+        isActive && "bg-primary/20"
       )}>
         <Icon className={cn(
           "h-4 w-4 transition-colors duration-200",
-          isActive ? "text-[#25D366]" : "text-[#F6F4EF]/70"
+          isActive ? "text-primary" : "text-sidebar-foreground/70"
         )} />
       </div>
       <span className={cn(
         "transition-colors duration-200",
-        isActive ? "text-[#25D366]" : "text-[#F6F4EF]/90"
+        isActive ? "text-primary" : "text-sidebar-foreground/90"
       )}>
         {item.title}
       </span>
       {isActive && (
-        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#25D366]" />
+        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
       )}
     </NavLink>
   );

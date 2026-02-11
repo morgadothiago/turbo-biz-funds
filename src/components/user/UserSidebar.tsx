@@ -73,7 +73,7 @@ function MenuItemLink({ item, end = false, isCollapsed = false }: MenuItemLinkPr
           "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 mx-auto",
           isActive
             ? "bg-primary/20 text-primary font-medium"
-            : "text-white/70 hover:bg-white/10 hover:text-white"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
         )}
         title={item.title}
         aria-label={item.title}
@@ -91,18 +91,18 @@ function MenuItemLink({ item, end = false, isCollapsed = false }: MenuItemLinkPr
         "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
         isActive
           ? "bg-primary/20 text-primary font-medium"
-          : "text-white/70 hover:bg-white/10 hover:text-white"
+          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
       )}
     >
       <div
         className={cn(
           "flex items-center justify-center w-8 h-8 rounded-lg transition-colors",
-          isActive ? "bg-primary/20" : "bg-white/5"
+          isActive ? "bg-primary/20" : "bg-sidebar-accent/50"
         )}
       >
-        <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-white/70")} />
+        <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-sidebar-foreground/70")} />
       </div>
-      <span className={cn("flex-1", isActive ? "text-primary" : "")}>
+      <span className={cn("flex-1", isActive ? "text-primary" : "text-sidebar-foreground/70")}>
         {item.title}
       </span>
       {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
@@ -135,30 +135,30 @@ export function UserSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="border-r border-border/50 bg-sidebar"
+      className="border-r border-sidebar-border bg-sidebar"
     >
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-white" />
+            <Sparkles className="w-5 h-5 text-primary-foreground" />
           </div>
           {!isCollapsed && (
             <div className="min-w-0">
               <h2 className="font-bold text-lg text-sidebar-foreground truncate">
                 Organiza<span className="text-primary">AI</span>
               </h2>
-              <p className="text-xs text-white/60 truncate">Minhas Finanças</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">Minhas Finanças</p>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <Separator className="mx-4 w-auto bg-white/10" />
+      <Separator className="mx-4 w-auto bg-sidebar-border" />
 
       <SidebarContent className="px-2 py-4">
         <SidebarGroup>
           {!isCollapsed && (
-            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-white/50 mb-3 px-3">
+            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-sidebar-foreground/50 mb-3 px-3">
               Menu Principal
             </SidebarGroupLabel>
           )}
@@ -181,7 +181,7 @@ export function UserSidebar() {
 
         <SidebarGroup className="mt-4">
           {!isCollapsed && (
-            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-white/50 mb-3 px-3">
+            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-sidebar-foreground/50 mb-3 px-3">
               Integrações
             </SidebarGroupLabel>
           )}
@@ -200,7 +200,7 @@ export function UserSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 mt-auto">
-        <Separator className="mb-4 bg-white/10" />
+        <Separator className="mb-4 bg-sidebar-border" />
         <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
           <Avatar className="h-9 w-9 bg-primary/20">
             <AvatarFallback className="bg-primary/20 text-primary font-medium text-sm">
@@ -213,12 +213,12 @@ export function UserSidebar() {
                 <p className="text-sm font-medium text-sidebar-foreground truncate">
                   {user?.name || "Usuário"}
                 </p>
-                <p className="text-xs text-white/60 truncate">{user?.email}</p>
+                <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
+                className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                 onClick={handleLogout}
                 aria-label="Sair"
               >

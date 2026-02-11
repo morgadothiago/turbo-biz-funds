@@ -1,13 +1,14 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/user/UserSidebar";
-import { Bell } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
+import { NotificationsSheet } from "@/components/user/NotificationsSheet";
 
 function Header() {
+  const { toggleSidebar } = useSidebar();
   const { user } = useAuth();
   const location = useLocation();
 
@@ -41,28 +42,29 @@ function Header() {
   };
 
   return (
-    <header className="h-16 bg-card/80 backdrop-blur-sm border-b border-border/50 flex items-center justify-between px-6 sticky top-0 z-40">
-      <div className="min-w-0">
-        <h1 className="text-lg font-semibold text-foreground truncate">
-          {page.title}
-        </h1>
-        {page.subtitle && (
-          <p className="text-xs text-muted-foreground truncate">{page.subtitle}</p>
-        )}
-      </div>
-
-      <div className="flex items-center gap-3">
+    <header className="h-16 bg-card/80 backdrop-blur-sm border-b border-border/50 flex items-center justify-between px-6 sticky top-0 z-40 gap-4">
+      <div className="flex items-center gap-3 min-w-0">
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 text-muted-foreground hover:text-foreground"
-          aria-label="Notificações"
+          onClick={toggleSidebar}
+          className="lg:hidden h-9 w-9 text-muted-foreground hover:text-foreground shrink-0"
+          aria-label="Abrir menu"
         >
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground text-[10px] rounded-full flex items-center justify-center font-medium">
-            3
-          </span>
+          <Menu className="h-5 w-5" />
         </Button>
+        <div className="min-w-0">
+          <h1 className="text-lg font-semibold text-foreground truncate">
+            {page.title}
+          </h1>
+          {page.subtitle && (
+            <p className="text-xs text-muted-foreground truncate">{page.subtitle}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <NotificationsSheet />
 
         <div className="flex items-center gap-3 pl-3 border-l border-border/50">
           <Avatar className="h-8 w-8">

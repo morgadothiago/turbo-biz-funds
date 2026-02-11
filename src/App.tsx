@@ -1,10 +1,9 @@
-import { lazy, Suspense, Component } from "react";
+import { lazy, Suspense, Component, startTransition } from "react";
 import type { ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import { Loader2 } from "lucide-react";
 
-// Lazy load everything that the landing page doesn't need
 const AppShell = lazy(() => import("./AppShell"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -14,9 +13,14 @@ const AppLoading = () => (
   </div>
 );
 
-// Error boundary to prevent blank screens
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
+const PageLoading = () => (
+  <div className="flex items-center justify-center py-12">
+    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+  </div>
+);
+
+class ErrorBoundary extends Component<{ children: ReactNode; fallback?: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode; fallback?: ReactNode }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -53,3 +57,5 @@ const App = () => (
 );
 
 export default App;
+
+export { PageLoading };

@@ -47,12 +47,12 @@ const WhatsAppPage = memo(() => {
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">WhatsApp</h1>
-        <p className="text-gray-600">Conecte-se e registre despesas pelo WhatsApp</p>
+        <h1 className="text-2xl font-bold text-foreground">WhatsApp</h1>
+        <p className="text-muted-foreground">Conecte-se e registre despesas pelo WhatsApp</p>
       </div>
 
       {/* Status Card - Minimalista */}
-      <Card className="bg-gradient-to-r from-[#25D366] to-[#128C7E] border-none shadow-lg">
+      <Card className="bg-gradient-to-r from-[#25D366] to-[#128C7E] border-0 shadow-lg">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
@@ -67,8 +67,8 @@ const WhatsAppPage = memo(() => {
                 Seu número está vinculado. Envie despesas pelo WhatsApp!
               </p>
             </div>
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               className="bg-white/20 text-white border-0 hover:bg-white/30 backdrop-blur-sm"
               onClick={() => toast.info("Em breve: desconectar")}
             >
@@ -80,25 +80,25 @@ const WhatsAppPage = memo(() => {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Phone Number - Minimalista */}
-        <Card className="border border-gray-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-[#25D366]/10 flex items-center justify-center">
-                <Smartphone className="w-5 h-5 text-[#25D366]" />
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Smartphone className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Número do OrganizaAI</h3>
-                <p className="text-sm text-gray-500">Salve para enviar suas despesas</p>
+                <h3 className="font-semibold text-foreground">Número do OrganizaAI</h3>
+                <p className="text-sm text-muted-foreground">Salve para enviar suas despesas</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
-              <div className="flex-1 p-4 rounded-lg bg-gray-50 border border-gray-200">
-                <span className="text-lg font-mono text-gray-900">{phoneNumber}</span>
+              <div className="flex-1 p-4 rounded-lg bg-accent border border-input">
+                <span className="text-lg font-mono text-foreground">{phoneNumber}</span>
               </div>
-              <Button 
-                variant="outline" 
-                className="border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white gap-2 transition-colors"
+              <Button
+                variant="outline"
+                className="border-primary text-primary hover:bg-primary hover:text-white gap-2 transition-colors"
                 onClick={copyToClipboard}
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
@@ -109,15 +109,15 @@ const WhatsAppPage = memo(() => {
         </Card>
 
         {/* QR Code - Minimalista */}
-        <Card className="border border-gray-200 shadow-sm">
+        <Card className="border-border shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                <QrCode className="w-16 h-16 text-gray-600" />
+              <div className="w-24 h-24 bg-accent rounded-lg flex items-center justify-center border border-border">
+                <QrCode className="w-16 h-16 text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 mb-1">Ou escaneie o QR Code</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="font-semibold text-foreground mb-1">Ou escaneie o QR Code</h3>
+                <p className="text-sm text-muted-foreground">
                   Abra o WhatsApp, vá em "Novo chat" e escaneie para adicionar.
                 </p>
               </div>
@@ -127,25 +127,25 @@ const WhatsAppPage = memo(() => {
       </div>
 
       {/* How to Use - Minimalista */}
-      <Card className="border border-gray-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardContent className="p-6">
-          <h3 className="font-semibold text-gray-900 mb-6">Como usar</h3>
+          <h3 className="font-semibold text-foreground mb-6">Como usar</h3>
           <div className="space-y-4">
             {STEPS.map((step, index) => (
               <div key={step.number} className="flex items-start gap-4">
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
+                  <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0 border border-border">
                     <span className="text-xl">{step.icon}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-[#25D366] uppercase tracking-wider">Passo {step.number}</span>
+                      <span className="text-xs font-medium text-primary uppercase tracking-wider">Passo {step.number}</span>
                     </div>
-                    <h4 className="font-medium text-gray-900">{step.title}</h4>
-                    <p className="text-sm text-gray-500">{step.description}</p>
+                    <h4 className="font-medium text-foreground">{step.title}</h4>
+                    <p className="text-sm text-muted-foreground">{step.description}</p>
                   </div>
                   {index < STEPS.length - 1 && (
-                    <ChevronRight className="w-5 h-5 text-gray-300 hidden md:block" />
+                    <ChevronRight className="w-5 h-5 text-muted-foreground hidden md:block" />
                   )}
                 </div>
               </div>
@@ -157,15 +157,15 @@ const WhatsAppPage = memo(() => {
       {/* Features - Minimalista */}
       <div className="grid gap-4 md:grid-cols-3">
         {FEATURES.map((feature) => (
-          <Card key={feature.title} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <Card key={feature.title} className="border-border shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#25D366]/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <span className="text-xl">{feature.icon}</span>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900">{feature.title}</h4>
-                  <p className="text-sm text-gray-500">{feature.description}</p>
+                  <h4 className="font-medium text-foreground">{feature.title}</h4>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
                 </div>
               </div>
             </CardContent>
