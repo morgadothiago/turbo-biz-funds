@@ -2,10 +2,17 @@ import { lazy, Suspense, Component } from "react";
 import type { ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import { Loader2 } from "lucide-react";
 
 // Lazy load everything that the landing page doesn't need
 const AppShell = lazy(() => import("./AppShell"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+
+const AppLoading = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+  </div>
+);
 
 // Error boundary to prevent blank screens
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -38,11 +45,8 @@ const App = () => (
   <ErrorBoundary>
     <BrowserRouter>
       <Routes>
-        {/* Landing page - loads fast with zero heavy dependencies */}
         <Route path="/" element={<Index />} />
-
-        {/* All other routes - lazy loads providers (QueryClient, Toaster, etc.) */}
-        <Route path="/*" element={<Suspense fallback={null}><AppShell /></Suspense>} />
+        <Route path="/*" element={<Suspense fallback={<AppLoading />}><AppShell /></Suspense>} />
       </Routes>
     </BrowserRouter>
   </ErrorBoundary>

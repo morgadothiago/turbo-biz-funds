@@ -81,11 +81,13 @@ const Cadastro = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    toast.success("Conta criada com sucesso!");
-    navigate("/dashboard");
-    setIsLoading(false);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Conta criada com sucesso!");
+      navigate("/dashboard");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const plans = [

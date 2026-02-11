@@ -76,12 +76,10 @@ describe("useAuth hook", () => {
     expect(result.current).toBeDefined();
     expect(result.current.login).toBeDefined();
     
-    // Login first
     await act(async () => {
       await result.current.login("admin@financeai.com", "admin123");
     });
     
-    // Then logout
     act(() => {
       result.current.logout();
     });
@@ -98,5 +96,15 @@ describe("useAuth hook", () => {
     });
     
     expect(result.current.isLoading).toBe(true);
+  });
+
+  it("should return user name correctly after login", async () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    
+    await act(async () => {
+      await result.current.login("admin@financeai.com", "admin123");
+    });
+    
+    expect(result.current.user?.name).toBe("Administrador");
   });
 });
