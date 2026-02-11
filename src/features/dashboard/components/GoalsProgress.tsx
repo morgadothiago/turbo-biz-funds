@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Target } from "lucide-react";
 import { Goal } from "../types";
+import { cn } from "@/lib/utils";
 
 interface GoalsProgressProps {
   goals: Goal[];
@@ -13,36 +14,58 @@ interface GoalsProgressProps {
 
 export const GoalsProgress = ({ goals }: GoalsProgressProps) => {
   const calculateProgress = (current: number, target: number): number => {
-    return Math.round((current / target) * 100);
+    return Math.min(Math.round((current / target) * 100), 100);
   };
 
+  if (goals.length === 0) {
+    return (
+      <Card className="border-border/60">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            Metas
+          </CardTitle>
+          <CardDescription>Configure suas metas financeiras</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground text-center py-4">
+            Nenhuma meta configurada
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Target className="h-5 w-5 text-warning" />
-          Minhas Metas
+    <Card className="border-border/60">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Target className="h-5 w-5 text-primary" />
+          Metas
         </CardTitle>
-        <CardDescription>
-          Progresso das suas economias
-        </CardDescription>
+        <CardDescription>Progresso das suas economias</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-5">
         {goals.map((goal) => {
           const percentage = calculateProgress(goal.current, goal.target);
           return (
             <div key={goal.id} className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{goal.name}</span>
-                <span className="text-muted-foreground">
-                  R$ {goal.current.toLocaleString()} / R${" "}
-                  {goal.target.toLocaleString()}
+                <span className="font-medium text-foreground truncate pr-2">
+                  {goal.name}
+                </span>
+                <span className="text-muted-foreground text-xs whitespace-nowrap">
+                  {percentage}%
                 </span>
               </div>
-              <Progress value={percentage} className="h-2" />
-              <p className="text-xs text-muted-foreground">
-                {percentage}% completo
-              </p>
+              <Progress
+                value={percentage}
+                className={cn("h-2", goal.color)}
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>R$ {goal.current.toLocaleString("pt-BR")}</span>
+                <span>R$ {goal.target.toLocaleString("pt-BR")}</span>
+              </div>
             </div>
           );
         })}

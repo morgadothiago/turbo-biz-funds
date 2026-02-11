@@ -1,6 +1,11 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useReveal } from "@/hooks/use-reveal";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const FAQS = [
   {
@@ -37,37 +42,11 @@ const FAQS = [
   },
 ] as const;
 
-const FAQItem = memo(({ faq }: { faq: typeof FAQS[number] }) => {
-  const [open, setOpen] = useState(false);
-  const toggle = useCallback(() => setOpen(prev => !prev), []);
-
-  return (
-    <div className="bg-card rounded-xl border border-border px-6 transition-all data-[open=true]:shadow-md data-[open=true]:border-primary/20" data-open={open}>
-      <button
-        onClick={toggle}
-        className="w-full flex items-center justify-between text-left font-medium text-foreground hover:text-primary py-5 transition-colors"
-      >
-        <span>{faq.question}</span>
-        <ChevronDown className={`w-5 h-5 text-muted-foreground shrink-0 ml-4 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open && (
-        <div className="text-muted-foreground pb-5 leading-relaxed">
-          {faq.answer}
-        </div>
-      )}
-    </div>
-  );
-});
-
-FAQItem.displayName = "FAQItem";
-
 const FAQ = memo(() => {
-  const headerRef = useReveal();
-
   return (
     <section id="faq" className="py-24 bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4">
-        <div ref={headerRef} className="max-w-3xl mx-auto text-center mb-16">
+        <div className="max-w-3xl mx-auto text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
             Dúvidas
           </span>
@@ -80,13 +59,25 @@ const FAQ = memo(() => {
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto space-y-4">
-          {FAQS.map((faq, index) => (
-            <FAQItem key={index} faq={faq} />
-          ))}
+        <div className="max-w-3xl mx-auto">
+          <Accordion type="single" collapsible className="space-y-4">
+            {FAQS.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="bg-card rounded-xl border border-border px-6"
+              >
+                <AccordionTrigger className="hover:text-primary py-5">
+                  <span>{faq.question}</span>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground pb-5">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
 
-        {/* Contact CTA */}
         <div className="mt-12 text-center">
           <p className="text-muted-foreground">
             Ainda tem dúvidas?{" "}

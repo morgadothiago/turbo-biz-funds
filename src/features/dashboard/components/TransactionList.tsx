@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Receipt } from "lucide-react";
 import type { Transaction } from "@/shared/types";
+import { cn } from "@/lib/utils";
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -13,44 +14,45 @@ interface TransactionListProps {
 
 export const TransactionList = ({ transactions }: TransactionListProps) => {
   return (
-    <Card className="lg:col-span-2">
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="border-border/60">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="text-lg flex items-center gap-2">
             <Receipt className="h-5 w-5 text-primary" />
-            Últimas Transações
+            Transações
           </CardTitle>
-          <CardDescription>
-            Suas movimentações recentes
-          </CardDescription>
+          <CardDescription>Suas movimentações recentes</CardDescription>
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
           Ver todas
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-1">
           {transactions.map((transaction) => (
             <div
               key={transaction.id}
-              className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors group cursor-pointer"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{transaction.icon}</span>
-                <div>
-                  <p className="font-medium text-sm">{transaction.description}</p>
-                  <p className="text-xs text-muted-foreground">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-2xl flex-shrink-0">{transaction.icon}</span>
+                <div className="min-w-0">
+                  <p className="font-medium text-sm truncate text-foreground">
+                    {transaction.description}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {transaction.category} • {transaction.date}
                   </p>
                 </div>
               </div>
               <span
-                className={`font-medium ${
-                  transaction.amount > 0 ? "text-success" : "text-destructive"
-                }`}
+                className={cn(
+                  "font-semibold text-sm flex-shrink-0",
+                  transaction.amount > 0 ? "text-success" : "text-foreground"
+                )}
               >
                 {transaction.amount > 0 ? "+" : ""}
-                R$ {Math.abs(transaction.amount).toFixed(2)}
+                R$ {Math.abs(transaction.amount).toFixed(2).replace(".", ",")}
               </span>
             </div>
           ))}

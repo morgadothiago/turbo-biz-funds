@@ -9,6 +9,29 @@ import {
   WhatsAppCTA,
 } from "@/features/dashboard/components";
 import { useDashboardData } from "@/features/dashboard/hooks";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const DashboardSkeleton = () => (
+  <div className="p-6 lg:p-8 space-y-8">
+    <div className="space-y-2">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-5 w-72" />
+    </div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {[1, 2, 3, 4].map((i) => (
+        <Skeleton key={i} className="h-36 rounded-xl" />
+      ))}
+    </div>
+    <div className="grid gap-4 lg:grid-cols-7">
+      <Skeleton className="h-80 lg:col-span-4 rounded-xl" />
+      <Skeleton className="h-80 lg:col-span-3 rounded-xl" />
+    </div>
+    <div className="grid gap-4 lg:grid-cols-3">
+      <Skeleton className="h-64 lg:col-span-2 rounded-xl" />
+      <Skeleton className="h-64 rounded-xl" />
+    </div>
+  </div>
+);
 
 const UserDashboard = memo(() => {
   const { user } = useAuth();
@@ -17,33 +40,21 @@ const UserDashboard = memo(() => {
   const userName = user?.name?.split(" ")[0]?.trim() || "Usuário";
 
   if (isLoading) {
-    return (
-      <div className="p-6 lg:p-8 space-y-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/4 mb-2"></div>
-          <div className="h-4 bg-muted rounded w-1/3"></div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-muted rounded-lg animate-pulse"></div>
-          ))}
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!dashboardData) {
-    return null;
+    return <DashboardSkeleton />;
   }
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
-      <div>
+      <div className="space-y-1">
         <h2 className="text-2xl font-bold tracking-tight">
           Olá, {userName}! 👋
         </h2>
         <p className="text-muted-foreground">
-          Aqui está o resumo das suas finanças deste mês.
+          Aqui está o resumo das suas finanças deste mês
         </p>
       </div>
 
@@ -53,14 +64,22 @@ const UserDashboard = memo(() => {
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-7">
-        <ExpenseChart data={dashboardData.expensesByDay} />
-        <CategoryChart data={dashboardData.categoryExpenses} />
+      <div className="grid gap-6 lg:grid-cols-7">
+        <div className="lg:col-span-4">
+          <ExpenseChart data={dashboardData.expensesByDay} />
+        </div>
+        <div className="lg:col-span-3">
+          <CategoryChart data={dashboardData.categoryExpenses} />
+        </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <TransactionList transactions={dashboardData.recentTransactions} />
-        <GoalsProgress goals={dashboardData.goals} />
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <TransactionList transactions={dashboardData.recentTransactions} />
+        </div>
+        <div>
+          <GoalsProgress goals={dashboardData.goals} />
+        </div>
       </div>
 
       <WhatsAppCTA />

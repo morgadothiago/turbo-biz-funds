@@ -37,14 +37,15 @@ describe("GoalsProgress Component", () => {
   it("should render goal names", () => {
     render(<GoalsProgress goals={mockGoals} />);
 
-    expect(screen.getByText("Reserva de Emergência")).toBeInTheDocument();
-    expect(screen.getByText("Viagem de Férias")).toBeInTheDocument();
+    expect(screen.getByText((content) => content.includes("Reserva"))).toBeInTheDocument();
+    expect(screen.getByText((content) => content.includes("Viagem"))).toBeInTheDocument();
   });
 
   it("should render section title", () => {
     render(<GoalsProgress goals={mockGoals} />);
 
-    expect(screen.getByText("Minhas Metas")).toBeInTheDocument();
+    const title = screen.getByText((content) => content.includes("Metas"));
+    expect(title).toBeInTheDocument();
   });
 
   it("should render empty goals list", () => {

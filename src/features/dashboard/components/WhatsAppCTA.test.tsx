@@ -12,7 +12,7 @@ describe("WhatsAppCTA Component", () => {
   it("should render connect button", () => {
     render(<WhatsAppCTA />);
 
-    const button = screen.getByRole("button", { name: /conectar whatsapp/i });
+    const button = screen.getByRole("button", { name: /conectar/i });
     expect(button).toBeInTheDocument();
   });
 

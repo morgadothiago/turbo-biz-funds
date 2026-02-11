@@ -1,9 +1,9 @@
 import { useState, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, Sparkles } from "lucide-react";
 
-// Static navigation links
 const NAV_LINKS = [
   { name: "Como Funciona", href: "#como-funciona" },
   { name: "Depoimentos", href: "#depoimentos" },
@@ -14,21 +14,31 @@ const NAV_LINKS = [
 const Navbar = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
-
   const closeMenu = useCallback(() => {
     setIsOpen(false);
   }, []);
 
+  const NavLinks = () => (
+    <>
+      {NAV_LINKS.map((link) => (
+        <a
+          key={link.name}
+          href={link.href}
+          className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+          onClick={closeMenu}
+        >
+          {link.name}
+        </a>
+      ))}
+    </>
+  );
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 md:bg-background/80 md:backdrop-blur-xl border-b border-white/5">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 md:bg-background/80 backdrop-blur-xl border-b border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center transition-transform group-hover:scale-105">
               <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold text-foreground">
@@ -36,20 +46,10 @@ const Navbar = memo(() => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="nav-link text-muted-foreground hover:text-foreground transition-colors text-sm font-medium"
-              >
-                {link.name}
-              </a>
-            ))}
+            <NavLinks />
           </div>
 
-          {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
             <Button variant="ghost" asChild>
               <Link to="/login">Entrar</Link>
@@ -59,41 +59,42 @@ const Navbar = memo(() => {
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-            onClick={toggleMenu}
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <button
+                className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <div className="flex flex-col gap-6 pt-6">
+                <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <span className="text-xl font-bold text-foreground">
+                    Organiza<span className="text-primary">AI</span>
+                  </span>
+                </Link>
 
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
-            <div className="flex flex-col gap-2">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                  onClick={closeMenu}
-                >
-                  {link.name}
-                </a>
-              ))}
-              <div className="flex flex-col gap-2 pt-4 px-4 border-t border-border/50 mt-2">
-                <Button variant="outline" asChild className="w-full">
-                  <Link to="/login">Entrar</Link>
-                </Button>
-                <Button variant="hero" asChild className="w-full">
-                  <Link to="/cadastro">Testar por R$ 9,90</Link>
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <NavLinks />
+                </div>
+
+                <div className="flex flex-col gap-3 pt-4 border-t border-border">
+                  <Button variant="outline" asChild className="w-full">
+                    <Link to="/login" onClick={closeMenu}>Entrar</Link>
+                  </Button>
+                  <Button variant="hero" asChild className="w-full">
+                    <Link to="/cadastro" onClick={closeMenu}>Testar por R$ 9,90</Link>
+                  </Button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </nav>
   );

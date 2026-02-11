@@ -2,10 +2,21 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Check, Star, Zap, Shield } from "lucide-react";
-import { useReveal } from "@/hooks/use-reveal";
 
-// Static data moved outside component
-const PLANS = [
+interface PlanProps {
+  name: string;
+  description: string;
+  price: string;
+  priceDecimal: string;
+  period: string;
+  features: string[];
+  cta: string;
+  highlighted?: boolean;
+  badge?: string;
+  savings?: string;
+}
+
+const PLANS: PlanProps[] = [
   {
     name: "Teste",
     description: "Experimente por 15 dias",
@@ -21,11 +32,10 @@ const PLANS = [
     ],
     cta: "Começar Teste",
     highlighted: false,
-    variant: "outline" as const,
   },
   {
     name: "Mensal",
-    description: "Sem compromisso, cancele quando quiser",
+    description: "Sem compromisso",
     price: "29",
     priceDecimal: "90",
     period: "/mês",
@@ -39,12 +49,11 @@ const PLANS = [
     ],
     cta: "Assinar Mensal",
     highlighted: true,
-    variant: "hero" as const,
     badge: "Mais Popular",
   },
   {
     name: "Trimestral",
-    description: "Economize 10% no plano",
+    description: "Economize 10%",
     price: "79",
     priceDecimal: "90",
     period: "/trimestre",
@@ -52,46 +61,39 @@ const PLANS = [
       "Tudo do Mensal +",
       "Equivale a R$ 26,63/mês",
       "Prioridade no suporte",
-      "Acesso antecipado a novidades",
+      "Acesso antecipado",
       "3 meses de organização",
     ],
     cta: "Assinar Trimestral",
     highlighted: false,
-    variant: "default" as const,
     savings: "Economize R$ 10",
   },
-] as const;
+];
 
 const TRUST_BADGES = [
-  { icon: Shield, text: "Pagamento 100% seguro" },
+  { icon: Shield, text: "Pagamento seguro" },
   { icon: Check, text: "Cancele quando quiser" },
   { icon: Star, text: "Suporte humanizado" },
 ] as const;
 
-// Memoized plan card component
-const PlanCard = memo(({ plan, index }: { plan: typeof PLANS[number]; index: number }) => {
-  const cardRef = useReveal(index * 150);
-
+const PlanCard = memo(({ plan }: { plan: PlanProps }) => {
   return (
     <div
-      ref={cardRef}
       className={`relative bg-card rounded-2xl p-8 border transition-all duration-300 ${
         plan.highlighted
           ? "border-primary shadow-xl shadow-primary/10 scale-105 z-10"
-          : "border-border hover:border-primary/30 hover:shadow-lg"
+          : "border-border/60 hover:border-primary/30 hover:shadow-lg"
       }`}
     >
-      {/* Badge */}
       {plan.badge && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
           <div className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-medium shadow-lg">
-            <Star className="w-4 h-4" />
+            <Zap className="w-4 h-4" />
             {plan.badge}
           </div>
         </div>
       )}
 
-      {/* Savings badge */}
       {plan.savings && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
           <div className="flex items-center gap-1.5 px-4 py-1.5 bg-accent text-accent-foreground rounded-full text-sm font-medium shadow-lg">
@@ -100,7 +102,6 @@ const PlanCard = memo(({ plan, index }: { plan: typeof PLANS[number]; index: num
         </div>
       )}
 
-      {/* Plan header */}
       <div className="text-center mb-8 pt-2">
         <h3 className="text-xl font-semibold text-foreground mb-2">
           {plan.name}
@@ -118,7 +119,6 @@ const PlanCard = memo(({ plan, index }: { plan: typeof PLANS[number]; index: num
         </div>
       </div>
 
-      {/* Features */}
       <ul className="space-y-3 mb-8">
         {plan.features.map((feature, featureIndex) => (
           <li key={featureIndex} className="flex items-start gap-3">
@@ -134,9 +134,8 @@ const PlanCard = memo(({ plan, index }: { plan: typeof PLANS[number]; index: num
         ))}
       </ul>
 
-      {/* CTA */}
       <Button
-        variant={plan.variant}
+        variant={plan.highlighted ? "hero" : "default"}
         size="lg"
         className="w-full"
         asChild
@@ -153,12 +152,10 @@ const PlanCard = memo(({ plan, index }: { plan: typeof PLANS[number]; index: num
 PlanCard.displayName = "PlanCard";
 
 const Pricing = memo(() => {
-  const headerRef = useReveal();
-
   return (
     <section id="planos" className="py-24 bg-gradient-to-b from-success/5 to-background">
       <div className="container mx-auto px-4">
-        <div ref={headerRef} className="max-w-3xl mx-auto text-center mb-16">
+        <div className="max-w-3xl mx-auto text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
             Investimento
           </span>
@@ -173,12 +170,11 @@ const Pricing = memo(() => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {PLANS.map((plan, index) => (
-            <PlanCard key={plan.name} plan={plan} index={index} />
+          {PLANS.map((plan) => (
+            <PlanCard key={plan.name} plan={plan} />
           ))}
         </div>
 
-        {/* Trust badges */}
         <div className="mt-16 max-w-2xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-sm text-muted-foreground">
             {TRUST_BADGES.map((badge, index) => (
@@ -190,12 +186,11 @@ const Pricing = memo(() => {
           </div>
         </div>
 
-        {/* No free plan notice */}
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground max-w-lg mx-auto">
             <span className="font-medium text-foreground">Por que não temos plano gratuito?</span>
             {" "}Acreditamos que quem investe no próprio controle financeiro leva a sério.
-            O teste de R$ 9,90 garante que você tenha a melhor experiência desde o primeiro dia.
+            O teste de R$ 9,90 garante a melhor experiência desde o primeiro dia.
           </p>
         </div>
       </div>

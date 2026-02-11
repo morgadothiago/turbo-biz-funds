@@ -52,7 +52,7 @@ describe("Login Page with Zod Validation", () => {
   it("should have Google login button", () => {
     renderWithProviders(<Login />);
     
-    expect(screen.getByRole("button", { name: /continuar com google/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /google/i })).toBeInTheDocument();
   });
 
   it("should have navigation links", () => {

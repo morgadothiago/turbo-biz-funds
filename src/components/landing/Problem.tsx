@@ -1,8 +1,7 @@
 import { memo, useState } from "react";
 import { Table2, Brain, CreditCard, HelpCircle } from "lucide-react";
-import { useReveal } from "@/hooks/use-reveal";
 import { Button } from "@/components/ui/button";
-import { LeadCaptureModal } from "./LeadCaptureModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const PROBLEMS = [
   {
@@ -32,17 +31,10 @@ const PROBLEMS = [
 ] as const;
 
 const ProblemCard = memo(({ problem, index }: { problem: typeof PROBLEMS[number]; index: number }) => {
-  const cardRef = useReveal(index * 100);
-
   return (
-    <div
-      ref={cardRef}
-      className="group relative bg-card rounded-2xl p-6 md:p-8 border border-border shadow-sm hover-lift"
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-
-      <div className="relative flex items-start gap-4 md:gap-5">
-        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors duration-300">
+    <div className="group bg-card rounded-2xl p-6 md:p-8 border border-border/60 hover:shadow-lg transition-all duration-300">
+      <div className="flex items-start gap-4 md:gap-5">
+        <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors">
           <problem.icon className="w-6 h-6 md:w-7 md:h-7 text-accent" />
         </div>
         <div>
@@ -64,17 +56,12 @@ const ProblemCard = memo(({ problem, index }: { problem: typeof PROBLEMS[number]
 ProblemCard.displayName = "ProblemCard";
 
 const Problem = memo(() => {
-  const sectionRef = useReveal();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-white to-primary/5 relative overflow-hidden">
-      {/* Background decoration - desktop only */}
-      <div className="hidden md:block blob w-96 h-96 bg-primary/10 -top-20 -right-20 animate-blob" />
-      <div className="hidden md:block blob w-72 h-72 bg-accent/10 -bottom-20 -left-20 animate-blob" style={{ animationDelay: '-8s' }} />
-
-      <div className="container mx-auto px-4 relative z-10">
-        <div ref={sectionRef} className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-background to-primary/5">
+      <div className="container mx-auto px-4">
+        <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
             A gente entende
           </span>
@@ -103,9 +90,23 @@ const Problem = memo(() => {
             Quero organizar minhas finanças
           </Button>
         </div>
-      </div>
 
-      <LeadCaptureModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Comece agora</DialogTitle>
+            </DialogHeader>
+            <div className="text-center py-4">
+              <p className="text-muted-foreground mb-4">
+                Deixe seu email para começar a organizar suas finanças pelo WhatsApp.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Você receberá acesso ao teste de R$ 9,90.
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </section>
   );
 });
