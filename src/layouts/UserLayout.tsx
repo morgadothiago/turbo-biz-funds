@@ -38,12 +38,12 @@ function Header() {
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-[#25D366]/10 text-[#25D366] text-sm font-medium">
-              {user?.name?.split(" ").map(n => n[0]).join("").substring(0, 2) || "US"}
+              {user?.name?.split(" ").map(n => n[0] || "").join("").substring(0, 2) || "US"}
             </AvatarFallback>
           </Avatar>
           <div className="hidden md:block">
             <p className="text-sm font-medium text-gray-900">{user?.name || "Usuário"}</p>
-            <p className="text-xs text-gray-500">{user?.email}</p>
+            <p className="text-xs text-gray-500">{user?.email || "-"}</p>
           </div>
         </div>
       </div>

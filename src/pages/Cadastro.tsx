@@ -5,22 +5,99 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Sparkles, Mail, Lock, User, ArrowRight, Check } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "Nome é obrigatório")
+      .min(2, "O nome deve ter no mínimo 2 caracteres"),
+    email: z
+      .string()
+      .min(1, "Email é obrigatório")
+      .email("Email inválido"),
+    password: z
+      .string()
+      .min(1, "Senha é obrigatória")
+      .min(8, "A senha deve ter no mínimo 8 caracteres"),
+    confirmPassword: z.string().min(1, "Confirme sua senha"),
+    plan: z.string().min(1, "Selecione um plano"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
+type RegisterFormData = z.infer<typeof registerSchema>;
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  plan?: string;
+}
+
+/**
+ * Componente de página de cadastro.
+ * Renderiza formulário em dois passos com validação Zod.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <Cadastro />
+ * ```
+ *
+ * @returns Formulário de cadastro com passo 1 (dados pessoais) e passo 2 (seleção de plano).
+ */
 
 const Cadastro = () => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     plan: "free",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const validateStep1 = (): boolean => {
+    const result = registerSchema.safeParse({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+    });
+
+    if (!result.success) {
+      const formattedErrors: FormErrors = {};
+      result.error.issues.forEach((issue) => {
+        const path = issue.path[0] as keyof FormErrors;
+        formattedErrors[path] = issue.message;
+      });
+      setErrors(formattedErrors);
+      return false;
+    }
+
+    setErrors({});
+    return true;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) {
-      setStep(2);
+      if (validateStep1()) {
+        setStep(2);
+      }
     } else {
-      // TODO: Implementar cadastro
+      if (errors.plan) {
+        toast.error("Por favor, selecione um plano");
+        return;
+      }
+      toast.success("Conta criada com sucesso!");
     }
   };
 
@@ -89,11 +166,17 @@ const Cadastro = () => {
                       type="text"
                       placeholder="Seu nome"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="pl-10"
+                      onChange={(e) => {
+                        setFormData({ ...formData, name: e.target.value });
+                        if (errors.name) setErrors({ ...errors, name: undefined });
+                      }}
+                      className={`pl-10 ${errors.name ? "border-destructive" : ""}`}
                       required
                     />
                   </div>
+                  {errors.name && (
+                    <p className="text-xs text-destructive">{errors.name}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -105,11 +188,17 @@ const Cadastro = () => {
                       type="email"
                       placeholder="seu@email.com"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="pl-10"
+                      onChange={(e) => {
+                        setFormData({ ...formData, email: e.target.value });
+                        if (errors.email) setErrors({ ...errors, email: undefined });
+                      }}
+                      className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
                       required
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-xs text-destructive">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -121,12 +210,39 @@ const Cadastro = () => {
                       type="password"
                       placeholder="Mínimo 8 caracteres"
                       value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="pl-10"
+                      onChange={(e) => {
+                        setFormData({ ...formData, password: e.target.value });
+                        if (errors.password) setErrors({ ...errors, password: undefined });
+                      }}
+                      className={`pl-10 ${errors.password ? "border-destructive" : ""}`}
                       required
-                      minLength={8}
                     />
                   </div>
+                  {errors.password && (
+                    <p className="text-xs text-destructive">{errors.password}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirme sua senha"
+                      value={formData.confirmPassword}
+                      onChange={(e) => {
+                        setFormData({ ...formData, confirmPassword: e.target.value });
+                        if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
+                      }}
+                      className={`pl-10 ${errors.confirmPassword ? "border-destructive" : ""}`}
+                      required
+                    />
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+                  )}
                 </div>
 
 

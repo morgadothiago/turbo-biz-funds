@@ -180,7 +180,7 @@ export function UserSidebar() {
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
             <AvatarFallback className="bg-accent/10 text-accent font-medium">
-              {user?.name?.split(" ").map(n => n[0]).join("").substring(0, 2) || "US"}
+              {user?.name?.split(" ").map(n => n[0] || "").join("").substring(0, 2) || "US"}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (

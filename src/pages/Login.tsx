@@ -6,26 +6,64 @@ import { Label } from "@/components/ui/label";
 import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
+  password: z.string().min(1, "Senha é obrigatória").min(6, "Senha deve ter no mínimo 6 caracteres"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+/**
+ * Componente de página de login.
+ * Renderiza formulário de autenticação com validação Zod.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <Login />
+ * ```
+ *
+ * @returns Formulário de login com campos de email, senha e validação.
+ */
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  const validateForm = (): boolean => {
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      const formattedErrors: { email?: string; password?: string } = {};
+      result.error.issues.forEach((issue) => {
+        if (issue.path[0] === "email") {
+          formattedErrors.email = issue.message;
+        } else if (issue.path[0] === "password") {
+          formattedErrors.password = issue.message;
+        }
+      });
+      setErrors(formattedErrors);
+      return false;
+    }
+    setErrors({});
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       await login(email, password);
       toast.success("Login realizado com sucesso!");
-      
-      // Redireciona baseado na role
-      if (email === "admin@financeai.com") {
-        navigate("/admin");
-      } else {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
     } catch (error) {
       toast.error("Email ou senha inválidos");
     }
@@ -34,7 +72,6 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary/50 to-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -52,7 +89,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Form */}
         <div className="bg-card rounded-2xl border border-border p-8 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
@@ -64,11 +100,17 @@ const Login = () => {
                   type="email"
                   placeholder="seu@email.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors({ ...errors, email: undefined });
+                  }}
+                  className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
                   required
                 />
               </div>
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -83,13 +125,19 @@ const Login = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Mínimo 6 caracteres"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors({ ...errors, password: undefined });
+                  }}
+                  className={`pl-10 ${errors.password ? "border-destructive" : ""}`}
                   required
                 />
               </div>
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password}</p>
+              )}
             </div>
 
             <Button variant="hero" size="lg" className="w-full" type="submit" disabled={isLoading}>
@@ -129,22 +177,12 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Sign up link */}
         <p className="text-center text-muted-foreground mt-6">
           Não tem uma conta?{" "}
           <Link to="/cadastro" className="text-accent font-medium hover:underline">
             Criar conta grátis
           </Link>
         </p>
-
-        {/* Credenciais de teste */}
-        <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-dashed border-muted-foreground/30">
-          <p className="text-xs text-muted-foreground font-medium mb-2">Credenciais de teste:</p>
-          <div className="space-y-1 text-xs text-muted-foreground">
-            <p><span className="font-medium">Admin:</span> admin@financeai.com / admin123</p>
-            <p><span className="font-medium">Usuário:</span> usuario@financeai.com / user123</p>
-          </div>
-        </div>
       </div>
     </div>
   );
