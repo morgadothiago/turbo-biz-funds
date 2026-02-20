@@ -110,6 +110,7 @@ export default defineConfig(({ mode }) => ({
     target: 'es2020',
     cssMinify: true,
     sourcemap: false,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -183,9 +184,11 @@ export default defineConfig(({ mode }) => ({
       'react',
       'react-dom',
       'react-router-dom',
+      'react-router',
       '@tanstack/react-query',
       'recharts',
       'framer-motion',
+      'lucide-react',
     ],
     exclude: ['@radix-ui/react-dialog'],
   },
