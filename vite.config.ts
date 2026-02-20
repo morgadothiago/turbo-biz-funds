@@ -113,56 +113,6 @@ export default defineConfig(({ mode }) => ({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          // Vendor chunks - group node_modules by library
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'vendor-react';
-            }
-            if (id.includes('@tanstack')) {
-              return 'vendor-query';
-            }
-            if (id.includes('recharts')) {
-              return 'vendor-charts';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'vendor-ui';
-            }
-            if (id.includes('framer-motion')) {
-              return 'vendor-motion';
-            }
-            if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
-              return 'vendor-forms';
-            }
-            if (id.includes('lucide-react')) {
-              return 'vendor-icons';
-            }
-            if (id.includes('date-fns') || id.includes('dayjs')) {
-              return 'vendor-date';
-            }
-            return 'vendor-misc';
-          }
-
-          // App chunks - group by feature/directory
-          if (id.includes('/contexts/')) {
-            return 'app-contexts';
-          }
-          if (id.includes('/pages/Login') || id.includes('/pages/Cadastro')) {
-            return 'auth';
-          }
-          if (id.includes('/pages/UserDashboard')) {
-            return 'dashboard';
-          }
-          if (id.includes('/pages/admin/')) {
-            return 'admin';
-          }
-          if (id.includes('/features/dashboard/')) {
-            return 'features-dashboard';
-          }
-          if (id.includes('/landing/')) {
-            return 'landing';
-          }
-        },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',

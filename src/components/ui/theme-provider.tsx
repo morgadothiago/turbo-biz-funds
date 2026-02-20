@@ -36,10 +36,15 @@ export function ThemeProvider({
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem(storageKey) as Theme;
+    // Only use stored value if it exists, otherwise use defaultTheme
     if (stored) {
       setThemeState(stored);
     }
-  }, [storageKey]);
+    // Always apply defaultTheme on first load if no stored value
+    if (!stored && defaultTheme) {
+      setThemeState(defaultTheme);
+    }
+  }, [storageKey, defaultTheme]);
 
   useEffect(() => {
     if (!mounted) return;
