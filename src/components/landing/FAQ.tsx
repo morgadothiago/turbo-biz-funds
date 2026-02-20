@@ -37,11 +37,11 @@ const FAQ = memo(() => {
     },
     {
       question: "Por que não tem plano gratuito?",
-      answer: "Acreditamos que quem investe R$ 9,90 para testar leva a sério a própria organização financeira. Isso nos permite oferecer suporte de qualidade e manter o produto sem anúncios ou venda de dados.",
+      answer: "Acreditamos que quem investe no próprio controle financeiro leva a sério. Isso nos permite oferecer suporte de qualidade e manter o produto sem anúncios ou venda de dados.",
     },
     {
-      question: "E se eu não gostar? Posso cancelar?",
-      answer: "Claro! Se não gostar do teste de 15 dias, é só falar com a gente que devolvemos seu dinheiro. Nos planos mensais, você cancela quando quiser pelo próprio WhatsApp, sem multa ou burocracia.",
+      question: "Posso cancelar quando quiser?",
+      answer: "Claro! Você cancela quando quiser pelo próprio WhatsApp, sem multa ou burocracia. É simples e rápido.",
     },
   ] : locale === "en" ? [
     {

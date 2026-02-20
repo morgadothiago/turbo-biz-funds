@@ -98,16 +98,6 @@ const Pricing = memo(() => {
 
   const PLANS: PlanProps[] = [
     {
-      name: t("landing", "planTest"),
-      description: t("landing", "planTestDescription"),
-      price: "9",
-      priceDecimal: "90",
-      period: t("landing", "planTestPeriod"),
-      features: t("landing", "planFeatures1") as unknown as string[],
-      cta: t("landing", "planCTA1"),
-      highlighted: false,
-    },
-    {
       name: t("landing", "planMonthly"),
       description: t("landing", "planMonthlyDescription"),
       price: "29",
@@ -152,7 +142,7 @@ const Pricing = memo(() => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {PLANS.map((plan) => (
             <PlanCard key={plan.name} plan={plan} />
           ))}
@@ -173,7 +163,7 @@ const Pricing = memo(() => {
           <p className="text-sm text-muted-foreground max-w-lg mx-auto">
             <span className="font-medium text-foreground">{t("landing", "pricingWhyNoFree")}</span>
             {" "}Acreditamos que quem investe no próprio controle financeiro leva a sério.
-            O teste de R$ 9,90 garante a melhor experiência desde o primeiro dia.
+            Isso nos permite oferecer suporte de qualidade e manter o produto sem anúncios.
           </p>
         </div>
       </div>

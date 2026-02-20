@@ -311,7 +311,7 @@ export const translations: Record<Locale, Translations> = {
       navPricing: "Preços",
       navFAQ: "Dúvidas",
       navLogin: "Entrar",
-      navSignUp: "Testar por R$ 9,90",
+      navSignUp: "Começar agora",
       // Hero
       heroBadge: "Chega de Planilhas",
       heroTitle: "Cansou de planilhas? Organize pelo WhatsApp",
