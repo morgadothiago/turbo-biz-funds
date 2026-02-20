@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Sparkles, Mail, Lock, User, ArrowRight, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { analytics } from "@/lib/analytics";
 
 const registerSchema = z
   .object({
@@ -83,6 +84,7 @@ const Cadastro = () => {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
+      analytics.signup("email");
       toast.success("Conta criada com sucesso!");
       navigate("/dashboard");
     } finally {

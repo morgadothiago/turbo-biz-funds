@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const NAV_LINKS = [
   { name: "Como Funciona", href: "#como-funciona" },
@@ -53,6 +54,7 @@ const Navbar = memo(() => {
 
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
+            <LanguageSelector />
             <Button variant="ghost" asChild>
               <Link to="/login">Entrar</Link>
             </Button>
@@ -83,6 +85,11 @@ const Navbar = memo(() => {
 
                 <div className="flex flex-col gap-2">
                   <NavLinks />
+                </div>
+
+                <div className="flex items-center gap-2 pt-4 border-t border-border">
+                  <ThemeToggle />
+                  <LanguageSelector />
                 </div>
 
                 <div className="flex flex-col gap-3 pt-4 border-t border-border">

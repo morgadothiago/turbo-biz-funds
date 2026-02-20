@@ -7,13 +7,12 @@ import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { z } from "zod";
+import { analytics } from "@/lib/analytics";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
   password: z.string().min(1, "Senha é obrigatória").min(6, "Senha deve ter no mínimo 6 caracteres"),
 });
-
-type LoginFormData = z.infer<typeof loginSchema>;
 
 /**
  * Página de login com design minimalista e profissional.
@@ -56,6 +55,7 @@ const Login = () => {
 
     try {
       const userData = await login(email, password);
+      analytics.login("email");
       toast.success("Login realizado com sucesso!");
       if (userData.role === "admin") {
         navigate("/admin", { replace: true });
