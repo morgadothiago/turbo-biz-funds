@@ -5,20 +5,22 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LanguageSelector } from "@/components/LanguageSelector";
-
-const NAV_LINKS = [
-  { name: "Como Funciona", href: "#como-funciona" },
-  { name: "Depoimentos", href: "#depoimentos" },
-  { name: "Preços", href: "#planos" },
-  { name: "Dúvidas", href: "#faq" },
-] as const;
+import { useI18n } from "@/lib/i18n-provider";
 
 const Navbar = memo(() => {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
 
   const closeMenu = useCallback(() => {
     setIsOpen(false);
   }, []);
+
+  const NAV_LINKS = [
+    { name: t("landing", "navHowItWorks"), href: "#como-funciona" },
+    { name: t("landing", "navTestimonials"), href: "#depoimentos" },
+    { name: t("landing", "navPricing"), href: "#planos" },
+    { name: t("landing", "navFAQ"), href: "#faq" },
+  ] as const;
 
   const NavLinks = () => (
     <>
@@ -56,10 +58,10 @@ const Navbar = memo(() => {
             <ThemeToggle />
             <LanguageSelector />
             <Button variant="ghost" asChild>
-              <Link to="/login">Entrar</Link>
+              <Link to="/login">{t("landing", "navLogin")}</Link>
             </Button>
             <Button variant="hero" asChild>
-              <Link to="/cadastro">Testar por R$ 9,90</Link>
+              <Link to="/cadastro">{t("landing", "navSignUp")}</Link>
             </Button>
           </div>
 
@@ -94,10 +96,10 @@ const Navbar = memo(() => {
 
                 <div className="flex flex-col gap-3 pt-4 border-t border-border">
                   <Button variant="outline" asChild className="w-full">
-                    <Link to="/login" onClick={closeMenu}>Entrar</Link>
+                    <Link to="/login" onClick={closeMenu}>{t("landing", "navLogin")}</Link>
                   </Button>
                   <Button variant="hero" asChild className="w-full">
-                    <Link to="/cadastro" onClick={closeMenu}>Testar por R$ 9,90</Link>
+                    <Link to="/cadastro" onClick={closeMenu}>{t("landing", "navSignUp")}</Link>
                   </Button>
                 </div>
               </div>

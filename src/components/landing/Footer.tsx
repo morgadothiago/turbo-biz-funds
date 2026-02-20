@@ -1,58 +1,61 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Sparkles, Instagram, Youtube, Mail } from "lucide-react";
+import { useI18n } from "@/lib/i18n-provider";
 
 interface FooterLink {
   name: string;
   href: string;
 }
 
-const FOOTER_LINKS: Record<string, FooterLink[]> = {
-  produto: [
-    { name: "Como Funciona", href: "#como-funciona" },
-    { name: "Preços", href: "#planos" },
-    { name: "Depoimentos", href: "#depoimentos" },
-    { name: "FAQ", href: "#faq" },
-  ],
-  suporte: [
-    { name: "Central de Ajuda", href: "#" },
-    { name: "Fale Conosco", href: "#" },
-    { name: "WhatsApp", href: "#" },
-  ],
-  legal: [
-    { name: "Privacidade", href: "#" },
-    { name: "Termos de Uso", href: "#" },
-    { name: "LGPD", href: "#" },
-  ],
-};
-
-const SOCIAL_LINKS = [
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Youtube, href: "#", label: "Youtube" },
-  { icon: Mail, href: "#", label: "Email" },
-] as const;
-
-const CURRENT_YEAR = new Date().getFullYear();
-
-const FooterColumn = ({ title, links }: { title: string; links: FooterLink[] }) => (
-  <div>
-    <h4 className="font-semibold mb-4 text-white">{title}</h4>
-    <ul className="space-y-3">
-      {links.map((link) => (
-        <li key={link.name}>
-          <a
-            href={link.href}
-            className="text-sm text-white/70 hover:text-white transition-colors"
-          >
-            {link.name}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </div>
-);
-
 const Footer = memo(() => {
+  const { t } = useI18n();
+
+  const FOOTER_LINKS: Record<string, FooterLink[]> = {
+    produto: [
+      { name: t("landing", "footerHowItWorks"), href: "#como-funciona" },
+      { name: t("landing", "footerPricing"), href: "#planos" },
+      { name: t("landing", "footerTestimonials"), href: "#depoimentos" },
+      { name: t("landing", "footerFAQ"), href: "#faq" },
+    ],
+    suporte: [
+      { name: t("landing", "footerHelpCenter"), href: "#" },
+      { name: t("landing", "footerContactUs"), href: "#" },
+      { name: t("landing", "footerWhatsApp"), href: "#" },
+    ],
+    legal: [
+      { name: t("landing", "footerPrivacy"), href: "#" },
+      { name: t("landing", "footerTerms"), href: "#" },
+      { name: t("landing", "footerLGPD"), href: "#" },
+    ],
+  };
+
+  const SOCIAL_LINKS = [
+    { icon: Instagram, href: "#", label: "Instagram" },
+    { icon: Youtube, href: "#", label: "Youtube" },
+    { icon: Mail, href: "#", label: "Email" },
+  ] as const;
+
+  const CURRENT_YEAR = new Date().getFullYear();
+
+  const FooterColumn = ({ title, links }: { title: string; links: FooterLink[] }) => (
+    <div>
+      <h4 className="font-semibold mb-4 text-white">{title}</h4>
+      <ul className="space-y-3">
+        {links.map((link) => (
+          <li key={link.name}>
+            <a
+              href={link.href}
+              className="text-sm text-white/70 hover:text-white transition-colors"
+            >
+              {link.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
   return (
     <footer className="relative bg-[#3F7F6B] text-white pt-12 pb-6 overflow-hidden">
       <div className="container mx-auto px-4">
@@ -67,8 +70,7 @@ const Footer = memo(() => {
               </span>
             </Link>
             <p className="text-white/80 text-sm mb-6 max-w-xs leading-relaxed">
-              Organize suas finanças pessoais pelo WhatsApp.
-              Simples, sem planilhas, sem estresse.
+              {t("landing", "footerDescription")}
             </p>
             <div className="flex gap-3">
               {SOCIAL_LINKS.map((social) => (
@@ -84,17 +86,17 @@ const Footer = memo(() => {
             </div>
           </div>
 
-          <FooterColumn title="Produto" links={FOOTER_LINKS.produto} />
-          <FooterColumn title="Suporte" links={FOOTER_LINKS.suporte} />
-          <FooterColumn title="Legal" links={FOOTER_LINKS.legal} />
+          <FooterColumn title={t("landing", "footerProduct")} links={FOOTER_LINKS.produto} />
+          <FooterColumn title={t("landing", "footerSupport")} links={FOOTER_LINKS.suporte} />
+          <FooterColumn title={t("landing", "footerLegal")} links={FOOTER_LINKS.legal} />
         </div>
 
         <div className="pt-6 border-t border-white/20 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-sm text-white/60">
-            © {CURRENT_YEAR} OrganizaAI. Todos os direitos reservados.
+            © {CURRENT_YEAR} OrganizaAI. {t("landing", "footerCopyright")}
           </p>
           <p className="text-sm text-white/60">
-            Feito com 💚 no Brasil
+            {t("landing", "footerMadeInBrazil")}
           </p>
         </div>
       </div>

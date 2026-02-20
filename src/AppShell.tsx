@@ -167,7 +167,7 @@ function AppRoutes() {
 }
 
 const AppShell = () => (
-  <ThemeProvider defaultTheme="system" storageKey="organizaai-theme">
+  <ThemeProvider defaultTheme="light" storageKey="organizaai-theme">
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>

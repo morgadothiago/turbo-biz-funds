@@ -1,44 +1,8 @@
 import { memo } from "react";
-import { MessageCircle, Sparkles, BarChart3, ArrowRight, Zap, Check } from "lucide-react";
+import { MessageCircle, Sparkles, BarChart3, ArrowRight } from "lucide-react";
+import { useI18n } from "@/lib/i18n-provider";
 
-const STEPS = [
-  {
-    number: "01",
-    icon: MessageCircle,
-    title: "Conecte o WhatsApp",
-    description: "Escaneie o QR Code e conecte em 30 segundos. Nada de app novo para baixar.",
-  },
-  {
-    number: "02",
-    icon: Sparkles,
-    title: "Mande seus gastos",
-    description: "Foto do comprovante, áudio 'gastei 50 no mercado', ou mensagem. A IA entende tudo.",
-  },
-  {
-    number: "03",
-    icon: BarChart3,
-    title: "Tudo organizado",
-    description: "Acesse o dashboard ou pergunte 'quanto gastei esse mês?' direto no WhatsApp.",
-  },
-] as const;
-
-const DASHBOARD_STATS = [
-  { label: "Saldo", value: "R$ 2.340", color: "text-primary" },
-  { label: "Gastos", value: "R$ 1.850", color: "text-accent" },
-  { label: "Economia", value: "R$ 490", color: "text-success" },
-  { label: "Meta", value: "76%", color: "text-primary" },
-];
-
-const CATEGORIES = [
-  { name: "Alimentação", value: "R$ 680", percent: 37, color: "bg-primary" },
-  { name: "Transporte", value: "R$ 420", percent: 23, color: "bg-accent" },
-  { name: "Moradia", value: "R$ 450", percent: 24, color: "bg-success" },
-  { name: "Lazer", value: "R$ 300", percent: 16, color: "bg-warning" },
-];
-
-const WHATSAPP_COMMANDS = ["quanto gastei hoje?", "sobra quanto?", "gastos do mês"];
-
-const StepCard = memo(({ step, index }: { step: typeof STEPS[number]; index: number }) => {
+const StepCard = memo(({ step, index, total }: { step: { number: string; icon: typeof MessageCircle; title: string; description: string }; index: number; total: number }) => {
   const colors: Record<string, { bg: string; border: string; text: string; number: string }> = {
     "01": { bg: "bg-primary/10", border: "border-primary/20", text: "text-primary", number: "text-primary/20" },
     "02": { bg: "bg-accent/10", border: "border-accent/20", text: "text-accent", number: "text-accent/20" },
@@ -65,7 +29,7 @@ const StepCard = memo(({ step, index }: { step: typeof STEPS[number]; index: num
         </p>
       </div>
 
-      {index < STEPS.length - 1 && (
+      {index < total - 1 && (
         <div className="hidden md:flex absolute top-1/2 -right-4 z-10 items-center justify-center w-8 h-8">
           <ArrowRight className="w-5 h-5 text-muted-foreground/40" />
         </div>
@@ -77,27 +41,66 @@ const StepCard = memo(({ step, index }: { step: typeof STEPS[number]; index: num
 StepCard.displayName = "StepCard";
 
 const HowItWorks = memo(() => {
+  const { t, locale } = useI18n();
+
+  const STEPS = [
+    {
+      number: "01",
+      icon: MessageCircle,
+      title: t("landing", "step1Title"),
+      description: t("landing", "step1Description"),
+    },
+    {
+      number: "02",
+      icon: Sparkles,
+      title: t("landing", "step2Title"),
+      description: t("landing", "step2Description"),
+    },
+    {
+      number: "03",
+      icon: BarChart3,
+      title: t("landing", "step3Title"),
+      description: t("landing", "step3Description"),
+    },
+  ];
+
+  const DASHBOARD_STATS = locale === "pt" 
+    ? [{ label: "Saldo", value: "R$ 2.340", color: "text-primary" }, { label: "Gastos", value: "R$ 1.850", color: "text-accent" }, { label: "Economia", value: "R$ 490", color: "text-success" }, { label: "Meta", value: "76%", color: "text-primary" }]
+    : locale === "en"
+    ? [{ label: "Balance", value: "$2,340", color: "text-primary" }, { label: "Expenses", value: "$1,850", color: "text-accent" }, { label: "Savings", value: "$490", color: "text-success" }, { label: "Goal", value: "76%", color: "text-primary" }]
+    : [{ label: "Saldo", value: "$2.340", color: "text-primary" }, { label: "Gastos", value: "$1.850", color: "text-accent" }, { label: "Ahorro", value: "$490", color: "text-success" }, { label: "Meta", value: "76%", color: "text-primary" }];
+
+  const CATEGORIES = locale === "pt"
+    ? [{ name: "Alimentação", value: "R$ 680", percent: 37, color: "bg-primary" }, { name: "Transporte", value: "R$ 420", percent: 23, color: "bg-accent" }, { name: "Moradia", value: "R$ 450", percent: 24, color: "bg-success" }, { name: "Lazer", value: "R$ 300", percent: 16, color: "bg-warning" }]
+    : locale === "en"
+    ? [{ name: "Food", value: "$680", percent: 37, color: "bg-primary" }, { name: "Transport", value: "$420", percent: 23, color: "bg-accent" }, { name: "Housing", value: "$450", percent: 24, color: "bg-success" }, { name: "Leisure", value: "$300", percent: 16, color: "bg-warning" }]
+    : [{ name: "Alimentación", value: "$680", percent: 37, color: "bg-primary" }, { name: "Transporte", value: "$420", percent: 23, color: "bg-accent" }, { name: "Vivienda", value: "$450", percent: 24, color: "bg-success" }, { name: "Ocio", value: "$300", percent: 16, color: "bg-warning" }];
+
+  const WHATSAPP_COMMANDS = locale === "pt"
+    ? ["quanto gastei hoje?", "sobra quanto?", "gastos do mês"]
+    : locale === "en"
+    ? ["how much did i spend today?", "any money left?", "monthly expenses"]
+    : ["cuánto gasté hoy?", "sobra algo?", "gastos del mes"];
+
   return (
     <section id="como-funciona" className="py-16 md:py-24 bg-gradient-to-b from-primary/5 to-background">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            Simples assim
+            {t("landing", "howItWorksBadge")}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Organize em{" "}
-            <span className="gradient-text">3 passos</span>
+            {t("landing", "howItWorksTitle")}
           </h2>
           <p className="text-lg text-muted-foreground">
-            Em 3 passos você organiza suas finanças sem complicação.
-            Sem planilhas, sem apps difíceis.
+            {t("landing", "howItWorksSubtitle")}
           </p>
         </div>
 
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {STEPS.map((step, index) => (
-              <StepCard key={step.number} step={step} index={index} />
+              <StepCard key={step.number} step={step} index={index} total={STEPS.length} />
             ))}
           </div>
         </div>
@@ -105,7 +108,7 @@ const HowItWorks = memo(() => {
         <div className="mt-20 max-w-5xl mx-auto">
           <div className="text-center mb-8">
             <p className="text-lg text-muted-foreground">
-              <span className="font-semibold text-foreground">✨ Você conversa, o sistema organiza</span>
+              <span className="font-semibold text-foreground">✨ You chat, the system organizes</span>
             </p>
           </div>
 
@@ -118,7 +121,7 @@ const HowItWorks = memo(() => {
               </div>
               <div className="flex-1 mx-4">
                 <div className="bg-background rounded-md px-4 py-1.5 text-xs text-muted-foreground text-center">
-                  app.organizaai.com.br/dashboard
+                  {t("landing", "dashboardLabel")}
                 </div>
               </div>
             </div>
@@ -134,7 +137,7 @@ const HowItWorks = memo(() => {
               </div>
 
               <div className="bg-muted/30 rounded-xl p-4">
-                <div className="text-sm font-medium text-foreground mb-3">Gastos por Categoria</div>
+                <div className="text-sm font-medium text-foreground mb-3">{t("landing", "expensesByCategory")}</div>
                 <div className="space-y-3">
                   {CATEGORIES.map((cat, i) => (
                     <div key={i} className="flex items-center gap-3">
@@ -168,10 +171,10 @@ const HowItWorks = memo(() => {
               </div>
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-xl font-semibold text-foreground mb-2">
-                  Pergunte pelo WhatsApp
+                  {t("landing", "whatsappFeature")}
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  Não precisa abrir o app. Pergunte direto na conversa:
+                  {t("landing", "whatsappFeatureDescription")}
                 </p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-2">
                   {WHATSAPP_COMMANDS.map((command) => (

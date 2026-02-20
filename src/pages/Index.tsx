@@ -60,7 +60,7 @@ const LazySection = ({ children }: { children: React.ReactNode }) => {
 
 const Index = () => {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="organizaai-theme">
+    <ThemeProvider defaultTheme="light" storageKey="organizaai-theme">
       <div className="min-h-screen bg-background relative">
         <BackgroundOrbs isGlobal={true} />
         <Navbar />

@@ -3,13 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Sparkles, Users, Star, Clock, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
-
-const HERO_STATS = [
-  { value: "3.000+", label: "Usuários", icon: Users },
-  { value: "500k+", label: "Gastos", icon: MessageCircle },
-  { value: "4.9", label: "Avaliação", icon: Star },
-  { value: "< 5min", label: "Para começar", icon: Clock },
-] as const;
+import { useI18n } from "@/lib/i18n-provider";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -38,6 +32,15 @@ const scaleIn = {
 };
 
 const Hero = memo(() => {
+  const { t } = useI18n();
+
+  const HERO_STATS = [
+    { value: "3.000+", label: t("landing", "heroStatUsers"), icon: Users },
+    { value: "500k+", label: t("landing", "heroStatExpenses"), icon: MessageCircle },
+    { value: "4.9", label: t("landing", "heroStatRating"), icon: Star },
+    { value: "< 5min", label: t("landing", "heroStatTime"), icon: Clock },
+  ] as const;
+
   return (
     <section className="relative min-h-[90vh] pt-20 pb-12 md:min-h-screen md:pt-24 md:pb-16 flex items-center bg-transparent">
       <div className="container mx-auto px-4 relative z-10">
@@ -51,30 +54,27 @@ const Hero = memo(() => {
 
           <motion.div variants={staggerItem} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6 md:mb-8">
             <Sparkles className="w-4 h-4" />
-            Chega de Planilhas
+            {t("landing", "heroBadge")}
           </motion.div>
 
           <motion.h1 variants={staggerItem} className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-4 md:mb-6">
-            Cansou de planilhas?{" "}
-            <span className="gradient-text">Organize pelo WhatsApp</span>
+            {t("landing", "heroTitle")}
           </motion.h1>
 
           <motion.p variants={staggerItem} className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 md:mb-10">
-            Você vive sua vida, a gente organiza seu dinheiro.
-            Mande áudio, foto ou texto — a IA categoriza automaticamente.
-            <span className="font-medium text-foreground"> Sem planilhas, sem estresse.</span>
+            {t("landing", "heroSubtitle")}
           </motion.p>
 
           <motion.div variants={staggerItem} className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 mb-12 md:mb-16">
             <Button variant="hero" size="lg" asChild className="w-full sm:w-auto md:size-xl">
               <Link to="/cadastro">
-                Comece agora
+                {t("landing", "heroCTA")}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
             <Button variant="outline" size="lg" className="w-full sm:w-auto md:size-xl gap-2">
               <Play className="w-5 h-5" />
-              Ver como funciona
+              {t("landing", "heroWatchDemo")}
             </Button>
           </motion.div>
 
@@ -101,13 +101,13 @@ const Hero = memo(() => {
                   <div className="absolute bottom-3 left-3 right-3 md:bottom-6 md:left-6 md:right-6">
                     <div className="bg-background/95 rounded-md md:rounded-lg px-3 py-2 md:px-4 md:py-3 text-center">
                       <p className="text-xs md:text-base text-foreground font-medium">
-                        📱 Manda → 🤖 IA → 📊 Você visualiza
+                        {t("landing", "heroProcess")}
                       </p>
                     </div>
                   </div>
 
                   <div className="absolute top-3 right-3 md:top-4 md:right-4 bg-accent/90 text-white text-[10px] md:text-xs font-medium px-2 py-0.5 md:px-3 md:py-1 rounded-full">
-                    30 seg
+                    {t("landing", "heroSeconds")}
                   </div>
                 </div>
               </div>
@@ -119,8 +119,8 @@ const Hero = memo(() => {
                   <MessageCircle className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-left">
-                  <div className="text-xs text-muted-foreground">Você enviou:</div>
-                  <div className="text-sm font-medium">"Gastei 45 no mercado"</div>
+                  <div className="text-xs text-muted-foreground">{t("landing", "heroSent")}</div>
+                  <div className="text-sm font-medium">"{t("landing", "heroSentExample")}"</div>
                 </div>
               </div>
             </div>
@@ -131,8 +131,8 @@ const Hero = memo(() => {
                   <Sparkles className="w-4 h-4 text-primary" />
                 </div>
                 <div className="text-left">
-                  <div className="text-xs text-muted-foreground">Categorizado:</div>
-                  <div className="text-sm font-medium text-primary">🛒 Alimentação</div>
+                  <div className="text-xs text-muted-foreground">{t("landing", "heroCategorized")}</div>
+                  <div className="text-sm font-medium text-primary">{t("landing", "heroCategoryFood")}</div>
                 </div>
               </div>
             </div>

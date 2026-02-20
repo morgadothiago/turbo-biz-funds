@@ -101,6 +101,110 @@ export interface Translations {
     serverError: string;
     reloadPage: string;
   };
+  landing: {
+    // Navbar
+    navHowItWorks: string;
+    navTestimonials: string;
+    navPricing: string;
+    navFAQ: string;
+    navLogin: string;
+    navSignUp: string;
+    // Hero
+    heroBadge: string;
+    heroTitle: string;
+    heroSubtitle: string;
+    heroCTA: string;
+    heroWatchDemo: string;
+    heroStatUsers: string;
+    heroStatExpenses: string;
+    heroStatRating: string;
+    heroStatTime: string;
+    heroProcess: string;
+    heroSeconds: string;
+    heroSent: string;
+    heroSentExample: string;
+    heroCategorized: string;
+    heroCategoryFood: string;
+    // Problem
+    problemSubtitle: string;
+    problemTitle: string;
+    problemDescription: string;
+    problemIdentified: string;
+    problemCreated: string;
+    problemCTA: string;
+    problemModalTitle: string;
+    problemModalDescription: string;
+    problemModalTestInfo: string;
+    // How It Works
+    howItWorksBadge: string;
+    howItWorksTitle: string;
+    howItWorksSubtitle: string;
+    step1Title: string;
+    step1Description: string;
+    step2Title: string;
+    step2Description: string;
+    step3Title: string;
+    step3Description: string;
+    dashboardLabel: string;
+    dashboardBalance: string;
+    dashboardExpenses: string;
+    dashboardSavings: string;
+    dashboardGoal: string;
+    expensesByCategory: string;
+    whatsappFeature: string;
+    whatsappFeatureDescription: string;
+    // Testimonials
+    testimonialsBadge: string;
+    testimonialsTitle: string;
+    testimonialsSubtitle: string;
+    // Pricing
+    pricingBadge: string;
+    pricingTitle: string;
+    pricingSubtitle: string;
+    planTest: string;
+    planTestDescription: string;
+    planTestPrice: string;
+    planTestPeriod: string;
+    planMonthly: string;
+    planMonthlyDescription: string;
+    planMonthlyPrice: string;
+    planQuarterly: string;
+    planQuarterlyDescription: string;
+    planQuarterlyPrice: string;
+    planFeatures1: string[];
+    planFeatures2: string[];
+    planFeatures3: string[];
+    planCTA1: string;
+    planCTA2: string;
+    planCTA3: string;
+    trustSecurePayment: string;
+    trustCancelAnyTime: string;
+    trustHumanSupport: string;
+    pricingWhyNoFree: string;
+    // FAQ
+    faqBadge: string;
+    faqTitle: string;
+    faqSubtitle: string;
+    faqStillQuestions: string;
+    faqContactWhatsApp: string;
+    // Footer
+    footerProduct: string;
+    footerSupport: string;
+    footerLegal: string;
+    footerHowItWorks: string;
+    footerPricing: string;
+    footerTestimonials: string;
+    footerFAQ: string;
+    footerHelpCenter: string;
+    footerContactUs: string;
+    footerWhatsApp: string;
+    footerPrivacy: string;
+    footerTerms: string;
+    footerLGPD: string;
+    footerDescription: string;
+    footerCopyright: string;
+    footerMadeInBrazil: string;
+  };
 }
 
 export const translations: Record<Locale, Translations> = {
@@ -200,6 +304,110 @@ export const translations: Record<Locale, Translations> = {
       serverError: "Erro no servidor",
       reloadPage: "Recarregar página",
     },
+    landing: {
+      // Navbar
+      navHowItWorks: "Como Funciona",
+      navTestimonials: "Depoimentos",
+      navPricing: "Preços",
+      navFAQ: "Dúvidas",
+      navLogin: "Entrar",
+      navSignUp: "Testar por R$ 9,90",
+      // Hero
+      heroBadge: "Chega de Planilhas",
+      heroTitle: "Cansou de planilhas? Organize pelo WhatsApp",
+      heroSubtitle: "Você vive sua vida, a gente organiza seu dinheiro. Mande áudio, foto ou texto — o Assistente Financeiro categoriza automaticamente. Sem planilhas, sem estresse.",
+      heroCTA: "Comece agora",
+      heroWatchDemo: "Ver como funciona",
+      heroStatUsers: "Usuários",
+      heroStatExpenses: "Gastos",
+      heroStatRating: "Avaliação",
+      heroStatTime: "Para começar",
+      heroProcess: "📱 Manda → 🤖 Assistente → 📊 Você visualiza",
+      heroSeconds: "30 seg",
+      heroSent: "Você enviou:",
+      heroSentExample: "Gastei 45 no mercado",
+      heroCategorized: "Categorizado:",
+      heroCategoryFood: "🛒 Alimentação",
+      // Problem
+      problemSubtitle: "A gente entende",
+      problemTitle: "A gente sabe como é...",
+      problemDescription: "Você não precisa de mais uma ferramenta complicateda. Precisa de algo que funcione no seu dia a dia, sem esforço.",
+      problemIdentified: "Se identificou?",
+      problemCreated: "A gente criou algo pra você nunca mais passar por isso.",
+      problemCTA: "Quero organizar minhas finanças",
+      problemModalTitle: "Comece agora",
+      problemModalDescription: "Deixe seu email para começar a organizar suas finanças pelo WhatsApp.",
+      problemModalTestInfo: "Você receberá acesso ao teste de R$ 9,90.",
+      // How It Works
+      howItWorksBadge: "Simples assim",
+      howItWorksTitle: "Organize em 3 passos",
+      howItWorksSubtitle: "Em 3 passos você organiza suas finanças sem complicação. Sem planilhas, sem apps difíceis.",
+      step1Title: "Conecte o WhatsApp",
+      step1Description: "Escaneie o QR Code e conecte em 30 segundos. Nada de app novo para baixar.",
+      step2Title: "Mande seus gastos",
+      step2Description: "Foto do comprovante, áudio 'gastei 50 no mercado', ou mensagem. O Assistente Financeiro entende tudo e categoriza automaticamente.",
+      step3Title: "Gráficos e Resumos em Tempo Real",
+      step3Description: "Acesse dashboards com gráficos de gastos, evolução patrimonial, alertas de orçamento e resumos que você nunca mais vai querer perder.",
+      dashboardLabel: "app.organizaai.com.br/dashboard",
+      dashboardBalance: "Saldo",
+      dashboardExpenses: "Gastos",
+      dashboardSavings: "Economia",
+      dashboardGoal: "Meta",
+      expensesByCategory: "Gastos por Categoria",
+      whatsappFeature: "Pergunte pelo WhatsApp",
+      whatsappFeatureDescription: "Não precisa abrir o app. Pergunte direto na conversa:",
+      // Testimonials
+      testimonialsBadge: "Histórias reais",
+      testimonialsTitle: "Pessoas que tomaram o controle",
+      testimonialsSubtitle: "Veja como pessoas comuns estão organizando suas finanças sem estresse",
+      // Pricing
+      pricingBadge: "Investimento",
+      pricingTitle: "Invista em paz de espírito",
+      pricingSubtitle: "Menos que um café por dia para nunca mais se perder nas contas. Cancele quando quiser, sem burocracia.",
+      planTest: "Teste",
+      planTestDescription: "Experimente por 15 dias",
+      planTestPrice: "9,90",
+      planTestPeriod: "único",
+      planMonthly: "Mensal",
+      planMonthlyDescription: "Sem compromisso",
+      planMonthlyPrice: "29,90",
+      planQuarterly: "Trimestral",
+      planQuarterlyDescription: "Economize 10%",
+      planQuarterlyPrice: "79,90",
+      planFeatures1: ["15 dias de acesso completo", "Lançamentos ilimitados", "Integração WhatsApp", "Dashboard completo", "Suporte por WhatsApp"],
+      planFeatures2: ["Tudo do Teste +", "Relatórios automáticos", "Categorias personalizadas", "Metas de economia", "Alertas de gastos", "Suporte prioritário"],
+      planFeatures3: ["Tudo do Mensal +", "Equivale a R$ 26,63/mês", "Prioridade no suporte", "Acesso antecipado", "3 meses de organização"],
+      planCTA1: "Começar Teste",
+      planCTA2: "Assinar Mensal",
+      planCTA3: "Assinar Trimestral",
+      trustSecurePayment: "Pagamento seguro",
+      trustCancelAnyTime: "Cancele quando quiser",
+      trustHumanSupport: "Suporte humanizado",
+      pricingWhyNoFree: "Por que não temos plano gratuito?",
+      // FAQ
+      faqBadge: "Dúvidas",
+      faqTitle: "Perguntas frequentes",
+      faqSubtitle: "Tudo que você precisa saber antes de começar",
+      faqStillQuestions: "Ainda tem dúvidas?",
+      faqContactWhatsApp: "Fale com a gente no WhatsApp",
+      // Footer
+      footerProduct: "Produto",
+      footerSupport: "Suporte",
+      footerLegal: "Legal",
+      footerHowItWorks: "Como Funciona",
+      footerPricing: "Preços",
+      footerTestimonials: "Depoimentos",
+      footerFAQ: "FAQ",
+      footerHelpCenter: "Central de Ajuda",
+      footerContactUs: "Fale Conosco",
+      footerWhatsApp: "WhatsApp",
+      footerPrivacy: "Privacidade",
+      footerTerms: "Termos de Uso",
+      footerLGPD: "LGPD",
+      footerDescription: "Organize suas finanças pessoais pelo WhatsApp. Simples, sem planilhas, sem estresse.",
+      footerCopyright: "Todos os direitos reservados.",
+      footerMadeInBrazil: "Feito com 💚 no Brasil",
+    },
   },
   en: {
     common: {
@@ -297,6 +505,110 @@ export const translations: Record<Locale, Translations> = {
       serverError: "Server error",
       reloadPage: "Reload page",
     },
+    landing: {
+      // Navbar
+      navHowItWorks: "How It Works",
+      navTestimonials: "Testimonials",
+      navPricing: "Pricing",
+      navFAQ: "FAQ",
+      navLogin: "Sign In",
+      navSignUp: "Try for $9.90",
+      // Hero
+      heroBadge: "No More Spreadsheets",
+      heroTitle: "Tired of spreadsheets? Organize via WhatsApp",
+      heroSubtitle: "You live your life, we organize your money. Send voice note, photo or text — the Financial Assistant categorizes automatically. No spreadsheets, no stress.",
+      heroCTA: "Get Started",
+      heroWatchDemo: "See how it works",
+      heroStatUsers: "Users",
+      heroStatExpenses: "Expenses",
+      heroStatRating: "Rating",
+      heroStatTime: "To start",
+      heroProcess: "📱 Send → 🤖 Assistant → 📊 You view",
+      heroSeconds: "30 sec",
+      heroSent: "You sent:",
+      heroSentExample: "Spent 45 at the market",
+      heroCategorized: "Categorized:",
+      heroCategoryFood: "🛒 Food",
+      // Problem
+      problemSubtitle: "We get it",
+      problemTitle: "We know how it is...",
+      problemDescription: "You don't need another complicated tool. You need something that works in your daily life, effortlessly.",
+      problemIdentified: "Resonated?",
+      problemCreated: "We created something so you never go through this again.",
+      problemCTA: "I want to organize my finances",
+      problemModalTitle: "Start now",
+      problemModalDescription: "Leave your email to start organizing your finances via WhatsApp.",
+      problemModalTestInfo: "You'll receive access to the $9.90 test.",
+      // How It Works
+      howItWorksBadge: "It's that simple",
+      howItWorksTitle: "Organize in 3 steps",
+      howItWorksSubtitle: "In 3 steps you organize your finances without complications. No spreadsheets, no difficult apps.",
+      step1Title: "Connect WhatsApp",
+      step1Description: "Scan the QR Code and connect in 30 seconds. No new app to download.",
+      step2Title: "Send your expenses",
+      step2Description: "Photo of receipt, voice note 'spent 50 at the market', or text. The Financial Assistant understands everything and categorizes automatically.",
+      step3Title: "Real-Time Charts & Summaries",
+      step3Description: "Access dashboards with expense charts, wealth evolution, budget alerts and summaries you'll never want to miss.",
+      dashboardLabel: "app.organizaai.com.br/dashboard",
+      dashboardBalance: "Balance",
+      dashboardExpenses: "Expenses",
+      dashboardSavings: "Savings",
+      dashboardGoal: "Goal",
+      expensesByCategory: "Expenses by Category",
+      whatsappFeature: "Ask via WhatsApp",
+      whatsappFeatureDescription: "No need to open the app. Ask right in the chat:",
+      // Testimonials
+      testimonialsBadge: "Real stories",
+      testimonialsTitle: "People who took control",
+      testimonialsSubtitle: "See how ordinary people are organizing their finances without stress",
+      // Pricing
+      pricingBadge: "Investment",
+      pricingTitle: "Invest in peace of mind",
+      pricingSubtitle: "Less than a coffee a day to never get lost in your accounts again. Cancel anytime, no bureaucracy.",
+      planTest: "Test",
+      planTestDescription: "Try for 15 days",
+      planTestPrice: "9.90",
+      planTestPeriod: "one-time",
+      planMonthly: "Monthly",
+      planMonthlyDescription: "No commitment",
+      planMonthlyPrice: "29.90",
+      planQuarterly: "Quarterly",
+      planQuarterlyDescription: "Save 10%",
+      planQuarterlyPrice: "79.90",
+      planFeatures1: ["15 days full access", "Unlimited entries", "WhatsApp Integration", "Complete Dashboard", "WhatsApp Support"],
+      planFeatures2: ["Everything in Test +", "Automatic Reports", "Custom Categories", "Savings Goals", "Spending Alerts", "Priority Support"],
+      planFeatures3: ["Everything in Monthly +", "Equivalent to $26.63/mo", "Priority Support", "Early Access", "3 months of organization"],
+      planCTA1: "Start Test",
+      planCTA2: "Subscribe Monthly",
+      planCTA3: "Subscribe Quarterly",
+      trustSecurePayment: "Secure payment",
+      trustCancelAnyTime: "Cancel anytime",
+      trustHumanSupport: "Human support",
+      pricingWhyNoFree: "Why no free plan?",
+      // FAQ
+      faqBadge: "Questions",
+      faqTitle: "Frequently asked questions",
+      faqSubtitle: "Everything you need to know before starting",
+      faqStillQuestions: "Still have questions?",
+      faqContactWhatsApp: "Chat with us on WhatsApp",
+      // Footer
+      footerProduct: "Product",
+      footerSupport: "Support",
+      footerLegal: "Legal",
+      footerHowItWorks: "How It Works",
+      footerPricing: "Pricing",
+      footerTestimonials: "Testimonials",
+      footerFAQ: "FAQ",
+      footerHelpCenter: "Help Center",
+      footerContactUs: "Contact Us",
+      footerWhatsApp: "WhatsApp",
+      footerPrivacy: "Privacy",
+      footerTerms: "Terms of Use",
+      footerLGPD: "LGPD",
+      footerDescription: "Organize your personal finances via WhatsApp. Simple, no spreadsheets, no stress.",
+      footerCopyright: "All rights reserved.",
+      footerMadeInBrazil: "Made with 💚 in Brazil",
+    },
   },
   es: {
     common: {
@@ -393,6 +705,110 @@ export const translations: Record<Locale, Translations> = {
       unauthorized: "No autorizado",
       serverError: "Error del servidor",
       reloadPage: "Recargar página",
+    },
+    landing: {
+      // Navbar
+      navHowItWorks: "Cómo Funciona",
+      navTestimonials: "Testimonios",
+      navPricing: "Precios",
+      navFAQ: "Preguntas",
+      navLogin: "Entrar",
+      navSignUp: "Probar por R$ 9,90",
+      // Hero
+      heroBadge: "Basta de Hojas de Cálculo",
+      heroTitle: "¿Cansado de hojas de cálculo? Organiza por WhatsApp",
+      heroSubtitle: "Tú vives tu vida, nosotros organizamos tu dinero. Envía audio, foto o texto — el Asistente Financiero categoriza automáticamente. Sin hojas de cálculo, sin estrés.",
+      heroCTA: "Comenzar Ahora",
+      heroWatchDemo: "Ver cómo funciona",
+      heroStatUsers: "Usuarios",
+      heroStatExpenses: "Gastos",
+      heroStatRating: "Calificación",
+      heroStatTime: "Para empezar",
+      heroProcess: "📱 Envía → 🤖 Asistente → 📊 Tú ves",
+      heroSeconds: "30 seg",
+      heroSent: "Tú enviaste:",
+      heroSentExample: "Gasté 45 en el mercado",
+      heroCategorized: "Categorizado:",
+      heroCategoryFood: "🛒 Alimentación",
+      // Problem
+      problemSubtitle: "Entendemos",
+      problemTitle: "Nosotros sabemos cómo es...",
+      problemDescription: "No necesitas otra herramienta complicada. Necesitas algo que funcione en tu vida diaria, sin esfuerzo.",
+      problemIdentified: "¿Te identificaste?",
+      problemCreated: "Creamos algo para que nunca más pasen esto.",
+      problemCTA: "Quiero organizar mis finanzas",
+      problemModalTitle: "Comenzar ahora",
+      problemModalDescription: "Deja tu correo para comenzar a organizar tus finanzas por WhatsApp.",
+      problemModalTestInfo: "Recibirás acceso a la prueba de R$ 9,90.",
+      // How It Works
+      howItWorksBadge: "Tan simple como eso",
+      howItWorksTitle: "Organiza en 3 pasos",
+      howItWorksSubtitle: "En 3 pasos organizas tus finanzas sin complicaciones. Sin hojas de cálculo, sin apps difíciles.",
+      step1Title: "Conecta WhatsApp",
+      step1Description: "Escanea el QR Code y conecta en 30 segundos. No hay nueva app para descargar.",
+      step2Title: "Envía tus gastos",
+      step2Description: "Foto del recibo, audio 'gasté 50 en el mercado', o mensaje. El Asistente Financiero entiende todo y categoriza automáticamente.",
+      step3Title: "Gráficos y Resúmenes en Tiempo Real",
+      step3Description: "Accede a dashboards con gráficos de gastos, evolución patrimonial, alertas de presupuesto y resúmenes que nunca más vas a querer perder.",
+      dashboardLabel: "app.organizaai.com.br/dashboard",
+      dashboardBalance: "Saldo",
+      dashboardExpenses: "Gastos",
+      dashboardSavings: "Ahorro",
+      dashboardGoal: "Meta",
+      expensesByCategory: "Gastos por Categoría",
+      whatsappFeature: "Pregunta por WhatsApp",
+      whatsappFeatureDescription: "No necesitas abrir la app. Pregunta directo en el chat:",
+      // Testimonials
+      testimonialsBadge: "Historias reales",
+      testimonialsTitle: "Personas que tomaron control",
+      testimonialsSubtitle: "Mira cómo personas comunes están organizando sus finanzas sin estrés",
+      // Pricing
+      pricingBadge: "Inversión",
+      pricingTitle: "Invierte en tranquilidad",
+      pricingSubtitle: "Menos que un café al día para nunca perderte en las cuentas. Cancela cuando quieras, sin burocracia.",
+      planTest: "Prueba",
+      planTestDescription: "Prueba por 15 días",
+      planTestPrice: "9,90",
+      planTestPeriod: "único",
+      planMonthly: "Mensual",
+      planMonthlyDescription: "Sin compromiso",
+      planMonthlyPrice: "29,90",
+      planQuarterly: "Trimestral",
+      planQuarterlyDescription: "Ahorra 10%",
+      planQuarterlyPrice: "79,90",
+      planFeatures1: ["15 días de acceso completo", "Lanzamientos ilimitados", "Integración WhatsApp", "Dashboard completo", "Soporte por WhatsApp"],
+      planFeatures2: ["Todo de Prueba +", "Reportes automáticos", "Categorías personalizadas", "Metas de ahorro", "Alertas de gastos", "Soporte prioritario"],
+      planFeatures3: ["Todo de Mensual +", "Equivale a R$ 26,63/mes", "Prioridad en soporte", "Acceso anticipado", "3 meses de organización"],
+      planCTA1: "Comenzar Prueba",
+      planCTA2: "Suscribir Mensual",
+      planCTA3: "Suscribir Trimestral",
+      trustSecurePayment: "Pago seguro",
+      trustCancelAnyTime: "Cancela cuando quieras",
+      trustHumanSupport: "Soporte humanizado",
+      pricingWhyNoFree: "¿Por qué no tenemos plan gratuito?",
+      // FAQ
+      faqBadge: "Preguntas",
+      faqTitle: "Preguntas frecuentes",
+      faqSubtitle: "Todo lo que necesitas saber antes de comenzar",
+      faqStillQuestions: "¿Aún tienes preguntas?",
+      faqContactWhatsApp: "Escríbenos en WhatsApp",
+      // Footer
+      footerProduct: "Producto",
+      footerSupport: "Soporte",
+      footerLegal: "Legal",
+      footerHowItWorks: "Cómo Funciona",
+      footerPricing: "Precios",
+      footerTestimonials: "Testimonios",
+      footerFAQ: "FAQ",
+      footerHelpCenter: "Centro de Ayuda",
+      footerContactUs: "Contáctanos",
+      footerWhatsApp: "WhatsApp",
+      footerPrivacy: "Privacidad",
+      footerTerms: "Términos de Uso",
+      footerLGPD: "LGPD",
+      footerDescription: "Organiza tus finanzas personales por WhatsApp. Simple, sin hojas de cálculo, sin estrés.",
+      footerCopyright: "Todos los derechos reservados.",
+      footerMadeInBrazil: "Hecho con 💚 en Brasil",
     },
   },
 };

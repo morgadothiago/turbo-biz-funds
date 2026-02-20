@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Check, Star, Zap, Shield } from "lucide-react";
+import { useI18n } from "@/lib/i18n-provider";
 
 interface PlanProps {
   name: string;
@@ -15,66 +16,6 @@ interface PlanProps {
   badge?: string;
   savings?: string;
 }
-
-const PLANS: PlanProps[] = [
-  {
-    name: "Teste",
-    description: "Experimente por 15 dias",
-    price: "9",
-    priceDecimal: "90",
-    period: "único",
-    features: [
-      "15 dias de acesso completo",
-      "Lançamentos ilimitados",
-      "Integração WhatsApp",
-      "Dashboard completo",
-      "Suporte por WhatsApp",
-    ],
-    cta: "Começar Teste",
-    highlighted: false,
-  },
-  {
-    name: "Mensal",
-    description: "Sem compromisso",
-    price: "29",
-    priceDecimal: "90",
-    period: "/mês",
-    features: [
-      "Tudo do Teste +",
-      "Relatórios automáticos",
-      "Categorias personalizadas",
-      "Metas de economia",
-      "Alertas de gastos",
-      "Suporte prioritário",
-    ],
-    cta: "Assinar Mensal",
-    highlighted: true,
-    badge: "Mais Popular",
-  },
-  {
-    name: "Trimestral",
-    description: "Economize 10%",
-    price: "79",
-    priceDecimal: "90",
-    period: "/trimestre",
-    features: [
-      "Tudo do Mensal +",
-      "Equivale a R$ 26,63/mês",
-      "Prioridade no suporte",
-      "Acesso antecipado",
-      "3 meses de organização",
-    ],
-    cta: "Assinar Trimestral",
-    highlighted: false,
-    savings: "Economize R$ 10",
-  },
-];
-
-const TRUST_BADGES = [
-  { icon: Shield, text: "Pagamento seguro" },
-  { icon: Check, text: "Cancele quando quiser" },
-  { icon: Star, text: "Suporte humanizado" },
-] as const;
 
 const PlanCard = memo(({ plan }: { plan: PlanProps }) => {
   return (
@@ -152,20 +93,61 @@ const PlanCard = memo(({ plan }: { plan: PlanProps }) => {
 PlanCard.displayName = "PlanCard";
 
 const Pricing = memo(() => {
+  const { t } = useI18n();
+
+  const PLANS: PlanProps[] = [
+    {
+      name: t("landing", "planTest"),
+      description: t("landing", "planTestDescription"),
+      price: "9",
+      priceDecimal: "90",
+      period: t("landing", "planTestPeriod"),
+      features: t("landing", "planFeatures1") as unknown as string[],
+      cta: t("landing", "planCTA1"),
+      highlighted: false,
+    },
+    {
+      name: t("landing", "planMonthly"),
+      description: t("landing", "planMonthlyDescription"),
+      price: "29",
+      priceDecimal: "90",
+      period: "/mês",
+      features: t("landing", "planFeatures2") as unknown as string[],
+      cta: t("landing", "planCTA2"),
+      highlighted: true,
+      badge: "Mais Popular",
+    },
+    {
+      name: t("landing", "planQuarterly"),
+      description: t("landing", "planQuarterlyDescription"),
+      price: "79",
+      priceDecimal: "90",
+      period: "/trimestre",
+      features: t("landing", "planFeatures3") as unknown as string[],
+      cta: t("landing", "planCTA3"),
+      highlighted: false,
+      savings: "Economize R$ 10",
+    },
+  ];
+
+  const TRUST_BADGES = [
+    { icon: Shield, text: t("landing", "trustSecurePayment") },
+    { icon: Check, text: t("landing", "trustCancelAnyTime") },
+    { icon: Star, text: t("landing", "trustHumanSupport") },
+  ] as const;
+
   return (
     <section id="planos" className="py-24 bg-gradient-to-b from-success/5 to-background">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            Investimento
+            {t("landing", "pricingBadge")}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Invista em{" "}
-            <span className="gradient-text">paz de espírito</span>
+            {t("landing", "pricingTitle")}
           </h2>
           <p className="text-lg text-muted-foreground">
-            Menos que um café por dia para nunca mais se perder nas contas.
-            Cancele quando quiser, sem burocracia.
+            {t("landing", "pricingSubtitle")}
           </p>
         </div>
 
@@ -188,7 +170,7 @@ const Pricing = memo(() => {
 
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-            <span className="font-medium text-foreground">Por que não temos plano gratuito?</span>
+            <span className="font-medium text-foreground">{t("landing", "pricingWhyNoFree")}</span>
             {" "}Acreditamos que quem investe no próprio controle financeiro leva a sério.
             O teste de R$ 9,90 garante a melhor experiência desde o primeiro dia.
           </p>
