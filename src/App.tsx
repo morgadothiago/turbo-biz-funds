@@ -4,6 +4,7 @@ import Index from "./pages/Index";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { analytics } from "./lib/analytics";
+import { I18nProvider } from "./lib/i18n-provider";
 
 const AppShell = lazy(() => import("./AppShell"));
 
@@ -35,13 +36,15 @@ function AnalyticsTracker() {
 
 const App = () => (
   <ErrorBoundary>
-    <BrowserRouter>
-      <AnalyticsTracker />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/*" element={<Suspense fallback={<AppLoading />}><AppShell /></Suspense>} />
-      </Routes>
-    </BrowserRouter>
+    <I18nProvider>
+      <BrowserRouter>
+        <AnalyticsTracker />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/*" element={<Suspense fallback={<AppLoading />}><AppShell /></Suspense>} />
+        </Routes>
+      </BrowserRouter>
+    </I18nProvider>
   </ErrorBoundary>
 );
 
