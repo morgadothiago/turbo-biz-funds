@@ -28,3 +28,6 @@ dist-ssr
 
 /.github
 /.vercel
+
+*storybook.log
+storybook-static

@@ -12,45 +12,23 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      include: [
-        "src/contexts/**",
-        "src/features/auth/schemas/**",
-        "src/features/dashboard/data/**",
-        "src/features/dashboard/hooks/**",
-      ],
-      exclude: [
-        "node_modules/",
-        "src/test/",
-        "**/*.d.ts",
-        "**/*.config.*",
-        "**/types/**",
-        "src/components/**",
-        "src/pages/**",
-        "src/layouts/**",
-        "src/features/dashboard/components/**",
-        "src/App.tsx",
-        "src/AppShell.tsx",
-        "src/main.tsx",
-        "src/hooks/**",
-        "src/contexts/index.ts",
-        "src/features/auth/schemas/index.ts",
-        "src/features/dashboard/hooks/index.ts",
-        "src/features/dashboard/data/index.ts",
-        "src/lib/**",
-      ],
+      include: ["src/contexts/**", "src/features/auth/schemas/**", "src/features/dashboard/data/**", "src/features/dashboard/hooks/**"],
+      exclude: ["node_modules/", "src/test/", "**/*.d.ts", "**/*.config.*", "**/types/**", "src/components/**", "src/pages/**", "src/layouts/**", "src/features/dashboard/components/**", "src/App.tsx", "src/AppShell.tsx", "src/main.tsx", "src/hooks/**", "src/contexts/index.ts", "src/features/auth/schemas/index.ts", "src/features/dashboard/hooks/index.ts", "src/features/dashboard/data/index.ts", "src/lib/**"],
       thresholds: {
         lines: 90,
         functions: 80,
         branches: 77,
-        statements: 90,
-      },
+        statements: 90
+      }
     },
     reporters: ["verbose"],
     alias: {
-      "@/": path.resolve(__dirname, "./src/"),
-    },
+      "@/": path.resolve(__dirname, "./src/")
+    }
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
-  },
+    alias: {
+      "@": path.resolve(__dirname, "./src")
+    }
+  }
 });
