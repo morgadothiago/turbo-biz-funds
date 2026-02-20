@@ -17,17 +17,11 @@ const SUPPORTED_LOCALES = ["pt", "en", "es"] as const;
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("pt");
 
-  // Load saved locale on mount
+  // Always use Portuguese
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && SUPPORTED_LOCALES.includes(saved as Locale)) {
-      setLocaleState(saved as Locale);
-    } else {
-      // Try to detect browser language
-      const browserLang = navigator.language.slice(0, 2);
-      if (SUPPORTED_LOCALES.includes(browserLang as Locale)) {
-        setLocaleState(browserLang as Locale);
-      }
+    if (saved !== "pt") {
+      localStorage.setItem(STORAGE_KEY, "pt");
     }
   }, []);
 
