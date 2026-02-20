@@ -157,14 +157,18 @@ const Testimonials = memo(() => {
         </p>
 
         <div className="flex items-center gap-4 mt-auto">
-          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-muted">
             <img
               src={testimonial.image}
               alt={testimonial.name}
               className="w-full h-full object-cover"
               loading="lazy"
+              decoding="async"
               width={48}
               height={48}
+              onError={(e) => {
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=3F7F6B&color=fff&size=48`;
+              }}
             />
           </div>
           <div>

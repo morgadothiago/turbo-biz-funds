@@ -1,9 +1,10 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Sparkles, Users, Star, Clock, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n-provider";
+import { analytics } from "@/lib/analytics";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -67,12 +68,12 @@ const Hero = memo(() => {
 
           <motion.div variants={staggerItem} className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 mb-12 md:mb-16">
             <Button variant="hero" size="lg" asChild className="w-full sm:w-auto md:size-xl">
-              <Link to="/cadastro">
+              <Link to="/cadastro" onClick={() => analytics.click("hero_cta", "hero")}>
                 {t("landing", "heroCTA")}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto md:size-xl gap-2">
+            <Button variant="outline" size="lg" className="w-full sm:w-auto md:size-xl gap-2" onClick={() => analytics.click("watch_demo", "hero")}>
               <Play className="w-5 h-5" />
               {t("landing", "heroWatchDemo")}
             </Button>

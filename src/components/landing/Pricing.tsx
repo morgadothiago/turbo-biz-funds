@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Check, Star, Zap, Shield } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
+import { analytics } from "@/lib/analytics";
 
 interface PlanProps {
   name: string;
@@ -81,7 +82,7 @@ const PlanCard = memo(({ plan }: { plan: PlanProps }) => {
         className="w-full"
         asChild
       >
-        <Link to="/cadastro">
+        <Link to="/cadastro" onClick={() => analytics.click(`pricing_${plan.name.toLowerCase()}`, "pricing")}>
           {plan.highlighted && <Zap className="w-4 h-4 mr-2" />}
           {plan.cta}
         </Link>

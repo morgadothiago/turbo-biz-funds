@@ -6,6 +6,7 @@ import { Menu, X, Sparkles } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useI18n } from "@/lib/i18n-provider";
+import { analytics } from "@/lib/analytics";
 
 const Navbar = memo(() => {
   const { t } = useI18n();
@@ -13,6 +14,10 @@ const Navbar = memo(() => {
 
   const closeMenu = useCallback(() => {
     setIsOpen(false);
+  }, []);
+
+  const handleCTAClick = useCallback((buttonName: string) => {
+    analytics.click(buttonName, "navbar");
   }, []);
 
   const NAV_LINKS = [
@@ -58,10 +63,10 @@ const Navbar = memo(() => {
             <ThemeToggle />
             <LanguageSelector />
             <Button variant="ghost" asChild>
-              <Link to="/login">{t("landing", "navLogin")}</Link>
+              <Link to="/login" onClick={() => handleCTAClick("login")}>{t("landing", "navLogin")}</Link>
             </Button>
             <Button variant="hero" asChild>
-              <Link to="/cadastro">{t("landing", "navSignUp")}</Link>
+              <Link to="/cadastro" onClick={() => handleCTAClick("sign_up")}>{t("landing", "navSignUp")}</Link>
             </Button>
           </div>
 
@@ -96,10 +101,10 @@ const Navbar = memo(() => {
 
                 <div className="flex flex-col gap-3 pt-4 border-t border-border">
                   <Button variant="outline" asChild className="w-full">
-                    <Link to="/login" onClick={closeMenu}>{t("landing", "navLogin")}</Link>
+                    <Link to="/login" onClick={() => { closeMenu(); handleCTAClick("login_mobile"); }}>{t("landing", "navLogin")}</Link>
                   </Button>
                   <Button variant="hero" asChild className="w-full">
-                    <Link to="/cadastro" onClick={closeMenu}>{t("landing", "navSignUp")}</Link>
+                    <Link to="/cadastro" onClick={() => { closeMenu(); handleCTAClick("sign_up_mobile"); }}>{t("landing", "navSignUp")}</Link>
                   </Button>
                 </div>
               </div>
