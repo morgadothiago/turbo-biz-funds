@@ -26,7 +26,7 @@ describe("i18n Utilities", () => {
     });
 
     it("should return key when translation not found", () => {
-      const result = getTranslatedValue("pt", "common" as any, "unknownKey" as any);
+      const result = getTranslatedValue("pt", "common", "unknownKey");
       expect(result).toBe("unknownKey");
     });
 

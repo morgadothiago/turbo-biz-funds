@@ -108,6 +108,6 @@ test.describe('Registration Flow', () => {
   });
 
   test('should have Google signup button', async ({ page }) => {
-    await expect(page.locator('button:has-text("Google")).toBeVisible();
+    await expect(page.locator('button:has-text("Google")')).toBeVisible();
   });
 });

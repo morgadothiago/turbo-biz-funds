@@ -1,0 +1,11 @@
+# Run lint and tests before commit
+echo "Running lint..."
+npm run lint -- --quiet
+
+echo "Running tests..."
+npm test
+
+echo "Build check..."
+npm run build
+
+echo "Pre-commit checks passed!"

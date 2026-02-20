@@ -1,11 +1,10 @@
-import { lazy, Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { AuthLoading } from "@/components/AuthLoading";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const Login = lazy(() => import(/* webpackChunkName: "auth-login" */ "./pages/Login"));
@@ -42,20 +41,6 @@ const queryClient = new QueryClient({
 const PageLoading = () => (
   <div className="flex items-center justify-center py-12">
     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-  </div>
-);
-
-const DashboardLoading = () => (
-  <div className="space-y-6 animate-pulse">
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="h-32 bg-muted rounded-lg"></div>
-      ))}
-    </div>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="h-80 bg-muted rounded-lg"></div>
-      <div className="h-80 bg-muted rounded-lg"></div>
-    </div>
   </div>
 );
 

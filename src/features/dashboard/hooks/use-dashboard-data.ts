@@ -3,7 +3,7 @@
  * Gerencia estado de loading, erro e dados.
  */
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   DASHBOARD_STATS,

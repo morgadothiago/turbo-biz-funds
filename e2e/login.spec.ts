@@ -52,7 +52,7 @@ test.describe('Login Flow', () => {
   });
 
   test('should have Google login button', async ({ page }) => {
-    await expect(page.locator('button:has-text("Google")).toBeVisible();
+    await expect(page.locator('button:has-text("Google")')).toBeVisible();
   });
 
   test('should remember email on failed login attempt', async ({ page }) => {

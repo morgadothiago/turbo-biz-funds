@@ -2,7 +2,7 @@ name: CI/CD - Test & Deploy
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, develop, new_layout ]
   pull_request:
     branches: [ main, master, develop ]
 

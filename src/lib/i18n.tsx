@@ -431,7 +431,7 @@ export function getTranslatedValue<K extends keyof Translations>(
   key: string
 ): string {
   const sectionData = translations[locale][section];
-  return (sectionData as Record<string, any>)[key] || key;
+  return (sectionData as Record<string, string>)[key] || key;
 }
 
 export function changeLocale(newLocale: Locale) {

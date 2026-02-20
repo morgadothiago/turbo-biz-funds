@@ -1,9 +1,9 @@
-import { test as base } from '@playwright/test';
+import { test as base, type Page } from '@playwright/test';
 
 export { expect } from '@playwright/test';
 
 interface TestFixtures {
-  authenticatedPage: any;
+  authenticatedPage: Page;
 }
 
 export const test = base.extend<TestFixtures>({

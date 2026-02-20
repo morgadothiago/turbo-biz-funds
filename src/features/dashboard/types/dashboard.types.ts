@@ -2,10 +2,18 @@
  * Tipos específicos do dashboard.
  */
 
-import { LucideIcon } from "lucide-react";
-import type { Transaction } from "@/shared/types";
+import type { LucideIcon } from "lucide-react";
 
 export type TrendDirection = "up" | "down";
+
+export interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+  category: string;
+  type: "income" | "expense";
+}
 
 export interface DashboardStat {
   id: string;

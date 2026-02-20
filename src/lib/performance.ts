@@ -34,8 +34,11 @@ export function initializePerformanceMonitoring() {
         if (entry.entryType === 'first-input') {
           console.log(`FID: ${entry.startTime.toFixed(2)}ms`);
         }
-        if (entry.entryType === 'layout-shift' && !(entry as any).hadRecentInput) {
-          console.log(`CLS: ${(entry as any).value.toFixed(4)}`);
+        if (entry.entryType === 'layout-shift') {
+          const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
+          if (!layoutShiftEntry.hadRecentInput) {
+            console.log(`CLS: ${layoutShiftEntry.value.toFixed(4)}`);
+          }
         }
       }
     });
@@ -48,7 +51,13 @@ export function initializePerformanceMonitoring() {
   }
 }
 
-export function reportWebVitals(metric: any) {
+interface WebVitalsMetric {
+  name: string;
+  value: number;
+  id: string;
+}
+
+export function reportWebVitals(metric: WebVitalsMetric) {
   switch (metric.name) {
     case 'FCP':
       console.log(`FCP: ${metric.value}`);
@@ -100,7 +109,7 @@ export async function measurePerformance<T>(
   }
 }
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
   delay: number,
   options?: { leading?: boolean }
@@ -109,7 +118,7 @@ export function debounce<T extends (...args: any[]) => any>(
   let lastArgs: Parameters<T> | null = null;
   let called = false;
 
-  return function (this: any, ...args: Parameters<T>) {
+  return function (this: unknown, ...args: Parameters<T>) {
     lastArgs = args;
 
     if (options?.leading && !called) {
@@ -133,14 +142,14 @@ export function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   fn: T,
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle = false;
   let lastArgs: Parameters<T> | null = null;
 
-  return function (this: any, ...args: Parameters<T>) {
+  return function (this: unknown, ...args: Parameters<T>) {
     lastArgs = args;
 
     if (!inThrottle) {
@@ -184,7 +193,7 @@ export function estimateReadingTime(text: string, wordsPerMinute = 200): number 
   return Math.max(1, Math.ceil(minutes));
 }
 
-export function generateCacheKey(prefix: string, params: Record<string, any>): string {
+export function generateCacheKey(prefix: string, params: Record<string, string | number | boolean>): string {
   const sortedParams = Object.keys(params)
     .sort()
     .map((key) => `${key}_${params[key]}`)
