@@ -101,110 +101,118 @@ export interface Translations {
     serverError: string;
     reloadPage: string;
   };
-  landing: {
-    // Navbar
-    navHowItWorks: string;
-    navTestimonials: string;
-    navPricing: string;
-    navFAQ: string;
-    navLogin: string;
-    navSignUp: string;
-    // Hero
-    heroBadge: string;
-    heroTitle: string;
-    heroSubtitle: string;
-    heroCTA: string;
-    heroWatchDemo: string;
-    heroStatUsers: string;
-    heroStatExpenses: string;
-    heroStatRating: string;
-    heroStatTime: string;
-    heroProcess: string;
-    heroSeconds: string;
-    heroSent: string;
-    heroSentExample: string;
-    heroCategorized: string;
-    heroCategoryFood: string;
-    // Problem
-    problemSubtitle: string;
-    problemTitle: string;
-    problemDescription: string;
-    problemIdentified: string;
-    problemCreated: string;
-    problemCTA: string;
-    problemModalTitle: string;
-    problemModalDescription: string;
-    problemModalTestInfo: string;
-    // How It Works
-    howItWorksBadge: string;
-    howItWorksTitle: string;
-    howItWorksSubtitle: string;
-    step1Title: string;
-    step1Description: string;
-    step2Title: string;
-    step2Description: string;
-    step3Title: string;
-    step3Description: string;
-    dashboardLabel: string;
-    dashboardBalance: string;
-    dashboardExpenses: string;
-    dashboardSavings: string;
-    dashboardGoal: string;
-    expensesByCategory: string;
-    whatsappFeature: string;
-    whatsappFeatureDescription: string;
-    // Testimonials
-    testimonialsBadge: string;
-    testimonialsTitle: string;
-    testimonialsSubtitle: string;
-    // Pricing
-    pricingBadge: string;
-    pricingTitle: string;
-    pricingSubtitle: string;
-    planTest: string;
-    planTestDescription: string;
-    planTestPrice: string;
-    planTestPeriod: string;
-    planMonthly: string;
-    planMonthlyDescription: string;
-    planMonthlyPrice: string;
-    planQuarterly: string;
-    planQuarterlyDescription: string;
-    planQuarterlyPrice: string;
-    planFeatures1: string[];
-    planFeatures2: string[];
-    planFeatures3: string[];
-    planCTA1: string;
-    planCTA2: string;
-    planCTA3: string;
-    trustSecurePayment: string;
-    trustCancelAnyTime: string;
-    trustHumanSupport: string;
-    pricingWhyNoFree: string;
-    // FAQ
-    faqBadge: string;
-    faqTitle: string;
-    faqSubtitle: string;
-    faqStillQuestions: string;
-    faqContactWhatsApp: string;
-    // Footer
-    footerProduct: string;
-    footerSupport: string;
-    footerLegal: string;
-    footerHowItWorks: string;
-    footerPricing: string;
-    footerTestimonials: string;
-    footerFAQ: string;
-    footerHelpCenter: string;
-    footerContactUs: string;
-    footerWhatsApp: string;
-    footerPrivacy: string;
-    footerTerms: string;
-    footerLGPD: string;
-    footerDescription: string;
-    footerCopyright: string;
-    footerMadeInBrazil: string;
-  };
+landing: {
+      // Navbar
+      navHowItWorks: string;
+      navTestimonials: string;
+      navPricing: string;
+      navFAQ: string;
+      navLogin: string;
+      navSignUp: string;
+      // Hero
+      heroBadge: string;
+      heroTitleLine1: string;
+      heroTitleLine2: string;
+      heroSubtitle: string;
+      heroCTA: string;
+      heroWatchDemo: string;
+      heroStatUsers: string;
+      heroStatExpenses: string;
+      heroStatRating: string;
+      heroStatTime: string;
+      heroProcess: string;
+      heroSeconds: string;
+      heroSent: string;
+      heroSentExample: string;
+      heroCategorized: string;
+      heroCategoryFood: string;
+      // Problem
+      problemSubtitle: string;
+      problemTitle: string;
+      problemDescription: string;
+      problemIdentified: string;
+      problemCreated: string;
+      problemCTA: string;
+      problemModalTitle: string;
+      problemModalDescription: string;
+      problemModalTestInfo: string;
+      // New Intermediate Section (Organized Life)
+      organizedLifeTitle: string;
+      organizedLifeSubtitle: string;
+      organizedLifeClosing: string;
+      // How It Works
+      howItWorksBadge: string;
+      howItWorksTitle: string;
+      howItWorksSubtitle: string;
+      step1Title: string;
+      step1Description: string;
+      step2Title: string;
+      step2Description: string;
+      step3Title: string;
+      step3Description: string;
+      dashboardLabel: string;
+      dashboardBalance: string;
+      dashboardExpenses: string;
+      dashboardSavings: string;
+      dashboardGoal: string;
+      expensesByCategory: string;
+      whatsappFeature: string;
+      whatsappFeatureDescription: string;
+      // Testimonials
+      testimonialsBadge: string;
+      testimonialsTitle: string;
+      testimonialsSubtitle: string;
+      // Pricing
+      pricingBadge: string;
+      pricingTitle: string;
+      pricingSubtitle: string;
+      planTest: string;
+      planTestDescription: string;
+      planTestPrice: string;
+      planTestPeriod: string;
+      planMonthly: string;
+      planMonthlyDescription: string;
+      planMonthlyPrice: string;
+      planQuarterly: string;
+      planQuarterlyDescription: string;
+      planQuarterlyPrice: string;
+      planAnnual: string;
+      planAnnualDescription: string;
+      planAnnualPrice: string;
+      planFeatures1: string[];
+      planFeatures2: string[];
+      planFeatures3: string[];
+      planCTA1: string;
+      planCTA2: string;
+      planCTA3: string;
+      trustSecurePayment: string;
+      trustCancelAnyTime: string;
+      trustHumanSupport: string;
+      pricingWhyNoFree: string;
+      // FAQ
+      faqBadge: string;
+      faqTitle: string;
+      faqSubtitle: string;
+      faqStillQuestions: string;
+      faqContactWhatsApp: string;
+      // Footer
+      footerProduct: string;
+      footerSupport: string;
+      footerLegal: string;
+      footerHowItWorks: string;
+      footerPricing: string;
+      footerTestimonials: string;
+      footerFAQ: string;
+      footerHelpCenter: string;
+      footerContactUs: string;
+      footerWhatsApp: string;
+      footerPrivacy: string;
+      footerTerms: string;
+      footerLGPD: string;
+      footerDescription: string;
+      footerCopyright: string;
+      footerMadeInBrazil: string;
+    };
 }
 
 export const translations: Record<Locale, Translations> = {
@@ -312,16 +320,17 @@ export const translations: Record<Locale, Translations> = {
       navFAQ: "Dúvidas",
       navLogin: "Entrar",
       navSignUp: "Começar agora",
-      // Hero
+      // Hero - Nova estrutura com duas linhas
       heroBadge: "Chega de Planilhas",
-      heroTitle: "Cansou de planilhas? Organize pelo WhatsApp",
-      heroSubtitle: "Você vive sua vida, a gente organiza seu dinheiro. Mande áudio, foto ou texto — o Assistente Financeiro categoriza automaticamente. Sem planilhas, sem estresse.",
+      heroTitleLine1: "Cansou de planilhas?",
+      heroTitleLine2: "Você ainda tenta lembrar tudo de cabeça ou não sabe para onde está indo o seu dinheiro?",
+      heroSubtitle: "Tenha um assessor financeiro pessoal trabalhando 24 horas por dia para você. Mande áudio, foto ou texto. Seu assistente financeiro resolve tudo pra você — sem planilha, sem estresse.",
       heroCTA: "Comece agora",
       heroWatchDemo: "Ver como funciona",
-      heroStatUsers: "Usuários",
-      heroStatExpenses: "Gastos",
-      heroStatRating: "Avaliação",
-      heroStatTime: "Para começar",
+      heroStatUsers: "3.000+ usuários",
+      heroStatExpenses: "500k+ gastos",
+      heroStatRating: "4.9 avaliação",
+      heroStatTime: "< 5min para começar",
       heroProcess: "📱 Manda → 🤖 Assistente → 📊 Você visualiza",
       heroSeconds: "30 seg",
       heroSent: "Você enviou:",
@@ -338,6 +347,10 @@ export const translations: Record<Locale, Translations> = {
       problemModalTitle: "Comece agora",
       problemModalDescription: "Deixe seu email para começar a organizar suas finanças pelo WhatsApp.",
       problemModalTestInfo: "Você receberá acesso ao teste de R$ 9,90.",
+      // Nova Seção Intermediária - Sua vida organizada sem esforço
+      organizedLifeTitle: "Sua vida organizada sem esforço.",
+      organizedLifeSubtitle: "Já se perdeu no meio das tarefas e das despesas? Esquece compromissos? Já levou um susto com a fatura do cartão?",
+      organizedLifeClosing: "O Planeja Aí resolve isso. Organização financeira simples e direta pelo WhatsApp.",
       // How It Works
       howItWorksBadge: "Simples assim",
       howItWorksTitle: "Organize em 3 passos",
@@ -371,15 +384,18 @@ export const translations: Record<Locale, Translations> = {
       planMonthly: "Mensal",
       planMonthlyDescription: "Sem compromisso",
       planMonthlyPrice: "29,90",
-      planQuarterly: "Trimestral",
+      planQuarterly: "Semestral",
       planQuarterlyDescription: "Economize 10%",
       planQuarterlyPrice: "79,90",
+      planAnnual: "Anual",
+      planAnnualDescription: "Maior economia",
+      planAnnualPrice: "159,90",
       planFeatures1: ["15 dias de acesso completo", "Lançamentos ilimitados", "Integração WhatsApp", "Dashboard completo", "Suporte por WhatsApp"],
       planFeatures2: ["Tudo do Teste +", "Relatórios automáticos", "Categorias personalizadas", "Metas de economia", "Alertas de gastos", "Suporte prioritário"],
       planFeatures3: ["Tudo do Mensal +", "Equivale a R$ 26,63/mês", "Prioridade no suporte", "Acesso antecipado", "3 meses de organização"],
       planCTA1: "Começar Teste",
       planCTA2: "Assinar Mensal",
-      planCTA3: "Assinar Trimestral",
+      planCTA3: "Assinar Semestral",
       trustSecurePayment: "Pagamento seguro",
       trustCancelAnyTime: "Cancele quando quiser",
       trustHumanSupport: "Suporte humanizado",
@@ -513,16 +529,17 @@ export const translations: Record<Locale, Translations> = {
       navFAQ: "FAQ",
       navLogin: "Sign In",
       navSignUp: "Try for $9.90",
-      // Hero
+      // Hero - Nova estrutura com duas linhas
       heroBadge: "No More Spreadsheets",
-      heroTitle: "Tired of spreadsheets? Organize via WhatsApp",
-      heroSubtitle: "You live your life, we organize your money. Send voice note, photo or text — the Financial Assistant categorizes automatically. No spreadsheets, no stress.",
+      heroTitleLine1: "Tired of spreadsheets?",
+      heroTitleLine2: "Do you still try to remember everything by heart or don't know where your money is going?",
+      heroSubtitle: "Have a personal financial advisor working 24 hours a day for you. Send voice note, photo or text. Your financial assistant solves everything for you — no spreadsheets, no stress.",
       heroCTA: "Get Started",
       heroWatchDemo: "See how it works",
-      heroStatUsers: "Users",
-      heroStatExpenses: "Expenses",
-      heroStatRating: "Rating",
-      heroStatTime: "To start",
+      heroStatUsers: "3,000+ users",
+      heroStatExpenses: "500k+ expenses",
+      heroStatRating: "4.9 rating",
+      heroStatTime: "< 5min to start",
       heroProcess: "📱 Send → 🤖 Assistant → 📊 You view",
       heroSeconds: "30 sec",
       heroSent: "You sent:",
@@ -539,6 +556,10 @@ export const translations: Record<Locale, Translations> = {
       problemModalTitle: "Start now",
       problemModalDescription: "Leave your email to start organizing your finances via WhatsApp.",
       problemModalTestInfo: "You'll receive access to the $9.90 test.",
+      // Nova Seção Intermediária - Organized life
+      organizedLifeTitle: "Your organized life, effortlessly.",
+      organizedLifeSubtitle: "Have you ever lost track of tasks and expenses? Forget appointments? Ever get a shock from your credit card bill?",
+      organizedLifeClosing: "Planeja Aí solves this. Simple and direct financial organization via WhatsApp.",
       // How It Works
       howItWorksBadge: "It's that simple",
       howItWorksTitle: "Organize in 3 steps",
@@ -575,6 +596,9 @@ export const translations: Record<Locale, Translations> = {
       planQuarterly: "Quarterly",
       planQuarterlyDescription: "Save 10%",
       planQuarterlyPrice: "79.90",
+      planAnnual: "Annual",
+      planAnnualDescription: "Best value",
+      planAnnualPrice: "159.90",
       planFeatures1: ["15 days full access", "Unlimited entries", "WhatsApp Integration", "Complete Dashboard", "WhatsApp Support"],
       planFeatures2: ["Everything in Test +", "Automatic Reports", "Custom Categories", "Savings Goals", "Spending Alerts", "Priority Support"],
       planFeatures3: ["Everything in Monthly +", "Equivalent to $26.63/mo", "Priority Support", "Early Access", "3 months of organization"],
@@ -714,16 +738,17 @@ export const translations: Record<Locale, Translations> = {
       navFAQ: "Preguntas",
       navLogin: "Entrar",
       navSignUp: "Probar por R$ 9,90",
-      // Hero
+      // Hero - Nova estrutura com duas linhas
       heroBadge: "Basta de Hojas de Cálculo",
-      heroTitle: "¿Cansado de hojas de cálculo? Organiza por WhatsApp",
-      heroSubtitle: "Tú vives tu vida, nosotros organizamos tu dinero. Envía audio, foto o texto — el Asistente Financiero categoriza automáticamente. Sin hojas de cálculo, sin estrés.",
+      heroTitleLine1: "¿Cansado de hojas de cálculo?",
+      heroTitleLine2: "¿Aún intentas recordar todo de memoria o no sabes a dónde va tu dinero?",
+      heroSubtitle: "Ten un asesor financiero personal trabajando 24 horas al día para ti. Envía audio, foto o texto. Tu asistente financiero resuelve todo por ti — sin hojas de cálculo, sin estrés.",
       heroCTA: "Comenzar Ahora",
       heroWatchDemo: "Ver cómo funciona",
-      heroStatUsers: "Usuarios",
-      heroStatExpenses: "Gastos",
-      heroStatRating: "Calificación",
-      heroStatTime: "Para empezar",
+      heroStatUsers: "3,000+ usuarios",
+      heroStatExpenses: "500k+ gastos",
+      heroStatRating: "4.9 calificación",
+      heroStatTime: "< 5min para empezar",
       heroProcess: "📱 Envía → 🤖 Asistente → 📊 Tú ves",
       heroSeconds: "30 seg",
       heroSent: "Tú enviaste:",
@@ -740,6 +765,10 @@ export const translations: Record<Locale, Translations> = {
       problemModalTitle: "Comenzar ahora",
       problemModalDescription: "Deja tu correo para comenzar a organizar tus finanzas por WhatsApp.",
       problemModalTestInfo: "Recibirás acceso a la prueba de R$ 9,90.",
+      // Nova Seção Intermediária - Organized life
+      organizedLifeTitle: "Tu vida organizada, sin esfuerzo.",
+      organizedLifeSubtitle: "¿Te has perdido entre tareas y gastos? ¿Olvidas compromisos? ¿Te has llevado un susto con la factura de la tarjeta?",
+      organizedLifeClosing: "Planeja Aí lo resuelve. Organización financiera simple y directa por WhatsApp.",
       // How It Works
       howItWorksBadge: "Tan simple como eso",
       howItWorksTitle: "Organiza en 3 pasos",
@@ -776,6 +805,9 @@ export const translations: Record<Locale, Translations> = {
       planQuarterly: "Trimestral",
       planQuarterlyDescription: "Ahorra 10%",
       planQuarterlyPrice: "79,90",
+      planAnnual: "Anual",
+      planAnnualDescription: "Mejor valor",
+      planAnnualPrice: "159,90",
       planFeatures1: ["15 días de acceso completo", "Lanzamientos ilimitados", "Integración WhatsApp", "Dashboard completo", "Soporte por WhatsApp"],
       planFeatures2: ["Todo de Prueba +", "Reportes automáticos", "Categorías personalizadas", "Metas de ahorro", "Alertas de gastos", "Soporte prioritario"],
       planFeatures3: ["Todo de Mensual +", "Equivale a R$ 26,63/mes", "Prioridad en soporte", "Acceso anticipado", "3 meses de organización"],

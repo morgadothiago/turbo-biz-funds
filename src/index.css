@@ -6,37 +6,40 @@
 
 @layer base {
   :root {
-    /* Paleta Acolhedora - Feedback Cliente */
-    --background: 43 28% 95%;
-    /* Bege/Areia #F6F4EF - Acolhedor, foge do branco hospitalar */
-    --foreground: 0 0% 29%;
-    /* Cinza Médio #4A4A4A - Leitura menos cansativa */
+    /* NOVA PALETA DE CORES - Planeja Aí */
+    /* Verde CTA: #0F9D58 | Verde Hover: #0C7A45 | Azul Principal: #1E40AF | Azul Secundário: #3B82F6 */
+    /* Fundo: #F1F5F9 | Texto Principal: #0F172A */
+    
+    --background: 210 40% 96%;
+    /* Fundo #F1F5F9 */
+    --foreground: 222 47% 11%;
+    /* Texto Principal #0F172A */
 
     --card: 0 0% 100%;
     /* Branco puro para contraste */
-    --card-foreground: 0 0% 29%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 29%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Primary - Verde Escuro (Botões e Navegação) #3F7F6B */
-    --primary: 161 34% 37%;
+    /* Primary - Verde CTA #0F9D58 */
+    --primary: 153 71% 37%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Verde Suave (Destaques e Títulos) #6FAF8E */
-    --secondary: 149 29% 56%;
+    /* Secondary - Azul Secundário #3B82F6 */
+    --secondary: 217 91% 60%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted - Tons do Bege */
-    --muted: 43 20% 92%;
-    --muted-foreground: 0 0% 40%;
+    /* Muted - Tons do Fundo */
+    --muted: 210 40% 90%;
+    --muted-foreground: 215 16% 47%;
 
-    /* Accent - Verde Suave para highlights #6FAF8E */
-    --accent: 149 29% 56%;
+    /* Accent - Azul Principal #1E40AF */
+    --accent: 224 82% 42%;
     --accent-foreground: 0 0% 100%;
 
-    /* Success - Verde */
-    --success: 149 40% 45%;
+    /* Success - Verde (mantido) */
+    --success: 153 71% 37%;
     --success-foreground: 0 0% 100%;
 
     /* Warning - Amarelo Suave */
@@ -47,25 +50,25 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 43 20% 88%;
-    --input: 43 20% 88%;
-    --ring: 161 34% 37%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 153 71% 37%;
 
     --radius: 1rem;
 
-    /* Custom gradients (Paleta Acolhedora) */
-    --gradient-primary: linear-gradient(135deg, hsl(161, 34%, 37%) 0%, hsl(149, 29%, 56%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(43, 28%, 95%) 0%, hsl(43, 20%, 92%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(43, 28%, 98%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(149, 29%, 56%) 0%, hsl(161, 34%, 37%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(246, 244, 239, 0.7) 100%);
+    /* Custom gradients (Nova Paleta) */
+    --gradient-primary: linear-gradient(135deg, #0F9D58 0%, #3B82F6 100%);
+    --gradient-hero: linear-gradient(180deg, #F1F5F9 0%, #E2E8F0 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(210, 40%, 98%) 100%);
+    --gradient-accent: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.7) 100%);
 
     /* Shadows (Suaves e Acolhedoras) */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
-    --shadow-glow: 0 0 30px hsla(161, 34%, 37%, 0.25);
+    --shadow-glow: 0 0 30px rgba(15, 157, 88, 0.25);
     --shadow-card: 0 1px 3px rgb(0 0 0 / 0.04), 0 6px 16px rgb(0 0 0 / 0.04);
 
     /* Sidebar - Verde Escuro */
@@ -80,36 +83,39 @@
   }
 
   .dark {
-    --background: 161 20% 8%;
-    --foreground: 43 28% 95%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 96%;
 
-    --card: 161 20% 10%;
-    --card-foreground: 43 28% 95%;
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 96%;
 
-    --popover: 161 20% 10%;
-    --popover-foreground: 43 28% 95%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 96%;
 
-    --primary: 149 29% 56%;
-    --primary-foreground: 161 20% 8%;
+    /* Primary - Verde CTA #0F9D58 em modo escuro */
+    --primary: 153 71% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 161 34% 30%;
-    --secondary-foreground: 43 28% 95%;
+    /* Secondary - Azul Secundário em modo escuro */
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 161 15% 15%;
-    --muted-foreground: 43 15% 60%;
+    --muted: 222 47% 18%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 149 29% 50%;
+    /* Accent - Azul Principal em modo escuro */
+    --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 149 40% 50%;
+    --success: 153 71% 45%;
     --success-foreground: 0 0% 100%;
 
     --destructive: 0 70% 50%;
-    --destructive-foreground: 43 28% 95%;
+    --destructive-foreground: 210 40% 96%;
 
-    --border: 161 15% 18%;
-    --input: 161 15% 18%;
-    --ring: 149 29% 56%;
+    --border: 222 47% 22%;
+    --input: 222 47% 22%;
+    --ring: 153 71% 45%;
 
     --sidebar-background: 161 25% 6%;
     --sidebar-foreground: 43 20% 90%;
@@ -187,7 +193,7 @@
   /* Improved Button Hovers */
   .button-hero-hover:hover {
     @apply brightness-110 scale-[1.02] shadow-lg;
-    box-shadow: 0 10px 20px -5px hsla(var(--primary), 0.3);
+    box-shadow: 0 10px 20px -5px rgba(15, 157, 88, 0.3);
   }
 
   .button-ghost-hover:hover {
@@ -196,7 +202,7 @@
 
   /* Animated gradient background */
   .animated-gradient {
-    background: linear-gradient(-45deg, hsl(161, 34%, 30%), hsl(161, 34%, 37%), hsl(149, 29%, 50%), hsl(149, 29%, 56%));
+    background: linear-gradient(-45deg, #0F9D58, #0F9D58, #3B82F6, #1E40AF);
     background-size: 400% 400%;
     animation: gradient 15s ease infinite;
   }
@@ -258,11 +264,11 @@
 
     0%,
     100% {
-      box-shadow: 0 0 0 0 hsl(161 34% 37% / 0.4);
+      box-shadow: 0 0 0 0 rgba(15, 157, 88, 0.4);
     }
 
     50% {
-      box-shadow: 0 0 0 8px hsl(161 34% 37% / 0);
+      box-shadow: 0 0 0 8px rgba(15, 157, 88, 0);
     }
   }
 
@@ -359,7 +365,7 @@
 
   .hover-lift:hover {
     @apply -translate-y-2 scale-[1.02] border-primary/30;
-    box-shadow: 0 20px 40px -10px hsla(var(--primary), 0.1), 0 0 20px -5px hsla(var(--success), 0.2);
+    box-shadow: 0 20px 40px -10px rgba(15, 157, 88, 0.1), 0 0 20px -5px rgba(15, 157, 88, 0.2);
     background-color: hsl(var(--card) / 0.8);
   }
 
@@ -397,6 +403,11 @@
 
   .animate-blob {
     animation: blob-bounce 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Gradient from green to blue for visual elements */
+  .gradient-green-blue {
+    background: linear-gradient(135deg, #0F9D58 0%, #3B82F6 100%);
   }
 }
 

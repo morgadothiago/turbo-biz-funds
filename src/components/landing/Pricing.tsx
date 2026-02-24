@@ -105,19 +105,29 @@ const Pricing = memo(() => {
       period: "/mês",
       features: t("landing", "planFeatures2") as unknown as string[],
       cta: t("landing", "planCTA2"),
-      highlighted: true,
-      badge: "Mais Popular",
+      highlighted: false,
     },
     {
       name: t("landing", "planQuarterly"),
       description: t("landing", "planQuarterlyDescription"),
       price: "79",
       priceDecimal: "90",
-      period: "/trimestre",
+      period: "/semestre",
+      features: t("landing", "planFeatures3") as unknown as string[],
+      cta: t("landing", "planCTA3"),
+      highlighted: true,
+      badge: "Mais Popular",
+    },
+    {
+      name: t("landing", "planAnnual"),
+      description: t("landing", "planAnnualDescription"),
+      price: "159",
+      priceDecimal: "90",
+      period: "/ano",
       features: t("landing", "planFeatures3") as unknown as string[],
       cta: t("landing", "planCTA3"),
       highlighted: false,
-      savings: "Economize R$ 10",
+      badge: "Melhor Valor",
     },
   ];
 
@@ -142,7 +152,7 @@ const Pricing = memo(() => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {PLANS.map((plan) => (
             <PlanCard key={plan.name} plan={plan} />
           ))}

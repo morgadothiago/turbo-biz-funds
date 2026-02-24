@@ -112,6 +112,23 @@ const Problem = memo(() => {
 
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-background to-primary/5">
+      {/* Nova faixa intermediária - Sua vida organizada sem esforço */}
+      <div className="mb-16">
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-3xl mx-4 md:mx-8 p-8 md:p-12 border border-green-100">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+              {t("landing", "organizedLifeTitle")}
+            </h2>
+            <p className="text-base md:text-lg text-muted-foreground mb-6">
+              {t("landing", "organizedLifeSubtitle")}
+            </p>
+            <p className="text-lg md:text-xl font-semibold text-primary">
+              {t("landing", "organizedLifeClosing")}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
@@ -137,7 +154,12 @@ const Problem = memo(() => {
             <br />
             {t("landing", "problemCreated")}
           </p>
-          <Button variant="hero" size="lg" onClick={() => setIsModalOpen(true)}>
+          <Button 
+            variant="default" 
+            size="lg" 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#0F9D58] hover:bg-[#0C7A45] text-white font-semibold px-8"
+          >
             {t("landing", "problemCTA")}
           </Button>
         </div>

@@ -4,9 +4,9 @@ import { useI18n } from "@/lib/i18n-provider";
 
 const StepCard = memo(({ step, index, total }: { step: { number: string; icon: typeof MessageCircle; title: string; description: string }; index: number; total: number }) => {
   const colors: Record<string, { bg: string; border: string; text: string; number: string }> = {
-    "01": { bg: "bg-primary/10", border: "border-primary/20", text: "text-primary", number: "text-primary/20" },
-    "02": { bg: "bg-accent/10", border: "border-accent/20", text: "text-accent", number: "text-accent/20" },
-    "03": { bg: "bg-success/10", border: "border-success/20", text: "text-success", number: "text-success/20" },
+    "01": { bg: "bg-accent/10", border: "border-accent/20", text: "text-accent", number: "text-accent/20" },
+    "02": { bg: "bg-secondary/10", border: "border-secondary/20", text: "text-secondary", number: "text-secondary/20" },
+    "03": { bg: "bg-primary/10", border: "border-primary/20", text: "text-primary", number: "text-primary/20" },
   };
   const color = colors[step.number];
 
@@ -65,16 +65,16 @@ const HowItWorks = memo(() => {
   ];
 
   const DASHBOARD_STATS = locale === "pt" 
-    ? [{ label: "Saldo", value: "R$ 2.340", color: "text-primary" }, { label: "Gastos", value: "R$ 1.850", color: "text-accent" }, { label: "Economia", value: "R$ 490", color: "text-success" }, { label: "Meta", value: "76%", color: "text-primary" }]
+    ? [{ label: "Saldo", value: "R$ 2.340", color: "text-accent" }, { label: "Gastos", value: "R$ 1.850", color: "text-secondary" }, { label: "Economia", value: "R$ 490", color: "text-primary" }, { label: "Meta", value: "76%", color: "text-accent" }]
     : locale === "en"
-    ? [{ label: "Balance", value: "$2,340", color: "text-primary" }, { label: "Expenses", value: "$1,850", color: "text-accent" }, { label: "Savings", value: "$490", color: "text-success" }, { label: "Goal", value: "76%", color: "text-primary" }]
-    : [{ label: "Saldo", value: "$2.340", color: "text-primary" }, { label: "Gastos", value: "$1.850", color: "text-accent" }, { label: "Ahorro", value: "$490", color: "text-success" }, { label: "Meta", value: "76%", color: "text-primary" }];
+    ? [{ label: "Balance", value: "$2,340", color: "text-accent" }, { label: "Expenses", value: "$1,850", color: "text-secondary" }, { label: "Savings", value: "$490", color: "text-primary" }, { label: "Goal", value: "76%", color: "text-accent" }]
+    : [{ label: "Saldo", value: "$2.340", color: "text-accent" }, { label: "Gastos", value: "$1.850", color: "text-secondary" }, { label: "Ahorro", value: "$490", color: "text-primary" }, { label: "Meta", value: "76%", color: "text-accent" }];
 
   const CATEGORIES = locale === "pt"
-    ? [{ name: "Alimentação", value: "R$ 680", percent: 37, color: "bg-primary" }, { name: "Transporte", value: "R$ 420", percent: 23, color: "bg-accent" }, { name: "Moradia", value: "R$ 450", percent: 24, color: "bg-success" }, { name: "Lazer", value: "R$ 300", percent: 16, color: "bg-warning" }]
+    ? [{ name: "Alimentação", value: "R$ 680", percent: 37, color: "bg-accent" }, { name: "Transporte", value: "R$ 420", percent: 23, color: "bg-secondary" }, { name: "Moradia", value: "R$ 450", percent: 24, color: "bg-primary" }, { name: "Lazer", value: "R$ 300", percent: 16, color: "bg-warning" }]
     : locale === "en"
-    ? [{ name: "Food", value: "$680", percent: 37, color: "bg-primary" }, { name: "Transport", value: "$420", percent: 23, color: "bg-accent" }, { name: "Housing", value: "$450", percent: 24, color: "bg-success" }, { name: "Leisure", value: "$300", percent: 16, color: "bg-warning" }]
-    : [{ name: "Alimentación", value: "$680", percent: 37, color: "bg-primary" }, { name: "Transporte", value: "$420", percent: 23, color: "bg-accent" }, { name: "Vivienda", value: "$450", percent: 24, color: "bg-success" }, { name: "Ocio", value: "$300", percent: 16, color: "bg-warning" }];
+    ? [{ name: "Food", value: "$680", percent: 37, color: "bg-accent" }, { name: "Transport", value: "$420", percent: 23, color: "bg-secondary" }, { name: "Housing", value: "$450", percent: 24, color: "bg-primary" }, { name: "Leisure", value: "$300", percent: 16, color: "bg-warning" }]
+    : [{ name: "Alimentación", value: "$680", percent: 37, color: "bg-accent" }, { name: "Transporte", value: "$420", percent: 23, color: "bg-secondary" }, { name: "Vivienda", value: "$450", percent: 24, color: "bg-primary" }, { name: "Ocio", value: "$300", percent: 16, color: "bg-warning" }];
 
   const WHATSAPP_COMMANDS = locale === "pt"
     ? ["quanto gastei hoje?", "sobra quanto?", "gastos do mês"]
