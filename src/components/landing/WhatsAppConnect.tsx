@@ -24,18 +24,18 @@ const WhatsAppConnect = () => {
             </div>
 
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
-              Conecte seu WhatsApp na plataforma
+              Conecte seu WhatsApp à plataforma
             </h2>
 
             <p className="text-lg text-muted-foreground mb-8">
-              Conecte seu WhatsApp e envie imagens, texto e áudio para gravar e trabalhar
-              na sua plataforma interligada. Simplifique a gestão com a ferramenta que você já usa todos os dias.
+              Conecte seu WhatsApp e envie imagens, texto e áudio para registrar despesas.
+              Tudo fica salvo na plataforma automaticamente. Simplifique a gestão com a ferramenta que você já usa todos os dias.
             </p>
 
             <div className="space-y-4 mb-10">
               {[
                 { icon: Image, text: "Envie comprovantes e documentos por foto" },
-                { icon: Mic, text: "Grave áudios para registrar despesas rápidos" },
+                { icon: Mic, text: "Grave áudios para registrar despesas rápido" },
                 { icon: FileText, text: "Receba relatórios automáticos em PDF" },
                 { icon: CheckCircle2, text: "Confirmação instantânea de transações" }
               ].map((item, index) => (

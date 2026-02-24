@@ -340,7 +340,7 @@ export const translations: Record<Locale, Translations> = {
       // Problem
       problemSubtitle: "A gente entende",
       problemTitle: "A gente sabe como é...",
-      problemDescription: "Você não precisa de mais uma ferramenta complicateda. Precisa de algo que funcione no seu dia a dia, sem esforço.",
+      problemDescription: "Você não precisa de mais uma ferramenta complicada. Precisa de algo que funcione no seu dia a dia, sem esforço.",
       problemIdentified: "Se identificou?",
       problemCreated: "A gente criou algo pra você nunca mais passar por isso.",
       problemCTA: "Quero organizar minhas finanças",
