@@ -2,19 +2,18 @@ import { useState } from "react";
 import {
   Search,
   MoreHorizontal,
-  UserPlus,
   Mail,
   Shield,
   Ban,
   Edit,
   Trash2,
-  Download,
   ChevronLeft,
   ChevronRight,
   Users,
   X
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -42,16 +41,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { AdminUsersSkeleton } from "@/components/ui/admin-skeletons";
 
 const mockUsers = [
@@ -69,7 +58,7 @@ export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const filteredUsers = mockUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -88,64 +77,11 @@ export default function AdminUsers() {
   const hasActiveFilters = searchTerm || selectedPlan !== "all" || selectedStatus !== "all";
 
   return (
-    <div className="flex flex-col h-full -m-6">
-      <div className="p-6 pb-4 border-b bg-card/50">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
-            <p className="text-muted-foreground">Gerencie os clientes da plataforma</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <Download className="h-4 w-4" />
-              Exportar
-            </Button>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="sm" className="gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  Novo cliente
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Novo Cliente</DialogTitle>
-                  <DialogDescription>
-                    Adicione um novo cliente à plataforma
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Nome completo</Label>
-                    <Input id="name" placeholder="Nome do cliente" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="email@exemplo.com" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="plan">Plano inicial</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o plano" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Free">Free</SelectItem>
-                        <SelectItem value="Pro">Pro - R$ 29,90/mês</SelectItem>
-                        <SelectItem value="Business">Business - R$ 99,90/mês</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline">Cancelar</Button>
-                  <Button>Adicionar</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col h-full">
+      <AdminHeader 
+        title="Clientes" 
+        subtitle="Gerencie os clientes da plataforma"
+      />
 
       <div className="flex-1 overflow-auto p-6 space-y-6">
         {isLoading ? (
