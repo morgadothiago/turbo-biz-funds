@@ -9,7 +9,7 @@ const STEPS = [
   {
     number: 1,
     title: "Adicione o número",
-    description: "Salve o número +55 11 99999-9999 nos seus contatos como 'OrganizaAI'",
+    description: "Salve o número +55 11 99999-9999 nos seus contatos como 'Planeja Aí'",
     icon: "📱"
   },
   {
@@ -87,7 +87,7 @@ const WhatsAppPage = memo(() => {
                 <Smartphone className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">Número do OrganizaAI</h3>
+                <h3 className="font-semibold text-foreground">Número do Planeja Aí</h3>
                 <p className="text-sm text-muted-foreground">Salve para enviar suas despesas</p>
               </div>
             </div>

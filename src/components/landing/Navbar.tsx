@@ -50,7 +50,7 @@ const Navbar = memo(() => {
               <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold text-foreground">
-              Organiza<span className="text-primary">AI</span>
+              Planeja<span className="text-primary"> Aí</span>
             </span>
           </Link>
 
@@ -84,7 +84,7 @@ const Navbar = memo(() => {
                     <Sparkles className="w-5 h-5 text-primary-foreground" />
                   </div>
                   <span className="text-xl font-bold text-foreground">
-                    Organiza<span className="text-primary">AI</span>
+                    Planeja<span className="text-primary"> Aí</span>
                   </span>
                 </Link>
 

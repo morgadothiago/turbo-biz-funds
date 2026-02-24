@@ -74,9 +74,9 @@ describe("i18n Utilities", () => {
     });
 
     it("should have appName in common section for all locales", () => {
-      expect(translations.pt.common.appName).toBe("OrganizaAI");
-      expect(translations.en.common.appName).toBe("OrganizaAI");
-      expect(translations.es.common.appName).toBe("OrganizaAI");
+      expect(translations.pt.common.appName).toBe("Planeja Aí");
+      expect(translations.en.common.appName).toBe("Planeja Aí");
+      expect(translations.es.common.appName).toBe("Planeja Aí");
     });
 
     it("should have login button in all locales", () => {

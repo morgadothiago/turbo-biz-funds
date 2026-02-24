@@ -144,9 +144,9 @@ export function UserSidebar() {
           </div>
           {!isCollapsed && (
             <div className="min-w-0">
-              <h2 className="font-bold text-lg text-sidebar-foreground truncate">
-                Organiza<span className="text-primary">AI</span>
-              </h2>
+                <h2 className="font-bold text-lg text-sidebar-foreground truncate">
+                  Planeja<span className="text-primary"> Aí</span>
+                </h2>
               <p className="text-xs text-sidebar-foreground/60 truncate">Minhas Finanças</p>
             </div>
           )}

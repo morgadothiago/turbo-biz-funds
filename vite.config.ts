@@ -36,8 +36,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
-        name: 'OrganizaAI - Organize suas finanças pelo WhatsApp',
-        short_name: 'OrganizaAI',
+        name: 'Planeja Aí - Organize suas finanças pelo WhatsApp',
+        short_name: 'Planeja Aí',
         description: 'Organize suas finanças pessoais pelo WhatsApp com IA',
         theme_color: '#25D366',
         background_color: '#ffffff',

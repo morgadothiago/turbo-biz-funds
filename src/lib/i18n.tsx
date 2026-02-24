@@ -218,7 +218,7 @@ landing: {
 export const translations: Record<Locale, Translations> = {
   pt: {
     common: {
-      appName: "OrganizaAI",
+      appName: "Planeja Aí",
       welcome: "Bem-vindo",
       login: "Entrar",
       logout: "Sair",
@@ -427,7 +427,7 @@ export const translations: Record<Locale, Translations> = {
   },
   en: {
     common: {
-      appName: "OrganizaAI",
+      appName: "Planeja Aí",
       welcome: "Welcome",
       login: "Sign In",
       logout: "Sign Out",
@@ -636,7 +636,7 @@ export const translations: Record<Locale, Translations> = {
   },
   es: {
     common: {
-      appName: "OrganizaAI",
+      appName: "Planeja Aí",
       welcome: "Bienvenido",
       login: "Entrar",
       logout: "Salir",

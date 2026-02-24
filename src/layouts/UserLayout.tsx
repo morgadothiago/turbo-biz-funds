@@ -27,7 +27,7 @@ function Header() {
       return { title: "WhatsApp", subtitle: "Conexão" };
     if (path.includes("/dashboard/configuracoes"))
       return { title: "Configurações", subtitle: "Sua conta" };
-    return { title: "OrganizaAI", subtitle: "" };
+    return { title: "Planeja Aí", subtitle: "" };
   };
 
   const page = getPageTitle();

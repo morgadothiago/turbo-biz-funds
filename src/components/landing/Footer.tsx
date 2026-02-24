@@ -66,7 +66,7 @@ const Footer = memo(() => {
                 <Sparkles className="w-5 h-5" />
               </div>
               <span className="text-xl font-bold">
-                Organiza<span className="text-[#6FAF8E]">AI</span>
+                Planeja<span className="text-[#6FAF8E]"> Aí</span>
               </span>
             </Link>
             <p className="text-white/80 text-sm mb-6 max-w-xs leading-relaxed">
@@ -93,7 +93,7 @@ const Footer = memo(() => {
 
         <div className="pt-6 border-t border-white/20 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-sm text-white/60">
-            © {CURRENT_YEAR} OrganizaAI. {t("landing", "footerCopyright")}
+            © {CURRENT_YEAR} Planeja Aí. {t("landing", "footerCopyright")}
           </p>
           <p className="text-sm text-white/60">
             {t("landing", "footerMadeInBrazil")}

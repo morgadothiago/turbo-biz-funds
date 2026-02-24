@@ -133,7 +133,7 @@ export function AdminSidebar() {
           {!isCollapsed && (
             <div>
               <h2 className="font-bold text-lg text-[#F6F4EF]">
-                Organiza<span className="text-[#25D366]">AI</span>
+                Planeja<span className="text-[#25D366]"> Aí</span>
               </h2>
               <p className="text-xs text-[#F6F4EF]/60">Painel Admin</p>
             </div>
