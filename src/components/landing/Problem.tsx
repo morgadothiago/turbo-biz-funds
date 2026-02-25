@@ -114,17 +114,27 @@ const Problem = memo(() => {
     <section className="py-16 md:py-24 bg-gradient-to-b from-background to-primary/5">
       {/* Nova faixa intermediária - Sua vida organizada sem esforço */}
       <div className="mb-16">
-        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-3xl mx-4 md:mx-8 p-8 md:p-12 border border-green-100">
+        <div className="bg-gradient-to-r from-green-200 via-green-100 to-green-200 rounded-3xl mx-4 md:mx-8 p-8 md:p-12 border border-green-300">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-900 mb-6">
               {t("landing", "organizedLifeTitle")}
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground mb-6">
+            <p className="text-base md:text-lg text-green-800 mb-6">
               {t("landing", "organizedLifeSubtitle")}
             </p>
-            <p className="text-lg md:text-xl font-semibold text-primary">
+            <p className="text-lg md:text-xl font-semibold text-green-700">
               {t("landing", "organizedLifeClosing")}
             </p>
+          </div>
+          
+          {/* Imagem do wireframe */}
+          <div className="mt-8 max-w-4xl mx-auto">
+            <img 
+              src="/wirefrane.png" 
+              alt="Demo do aplicativo" 
+              className="rounded-xl w-full h-auto"
+              style={{ maxHeight: '500px', objectFit: 'contain' }}
+            />
           </div>
         </div>
       </div>
