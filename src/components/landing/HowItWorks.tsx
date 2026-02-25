@@ -108,7 +108,7 @@ const HowItWorks = memo(() => {
         <div className="mt-20 max-w-5xl mx-auto">
           <div className="text-center mb-8">
             <p className="text-lg text-muted-foreground">
-              <span className="font-semibold text-foreground">✨ You chat, the system organizes</span>
+              <span className="font-semibold text-foreground">✨ Você conversa, o sistema organiza</span>
             </p>
           </div>
 

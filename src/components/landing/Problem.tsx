@@ -1,12 +1,9 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Table2, Brain, CreditCard, HelpCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useI18n } from "@/lib/i18n-provider";
 
 const Problem = memo(() => {
   const { t, locale } = useI18n();
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const PROBLEMS = locale === "pt" ? [
     {
@@ -85,7 +82,7 @@ const Problem = memo(() => {
     },
   ] as const;
 
-  const ProblemCard = memo(({ problem, index }: { problem: typeof PROBLEMS[number]; index: number }) => {
+  const ProblemCard = memo(({ problem }: { problem: typeof PROBLEMS[number] }) => {
     return (
       <div className="group bg-card rounded-2xl p-6 md:p-8 border border-border/60 hover:shadow-lg transition-all duration-300">
         <div className="flex items-start gap-4 md:gap-5">
@@ -154,41 +151,9 @@ const Problem = memo(() => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
           {PROBLEMS.map((problem, index) => (
-            <ProblemCard key={index} problem={problem} index={index} />
+            <ProblemCard key={index} problem={problem} />
           ))}
         </div>
-
-        <div className="mt-10 md:mt-12 text-center">
-          <p className="text-base md:text-lg text-muted-foreground mb-6">
-            <span className="font-semibold text-foreground">{t("landing", "problemIdentified")}</span>
-            <br />
-            {t("landing", "problemCreated")}
-          </p>
-          <Button 
-            variant="default" 
-            size="lg" 
-            onClick={() => setIsModalOpen(true)}
-            className="bg-[#0F9D58] hover:bg-[#0C7A45] text-white font-semibold px-8"
-          >
-            {t("landing", "problemCTA")}
-          </Button>
-        </div>
-
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t("landing", "problemModalTitle")}</DialogTitle>
-            </DialogHeader>
-            <div className="text-center py-4">
-              <p className="text-muted-foreground mb-4">
-                {t("landing", "problemModalDescription")}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {t("landing", "problemModalTestInfo")}
-              </p>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </section>
   );
