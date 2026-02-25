@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Users, Star, Clock, MessageCircle, Info } from "lucide-react";
+import { ArrowRight, Sparkles, Users, Star, Clock, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useI18n } from "@/lib/i18n-provider";
 import { analytics } from "@/lib/analytics";
@@ -74,10 +74,6 @@ const Hero = memo(() => {
                 {t("landing", "heroCTA")}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
-            </Button>
-            <Button variant="outline" size="lg" className="w-full sm:w-auto md:size-xl gap-2" onClick={() => analytics.click("watch_demo", "hero")}>
-              <Info className="w-5 h-5" />
-              {t("landing", "heroWatchDemo")}
             </Button>
           </motion.div>
 
