@@ -3,6 +3,7 @@ import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import BackgroundOrbs from "@/components/landing/BackgroundOrbs";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { MessageCircle } from "lucide-react";
 
 // Lazy load components below the fold for better performance
 const Problem = lazy(() => import("@/components/landing/Problem"));
@@ -90,6 +91,17 @@ const Index = () => {
         <LazySection>
           <Footer />
         </LazySection>
+        
+        {/* Botão flutuante do WhatsApp */}
+        <a
+          href="https://wa.me/5511999999999"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#20BD5A] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+          aria-label="Falar no WhatsApp"
+        >
+          <MessageCircle className="w-6 h-6" />
+        </a>
       </div>
     </ThemeProvider>
   );
