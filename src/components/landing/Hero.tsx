@@ -90,13 +90,13 @@ const Hero = memo(() => {
           </motion.div>
 
           <motion.div variants={scaleIn} className="relative">
-            <div className="relative bg-gradient-to-b from-primary/5 to-accent/10 rounded-xl md:rounded-2xl p-1.5 md:p-3 shadow-lg md:shadow-xl border border-border/50">
+            <div className="relative bg-gradient-to-b from-primary/5 to-accent/10 rounded-xl md:rounded-2xl p-1.5 md:p-3 shadow-lg md:shadow-xl border border-border/50 ">
               <div className="bg-card rounded-lg md:rounded-xl overflow-hidden shadow-card">
                 {/* 3 Mobile Mockups - Substituindo o vídeo */}
                 <div className="p-6 md:p-8">
                   <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
                     {/* Celular 1 - Registro Simples */}
-                    <div className="flex-1 max-w-[200px]">
+                    <div className="flex-1 max-w-[200px] ">
                       <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-4 border border-border/50 shadow-md">
                         <div className="bg-white rounded-xl p-3 shadow-sm">
                           <div className="text-xs text-muted-foreground mb-2">WhatsApp</div>
@@ -117,7 +117,7 @@ const Hero = memo(() => {
 
                     {/* Celular 2 - Multiformato */}
                     <div className="flex-1 max-w-[200px]">
-                      <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-4 border border-border/50 shadow-md">
+                      <div className="bg-gradient-to-br dark:text-black from-green-50 to-blue-50 rounded-2xl p-4 border border-border/50 shadow-md">
                         <div className="bg-white rounded-xl p-3 shadow-sm">
                           <div className="text-xs text-muted-foreground mb-2">Múltiplos formatos</div>
                           <div className="space-y-2">
