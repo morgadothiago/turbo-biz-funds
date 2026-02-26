@@ -1,11 +1,38 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { UserSidebar } from "@/components/user/UserSidebar";
-import { Menu, MessageCircle } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsSheet } from "@/components/user/NotificationsSheet";
+import { useState, useEffect, useRef } from "react";
+
+// Hook to detect scroll direction and hide/show balloon
+const useScrollDirection = () => {
+  const [hideBalloon, setHideBalloon] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Hide balloon when scrolling down, show when scrolling up
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setHideBalloon(true);
+      } else {
+        setHideBalloon(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return hideBalloon;
+};
 
 function Header() {
   const { toggleSidebar } = useSidebar();
@@ -87,6 +114,8 @@ function Header() {
 }
 
 export default function UserLayout() {
+  const hideBalloon = useScrollDirection();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background relative">
@@ -98,17 +127,26 @@ export default function UserLayout() {
           </div>
         </main>
       </div>
-      
-      {/* Botão flutuante do WhatsApp */}
-      <a
-        href="https://wa.me/5511999999999"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#20BD5A] text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-        aria-label="Falar no WhatsApp"
-      >
-        <MessageCircle className="w-6 h-6" />
-      </a>
+
+      {/* Botão flutuante do WhatsApp com balão */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 ">
+        <div className={`bg-white text-gray-900  px-4 py-2 rounded-2xl shadow-lg text-sm font-medium whitespace-nowrap border border-gray-200 transition-all duration-300 ${hideBalloon ? 'opacity-0 -translate-y-2 pointer-events-none' : 'opacity-100 translate-y-0'}`}>
+          Como posso ajudar?
+        </div>
+        <a
+          href="https://wa.me/5511999999999"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-1 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+          aria-label="Falar no WhatsApp"
+        >
+          <img
+            src="/whatsapp.png"
+            alt="WhatsApp"
+            className="w-10 h-10"
+          />
+        </a>
+      </div>
     </SidebarProvider>
   );
 }

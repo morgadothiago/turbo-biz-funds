@@ -26,12 +26,6 @@ const STEPS = [
   }
 ];
 
-const FEATURES = [
-  { icon: "🎙️", title: "Áudio", description: "Fale o valor e a descrição" },
-  { icon: "📸", title: "Foto", description: "Fotografe o comprovante" },
-  { icon: "💬", title: "Texto", description: "Digite: 'Gastei 50 no mercado'" },
-];
-
 const WhatsAppPage = memo(() => {
   const [copied, setCopied] = useState(false);
   const phoneNumber = "+55 11 99999-9999";
@@ -154,24 +148,81 @@ const WhatsAppPage = memo(() => {
         </CardContent>
       </Card>
 
-      {/* Features - Minimalista */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {FEATURES.map((feature) => (
-          <Card key={feature.title} className="border-border shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <span className="text-xl">{feature.icon}</span>
+      {/* Exemplos de envio */}
+      <Card className="border-border shadow-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-[#25D366] to-[#128C7E] px-6 py-4 relative">
+          <h3 className="font-semibold text-white text-lg">Como enviar suas despesas</h3>
+          <p className="text-white/80 text-sm">Envie no formato que preferir</p>
+          {/* Seta indicando fluxo */}
+          <div className="hidden md:flex absolute bottom-4 right-6 items-center gap-2 text-white/60">
+            <span className="text-sm">Fluxo →</span>
+          </div>
+          {/* Seta para mobile */}
+          <div className="md:hidden absolute bottom-4 right-6 animate-bounce">
+            <svg className="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
+        </div>
+        <CardContent className="p-4 md:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Áudio */}
+            <div className="bg-muted/50 rounded-xl p-4 border border-border hover:border-primary/50 transition-colors">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 rounded-full bg-[#25D366]/10 flex items-center justify-center">
+                  <span className="text-2xl">🎤</span>
                 </div>
                 <div>
-                  <h4 className="font-medium text-foreground">{feature.title}</h4>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  <h4 className="font-semibold text-foreground">Áudio</h4>
+                  <p className="text-xs text-muted-foreground">Fale rapidinho</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <div className="bg-background rounded-lg p-3 border border-border">
+                <p className="text-sm text-foreground italic">"Gastei 50 reais na farmácia"</p>
+              </div>
+              <p className="text-xs text-green-600 mt-2 font-medium">→ Registrado em Saúde 💊</p>
+            </div>
+
+            {/* Foto */}
+            <div className="bg-muted/50 rounded-xl p-4 border border-border hover:border-primary/50 transition-colors">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 rounded-full bg-[#25D366]/10 flex items-center justify-center">
+                  <span className="text-2xl">📷</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">Foto</h4>
+                  <p className="text-xs text-muted-foreground">Fotografe o comprovante</p>
+                </div>
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-border min-h-[60px] flex items-center justify-center">
+                <div className="flex gap-1">
+                  <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                  <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                  <div className="w-8 h-8 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+              <p className="text-xs text-green-600 mt-2 font-medium">→ Registro automático</p>
+            </div>
+
+            {/* Texto */}
+            <div className="bg-muted/50 rounded-xl p-4 border border-border hover:border-primary/50 transition-colors">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 rounded-full bg-[#25D366]/10 flex items-center justify-center">
+                  <span className="text-2xl">✍️</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">Texto</h4>
+                  <p className="text-xs text-muted-foreground">Digite sua despesa</p>
+                </div>
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-border">
+                <p className="text-sm text-foreground">R$ 150,00 mercado</p>
+              </div>
+              <p className="text-xs text-green-600 mt-2 font-medium">→ Categoria detectada</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 });

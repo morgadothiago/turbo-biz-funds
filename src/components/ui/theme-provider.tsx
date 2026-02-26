@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "light";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -13,11 +13,11 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: "light" | "dark";
+  resolvedTheme: "light";
 };
 
 const initialState: ThemeProviderState = {
-  theme: "system",
+  theme: "light",
   setTheme: () => null,
   resolvedTheme: "light",
 };
@@ -26,24 +26,17 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "light",
   storageKey = "organizaai-theme",
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const [resolvedTheme, setResolvedTheme] = useState<"light">("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem(storageKey) as Theme;
-    // Only use stored value if it exists, otherwise use defaultTheme
-    if (stored) {
-      setThemeState(stored);
-    }
-    // Always apply defaultTheme on first load if no stored value
-    if (!stored && defaultTheme) {
-      setThemeState(defaultTheme);
-    }
+    // Always force light theme
+    setThemeState("light");
   }, [storageKey, defaultTheme]);
 
   useEffect(() => {
@@ -51,38 +44,8 @@ export function ThemeProvider({
 
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
-
-    let effectiveTheme: "light" | "dark";
-
-    if (theme === "system") {
-      effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    } else {
-      effectiveTheme = theme;
-    }
-
-    root.classList.add(effectiveTheme);
-    setResolvedTheme(effectiveTheme);
-  }, [theme, mounted]);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const handleChange = () => {
-      if (theme === "system") {
-        const root = window.document.documentElement;
-        const newTheme = mediaQuery.matches ? "dark" : "light";
-        root.classList.remove("light", "dark");
-        root.classList.add(newTheme);
-        setResolvedTheme(newTheme);
-      }
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    root.classList.add("light");
+    setResolvedTheme("light");
   }, [theme, mounted]);
 
   const setTheme = (theme: Theme) => {
