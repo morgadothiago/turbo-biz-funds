@@ -101,118 +101,118 @@ export interface Translations {
     serverError: string;
     reloadPage: string;
   };
-landing: {
-      // Navbar
-      navHowItWorks: string;
-      navTestimonials: string;
-      navPricing: string;
-      navFAQ: string;
-      navLogin: string;
-      navSignUp: string;
-      // Hero
-      heroBadge: string;
-      heroTitleLine1: string;
-      heroTitleLine2: string;
-      heroSubtitle: string;
-      heroCTA: string;
-      heroWatchDemo: string;
-      heroStatUsers: string;
-      heroStatExpenses: string;
-      heroStatRating: string;
-      heroStatTime: string;
-      heroProcess: string;
-      heroSeconds: string;
-      heroSent: string;
-      heroSentExample: string;
-      heroCategorized: string;
-      heroCategoryFood: string;
-      // Problem
-      problemSubtitle: string;
-      problemTitle: string;
-      problemDescription: string;
-      problemIdentified: string;
-      problemCreated: string;
-      problemCTA: string;
-      problemModalTitle: string;
-      problemModalDescription: string;
-      problemModalTestInfo: string;
-      // New Intermediate Section (Organized Life)
-      organizedLifeTitle: string;
-      organizedLifeSubtitle: string;
-      organizedLifeClosing: string;
-      // How It Works
-      howItWorksBadge: string;
-      howItWorksTitle: string;
-      howItWorksSubtitle: string;
-      step1Title: string;
-      step1Description: string;
-      step2Title: string;
-      step2Description: string;
-      step3Title: string;
-      step3Description: string;
-      dashboardLabel: string;
-      dashboardBalance: string;
-      dashboardExpenses: string;
-      dashboardSavings: string;
-      dashboardGoal: string;
-      expensesByCategory: string;
-      whatsappFeature: string;
-      whatsappFeatureDescription: string;
-      // Testimonials
-      testimonialsBadge: string;
-      testimonialsTitle: string;
-      testimonialsSubtitle: string;
-      // Pricing
-      pricingBadge: string;
-      pricingTitle: string;
-      pricingSubtitle: string;
-      planTest: string;
-      planTestDescription: string;
-      planTestPrice: string;
-      planTestPeriod: string;
-      planMonthly: string;
-      planMonthlyDescription: string;
-      planMonthlyPrice: string;
-      planQuarterly: string;
-      planQuarterlyDescription: string;
-      planQuarterlyPrice: string;
-      planAnnual: string;
-      planAnnualDescription: string;
-      planAnnualPrice: string;
-      planFeatures1: string[];
-      planFeatures2: string[];
-      planFeatures3: string[];
-      planCTA1: string;
-      planCTA2: string;
-      planCTA3: string;
-      trustSecurePayment: string;
-      trustCancelAnyTime: string;
-      trustHumanSupport: string;
-      pricingWhyNoFree: string;
-      // FAQ
-      faqBadge: string;
-      faqTitle: string;
-      faqSubtitle: string;
-      faqStillQuestions: string;
-      faqContactWhatsApp: string;
-      // Footer
-      footerProduct: string;
-      footerSupport: string;
-      footerLegal: string;
-      footerHowItWorks: string;
-      footerPricing: string;
-      footerTestimonials: string;
-      footerFAQ: string;
-      footerHelpCenter: string;
-      footerContactUs: string;
-      footerWhatsApp: string;
-      footerPrivacy: string;
-      footerTerms: string;
-      footerLGPD: string;
-      footerDescription: string;
-      footerCopyright: string;
-      footerMadeInBrazil: string;
-    };
+  landing: {
+    // Navbar
+    navHowItWorks: string;
+    navTestimonials: string;
+    navPricing: string;
+    navFAQ: string;
+    navLogin: string;
+    navSignUp: string;
+    // Hero
+    heroBadge: string;
+    heroTitleLine1: string;
+    heroTitleLine2: string;
+    heroSubtitle: string;
+    heroCTA: string;
+    heroWatchDemo: string;
+    heroStatUsers: string;
+    heroStatExpenses: string;
+    heroStatRating: string;
+    heroStatTime: string;
+    heroProcess: string;
+    heroSeconds: string;
+    heroSent: string;
+    heroSentExample: string;
+    heroCategorized: string;
+    heroCategoryFood: string;
+    // Problem
+    problemSubtitle: string;
+    problemTitle: string;
+    problemDescription: string;
+    problemIdentified: string;
+    problemCreated: string;
+    problemCTA: string;
+    problemModalTitle: string;
+    problemModalDescription: string;
+    problemModalTestInfo: string;
+    // New Intermediate Section (Organized Life)
+    organizedLifeTitle: string;
+    organizedLifeSubtitle: string;
+    organizedLifeClosing: string;
+    // How It Works
+    howItWorksBadge: string;
+    howItWorksTitle: string;
+    howItWorksSubtitle: string;
+    step1Title: string;
+    step1Description: string;
+    step2Title: string;
+    step2Description: string;
+    step3Title: string;
+    step3Description: string;
+    dashboardLabel: string;
+    dashboardBalance: string;
+    dashboardExpenses: string;
+    dashboardSavings: string;
+    dashboardGoal: string;
+    expensesByCategory: string;
+    whatsappFeature: string;
+    whatsappFeatureDescription: string;
+    // Testimonials
+    testimonialsBadge: string;
+    testimonialsTitle: string;
+    testimonialsSubtitle: string;
+    // Pricing
+    pricingBadge: string;
+    pricingTitle: string;
+    pricingSubtitle: string;
+    planTest: string;
+    planTestDescription: string;
+    planTestPrice: string;
+    planTestPeriod: string;
+    planMonthly: string;
+    planMonthlyDescription: string;
+    planMonthlyPrice: string;
+    planQuarterly: string;
+    planQuarterlyDescription: string;
+    planQuarterlyPrice: string;
+    planAnnual: string;
+    planAnnualDescription: string;
+    planAnnualPrice: string;
+    planFeatures1: string[];
+    planFeatures2: string[];
+    planFeatures3: string[];
+    planCTA1: string;
+    planCTA2: string;
+    planCTA3: string;
+    trustSecurePayment: string;
+    trustCancelAnyTime: string;
+    trustHumanSupport: string;
+    pricingWhyNoFree: string;
+    // FAQ
+    faqBadge: string;
+    faqTitle: string;
+    faqSubtitle: string;
+    faqStillQuestions: string;
+    faqContactWhatsApp: string;
+    // Footer
+    footerProduct: string;
+    footerSupport: string;
+    footerLegal: string;
+    footerHowItWorks: string;
+    footerPricing: string;
+    footerTestimonials: string;
+    footerFAQ: string;
+    footerHelpCenter: string;
+    footerContactUs: string;
+    footerWhatsApp: string;
+    footerPrivacy: string;
+    footerTerms: string;
+    footerLGPD: string;
+    footerDescription: string;
+    footerCopyright: string;
+    footerMadeInBrazil: string;
+  };
 }
 
 export const translations: Record<Locale, Translations> = {
@@ -376,7 +376,7 @@ export const translations: Record<Locale, Translations> = {
       // Pricing
       pricingBadge: "Investimento",
       pricingTitle: "Invista em paz de espírito",
-      pricingSubtitle: "Menos que um café por dia para nunca mais se perder nas contas. Cancele quando quiser, sem burocracia.",
+      pricingSubtitle: "Organize seu dinheiro de forma simples. Sem complicação, sem planilhas difíceis. Você no controle das suas contas todos os dias.",
       planTest: "Teste",
       planTestDescription: "Experimente por 15 dias",
       planTestPrice: "9,90",
@@ -890,7 +890,7 @@ export function changeLocale(newLocale: Locale) {
 
 export function getStoredLocale(): Locale {
   if (typeof window === "undefined") return "pt";
-  
+
   const stored = localStorage.getItem("organizaai-locale") as Locale;
   return (stored && ["pt", "en", "es"].includes(stored)) ? stored : "pt";
 }

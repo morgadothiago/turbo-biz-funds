@@ -103,12 +103,15 @@ const Index = () => {
           <HowItWorks />
         </LazySection>
 
-        <LazySection>
-          <Testimonials />
-        </LazySection>
+
 
         <LazySection>
           <Pricing />
+        </LazySection>
+
+
+        <LazySection>
+          <Testimonials />
         </LazySection>
 
         <LazySection>
