@@ -375,7 +375,7 @@ export const translations: Record<Locale, Translations> = {
       testimonialsSubtitle: "Veja como pessoas comuns estão organizando suas finanças sem estresse",
       // Pricing
       pricingBadge: "Investimento",
-      pricingTitle: "Invista em paz de espírito",
+      pricingTitle: "Organize seu dinheiro de forma simples.",
       pricingSubtitle: "Organize seu dinheiro de forma simples. Sem complicação, sem planilhas difíceis. Você no controle das suas contas todos os dias.",
       planTest: "Teste",
       planTestDescription: "Experimente por 15 dias",
