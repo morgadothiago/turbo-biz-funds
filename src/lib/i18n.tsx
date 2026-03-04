@@ -376,7 +376,7 @@ export const translations: Record<Locale, Translations> = {
       // Pricing
       pricingBadge: "Investimento",
       pricingTitle: "Organize seu dinheiro de forma simples.",
-      pricingSubtitle: "Organize seu dinheiro de forma simples. Sem complicação, sem planilhas difíceis. Você no controle das suas contas todos os dias.",
+      pricingSubtitle: "Sem complicação, sem planilhas difíceis. Você no controle das suas contas todos os dias.",
       planTest: "Teste",
       planTestDescription: "Experimente por 15 dias",
       planTestPrice: "9,90",
