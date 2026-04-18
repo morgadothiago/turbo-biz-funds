@@ -10,6 +10,7 @@ import {
 } from "@/features/dashboard/components";
 import { useDashboardData } from "@/features/dashboard/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle } from "lucide-react";
 
 const DashboardSkeleton = () => (
   <div className="p-6 lg:p-8 space-y-8">
@@ -35,16 +36,20 @@ const DashboardSkeleton = () => (
 
 const UserDashboard = memo(() => {
   const { user } = useAuth();
-  const { data: dashboardData, isLoading } = useDashboardData();
+  const { data: dashboardData, isLoading, isError } = useDashboardData();
 
   const userName = user?.name?.split(" ")[0]?.trim() || "Usuário";
 
-  if (isLoading) {
-    return <DashboardSkeleton />;
-  }
+  if (isLoading) return <DashboardSkeleton />;
 
-  if (!dashboardData) {
-    return <DashboardSkeleton />;
+  if (isError || !dashboardData) {
+    return (
+      <div className="p-6 lg:p-8 flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <AlertCircle className="h-10 w-10 text-destructive" />
+        <p className="text-destructive font-medium">Falha ao carregar o dashboard</p>
+        <p className="text-sm text-muted-foreground">Verifique sua conexão e tente novamente.</p>
+      </div>
+    );
   }
 
   return (

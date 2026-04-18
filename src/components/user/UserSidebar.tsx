@@ -139,16 +139,13 @@ export function UserSidebar() {
     >
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img
+            src="/logoweb.png"
+            alt="doutorcash"
+            className="h-8 w-auto flex-shrink-0 object-contain"
+          />
           {!isCollapsed && (
-            <div className="min-w-0">
-                <h2 className="font-bold text-lg text-sidebar-foreground truncate">
-                  Planeja<span className="text-primary"> Aí</span>
-                </h2>
-              <p className="text-xs text-sidebar-foreground/60 truncate">Minhas Finanças</p>
-            </div>
+            <p className="text-xs text-sidebar-foreground/60 truncate">Minhas Finanças</p>
           )}
         </div>
       </SidebarHeader>

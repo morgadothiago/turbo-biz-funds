@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles, Mail, Lock, User, ArrowRight, Check, Loader2 } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
+import { useAuth } from "@/contexts/AuthContext";
+const logoWeb = "/logoweb.png";
 
 const registerSchema = z
   .object({
@@ -49,6 +51,7 @@ const Cadastro = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const validateStep1 = (): boolean => {
     const result = registerSchema.safeParse({
@@ -83,10 +86,31 @@ const Cadastro = () => {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        plan: formData.plan,
+      });
+
       analytics.signup("email");
+
       toast.success("Conta criada com sucesso!");
-      navigate("/dashboard");
+
+      if (formData.plan === "free") {
+        navigate("/login");
+      } else {
+        navigate("/pagamento", { state: { plan: formData.plan } });
+      }
+    } catch (err: unknown) {
+      const apiError = err as { message?: string; status?: number };
+      if (apiError?.status === 409) {
+        setErrors({ email: "Este email já está cadastrado" });
+      } else if (apiError?.status === 422) {
+        toast.error(apiError.message ?? "Dados inválidos. Verifique o formulário.");
+      } else {
+        toast.error(apiError?.message ?? "Erro ao criar conta. Tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -137,12 +161,11 @@ const Cadastro = () => {
       <div className="w-full max-w-lg">
         <div className="text-center mb-6">
           <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">
-              Planeja<span className="text-accent"> Aí</span>
-            </span>
+            <img
+              src={logoWeb}
+              alt="doutorcash"
+              className="h-12 w-auto transition-transform group-hover:scale-105"
+            />
           </Link>
           <h1 className="text-2xl font-bold text-foreground mb-2">
             {step === 1 ? "Crie sua conta" : "Escolha seu plano"}
@@ -354,6 +377,11 @@ const Cadastro = () => {
                       />
                       <div className="pr-8">
                         <div className="flex items-center gap-2 mb-1">
+                          {formData.plan === plan.id && (
+                            <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0">
+                              <Check className="w-3 h-3 text-primary-foreground" />
+                            </div>
+                          )}
                           <span className="font-semibold text-foreground">
                             {plan.name}
                           </span>
@@ -383,13 +411,6 @@ const Cadastro = () => {
                           ))}
                         </ul>
                       </div>
-                      {formData.plan === plan.id && (
-                        <div className="absolute top-4 left-4">
-                          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                            <Check className="w-3.5 h-3.5 text-primary-foreground" />
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </RadioGroup>

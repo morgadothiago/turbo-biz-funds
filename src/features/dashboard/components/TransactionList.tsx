@@ -33,6 +33,11 @@ export const TransactionList = memo(({ transactions }: TransactionListProps) => 
         </Button>
       </CardHeader>
       <CardContent>
+        {transactions.length === 0 && (
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            Nenhuma transação neste período
+          </div>
+        )}
         <div className="space-y-1">
           {transactions.map((transaction, index) => (
             <div

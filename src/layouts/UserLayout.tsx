@@ -54,7 +54,7 @@ function Header() {
       return { title: "WhatsApp", subtitle: "Conexão" };
     if (path.includes("/dashboard/configuracoes"))
       return { title: "Configurações", subtitle: "Sua conta" };
-    return { title: "Planeja Aí", subtitle: "" };
+    return { title: "doutorcash", subtitle: "" };
   };
 
   const page = getPageTitle();

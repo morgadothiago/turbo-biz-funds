@@ -3,11 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
+const logoWeb = "/logoweb.png";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
@@ -54,15 +55,11 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const userData = await login(email, password);
+      const loggedUser = await login(email, password);
       analytics.login("email");
       toast.success("Login realizado com sucesso!");
-      if (userData.role === "admin") {
-        navigate("/admin", { replace: true });
-      } else {
-        navigate("/dashboard", { replace: true });
-      }
-    } catch (error) {
+      navigate(loggedUser.role === "admin" ? "/admin" : "/dashboard", { replace: true });
+    } catch {
       toast.error("Email ou senha inválidos");
     } finally {
       setIsLoading(false);
@@ -74,12 +71,11 @@ const Login = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">
-              Planeja<span className="text-accent"> Aí</span>
-            </span>
+            <img
+              src={logoWeb}
+              alt="doutorcash"
+              className="h-12 w-auto transition-transform group-hover:scale-105"
+            />
           </Link>
           <h1 className="text-2xl font-bold text-foreground mb-2">
             Bem-vindo de volta

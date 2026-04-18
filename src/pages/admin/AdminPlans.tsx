@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { 
+import {
   Plus,
   Edit,
   Trash2,
@@ -11,7 +11,9 @@ import {
   Crown,
   Sparkles,
   MoreHorizontal,
-  TrendingUp
+  TrendingUp,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,76 +47,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
-
-const plans = [
-  {
-    id: "free",
-    name: "Free",
-    description: "Para começar a organizar suas finanças",
-    price: 0,
-    billingPeriod: "mês",
-    subscribers: 89,
-    mrr: 0,
-    icon: Sparkles,
-    color: "bg-muted",
-    features: [
-      { name: "Até 100 lançamentos/mês", included: true },
-      { name: "1 conta", included: true },
-      { name: "Relatórios básicos", included: true },
-      { name: "Chat com IA (5 msgs/dia)", included: true },
-      { name: "Integração WhatsApp", included: false },
-      { name: "Suporte prioritário", included: false },
-    ]
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    description: "Para quem quer mais controle",
-    price: 99,
-    billingPeriod: "mês",
-    subscribers: 98,
-    mrr: 9702,
-    icon: Zap,
-    color: "bg-primary/10",
-    popular: true,
-    features: [
-      { name: "Lançamentos ilimitados", included: true },
-      { name: "Até 3 contas", included: true },
-      { name: "Relatórios avançados", included: true },
-      { name: "Chat com IA ilimitado", included: true },
-      { name: "Integração WhatsApp", included: true },
-      { name: "Suporte prioritário", included: false },
-    ]
-  },
-  {
-    id: "business",
-    name: "Business",
-    description: "Para famílias e pequenos grupos",
-    price: 249,
-    billingPeriod: "mês",
-    subscribers: 47,
-    mrr: 11703,
-    icon: Crown,
-    color: "bg-success/10",
-    features: [
-      { name: "Tudo do Pro", included: true },
-      { name: "Contas ilimitadas", included: true },
-      { name: "Usuários ilimitados", included: true },
-      { name: "API personalizada", included: true },
-      { name: "White-label", included: true },
-      { name: "Suporte prioritário 24/7", included: true },
-    ]
-  }
-];
-
-const subscriptions = [
-  { id: "1", client: "João Silva", plan: "Pro", status: "Ativo", startDate: "10/01/2025", nextBilling: "10/02/2025", amount: 99 },
-  { id: "2", client: "Maria Santos", plan: "Business", status: "Ativo", startDate: "15/01/2025", nextBilling: "15/02/2025", amount: 249 },
-  { id: "3", client: "Pedro Costa", plan: "Free", status: "Trial", startDate: "20/01/2025", nextBilling: "-", amount: 0 },
-  { id: "4", client: "Ana Oliveira", plan: "Pro", status: "Ativo", startDate: "05/01/2025", nextBilling: "05/02/2025", amount: 99 },
-  { id: "5", client: "Carlos Mendes", plan: "Business", status: "Inadimplente", startDate: "12/01/2025", nextBilling: "12/02/2025", amount: 249 },
-  { id: "6", client: "Fernanda Lima", plan: "Pro", status: "Ativo", startDate: "18/01/2025", nextBilling: "18/02/2025", amount: 99 },
-];
+import {
+  useAdminPlans,
+  getAdminPlanIcon,
+  getAdminPlanColor,
+} from "@/features/admin/hooks/use-admin-plans";
 
 const statusColors: Record<string, string> = {
   Ativo: "bg-success/10 text-success",
@@ -125,15 +62,48 @@ const statusColors: Record<string, string> = {
 
 export default function AdminPlans() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
 
+  const { plans, subscriptions, isLoading, isError, error } = useAdminPlans();
+
+  const selectedPlan = plans.find((p) => p.id === editingPlanId) ?? null;
   const totalMRR = plans.reduce((sum, plan) => sum + plan.mrr, 0);
   const totalSubscribers = plans.reduce((sum, plan) => sum + plan.subscribers, 0);
 
-  const openEditDialog = (plan: typeof plans[0]) => {
-    setSelectedPlan(plan);
+  const openEditDialog = (planId: string) => {
+    setEditingPlanId(planId);
     setIsEditDialogOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full">
+        <AdminHeader title="Gestão de Planos" subtitle="Configure planos e gerencie assinaturas" />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Carregando planos...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    const msg = error instanceof Error ? error.message : "Erro desconhecido";
+    return (
+      <div className="flex flex-col h-full">
+        <AdminHeader title="Gestão de Planos" subtitle="Configure planos e gerencie assinaturas" />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="text-center space-y-2">
+            <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+            <p className="text-destructive font-medium">Falha ao carregar planos</p>
+            <p className="text-sm text-muted-foreground">{msg}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -178,7 +148,7 @@ export default function AdminPlans() {
                   <TrendingUp className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">R$ {(totalMRR / totalSubscribers).toFixed(0)}</div>
+                  <div className="text-2xl font-bold">R$ {totalSubscribers > 0 ? (totalMRR / totalSubscribers).toFixed(0) : "0"}</div>
                   <p className="text-sm text-muted-foreground">Ticket médio</p>
                 </div>
               </div>
@@ -195,7 +165,10 @@ export default function AdminPlans() {
           <TabsContent value="plans" className="space-y-6">
             {/* Plan Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {plans.map((plan) => (
+              {plans.map((plan) => {
+                const PlanIcon = getAdminPlanIcon(plan.id);
+                const planColor = getAdminPlanColor(plan.id);
+                return (
                 <Card key={plan.id} className={`relative ${plan.popular ? 'border-primary shadow-lg' : ''}`}>
                   {plan.popular && (
                     <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">
@@ -204,8 +177,8 @@ export default function AdminPlans() {
                   )}
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <div className={`p-3 rounded-xl ${plan.color}`}>
-                        <plan.icon className="h-6 w-6" />
+                      <div className={`p-3 rounded-xl ${planColor}`}>
+                        <PlanIcon className="h-6 w-6" />
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -214,7 +187,7 @@ export default function AdminPlans() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditDialog(plan)}>
+                          <DropdownMenuItem onClick={() => openEditDialog(plan.id)}>
                             <Edit className="h-4 w-4 mr-2" />
                             Editar plano
                           </DropdownMenuItem>
@@ -265,7 +238,8 @@ export default function AdminPlans() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
 
             <div className="flex justify-center">
