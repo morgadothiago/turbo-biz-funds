@@ -14,6 +14,13 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      "/v1": {
+        target: "https://api.doutorcashapp.com.br",
+        changeOrigin: true,
+        secure: true,
+      },
+    },
   },
   plugins: [
     react(),
@@ -36,8 +43,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
-        name: 'Planeja Aí - Organize suas finanças pelo WhatsApp',
-        short_name: 'Planeja Aí',
+        name: 'doutorcash - Organize suas finanças pelo WhatsApp',
+        short_name: 'doutorcash',
         description: 'Organize suas finanças pessoais pelo WhatsApp com IA',
         theme_color: '#25D366',
         background_color: '#ffffff',

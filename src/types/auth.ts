@@ -2,10 +2,16 @@ export type UserRole = "admin" | "user";
 
 export interface User {
   id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+}
+
+export interface RegisterPayload {
   name: string;
   email: string;
-  role: UserRole;
-  avatar?: string;
+  password: string;
+  plan: string;
 }
 
 export interface AuthContextType {
@@ -13,13 +19,6 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<User>;
+  register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
-}
-
-export interface MockUser {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-  role: UserRole;
 }

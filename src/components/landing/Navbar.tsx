@@ -2,10 +2,11 @@ import { useState, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useI18n } from "@/lib/i18n-provider";
 import { analytics } from "@/lib/analytics";
+const logoWeb = "/logoweb.png";
 
 const Navbar = memo(() => {
   const { t } = useI18n();
@@ -46,12 +47,11 @@ const Navbar = memo(() => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center transition-transform group-hover:scale-105">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">
-              Planeja<span className="text-primary"> Aí</span>
-            </span>
+            <img
+              src={logoWeb}
+              alt="doutorcash"
+              className="h-9 w-auto transition-transform group-hover:scale-105"
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
@@ -80,12 +80,11 @@ const Navbar = memo(() => {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col gap-6 pt-6">
                 <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-xl font-bold text-foreground">
-                    Planeja<span className="text-primary"> Aí</span>
-                  </span>
+                  <img
+                    src={logoWeb}
+                    alt="doutorcash"
+                    className="h-9 w-auto"
+                  />
                 </Link>
 
                 <div className="flex flex-col gap-2">

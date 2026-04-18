@@ -218,7 +218,7 @@ export interface Translations {
 export const translations: Record<Locale, Translations> = {
   pt: {
     common: {
-      appName: "Planeja Aí",
+      appName: "doutorcash",
       welcome: "Bem-vindo",
       login: "Entrar",
       logout: "Sair",
@@ -350,7 +350,7 @@ export const translations: Record<Locale, Translations> = {
       // Nova Seção Intermediária - Sua vida organizada sem esforço
       organizedLifeTitle: "Sua vida organizada sem esforço.",
       organizedLifeSubtitle: "Já se perdeu no meio das tarefas e das despesas? Esquece compromissos? Já levou um susto com a fatura do cartão?",
-      organizedLifeClosing: "O Planeja Aí resolve isso. Organização financeira simples e direta pelo WhatsApp.",
+      organizedLifeClosing: "O doutorcash resolve isso. Organização financeira simples e direta pelo WhatsApp.",
       // How It Works
       howItWorksBadge: "Simples assim",
       howItWorksTitle: "Organize em 3 passos",
@@ -427,7 +427,7 @@ export const translations: Record<Locale, Translations> = {
   },
   en: {
     common: {
-      appName: "Planeja Aí",
+      appName: "doutorcash",
       welcome: "Welcome",
       login: "Sign In",
       logout: "Sign Out",
@@ -559,7 +559,7 @@ export const translations: Record<Locale, Translations> = {
       // Nova Seção Intermediária - Organized life
       organizedLifeTitle: "Your organized life, effortlessly.",
       organizedLifeSubtitle: "Have you ever lost track of tasks and expenses? Forget appointments? Ever get a shock from your credit card bill?",
-      organizedLifeClosing: "Planeja Aí solves this. Simple and direct financial organization via WhatsApp.",
+      organizedLifeClosing: "doutorcash solves this. Simple and direct financial organization via WhatsApp.",
       // How It Works
       howItWorksBadge: "It's that simple",
       howItWorksTitle: "Organize in 3 steps",
@@ -636,7 +636,7 @@ export const translations: Record<Locale, Translations> = {
   },
   es: {
     common: {
-      appName: "Planeja Aí",
+      appName: "doutorcash",
       welcome: "Bienvenido",
       login: "Entrar",
       logout: "Salir",
@@ -768,7 +768,7 @@ export const translations: Record<Locale, Translations> = {
       // Nova Seção Intermediária - Organized life
       organizedLifeTitle: "Tu vida organizada, sin esfuerzo.",
       organizedLifeSubtitle: "¿Te has perdido entre tareas y gastos? ¿Olvidas compromisos? ¿Te has llevado un susto con la factura de la tarjeta?",
-      organizedLifeClosing: "Planeja Aí lo resuelve. Organización financiera simple y directa por WhatsApp.",
+      organizedLifeClosing: "doutorcash lo resuelve. Organización financiera simple y directa por WhatsApp.",
       // How It Works
       howItWorksBadge: "Tan simple como eso",
       howItWorksTitle: "Organiza en 3 pasos",

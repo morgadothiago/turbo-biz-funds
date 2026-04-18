@@ -1,53 +1,75 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import type { User, AuthContextType } from "@/types/auth";
-import { storage, generateToken, getMockUsers } from "@/lib/storage";
+import { storage } from "@/lib/storage";
+import { api, apiEndpoints } from "@/lib/api/client";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+function decodeJwt(token: string): Record<string, unknown> {
+  try {
+    const payload = token.split(".")[1];
+    return JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+  } catch {
+    return {};
+  }
+}
+
+interface LoginApiResponse {
+  data: { token: string };
+}
+
+interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  plan: string;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = () => {
-      const token = storage.getToken();
-      const savedUser = storage.getUser();
-      
-      if (token && savedUser) {
-        setUser(savedUser);
-      }
-      
-      setIsLoading(false);
-    };
-    
-    initAuth();
+    const token = storage.getToken();
+    const savedUser = storage.getUser();
+    if (token && savedUser) {
+      setUser(savedUser);
+    }
+    setIsLoading(false);
   }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<User> => {
     setIsLoading(true);
+    try {
+      const response = await api.post<LoginApiResponse>(apiEndpoints.auth.login, {
+        email,
+        password,
+      });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      const token = response.data.token;
+      const claims = decodeJwt(token);
 
-    const mockUsers = getMockUsers();
-    const foundUser = mockUsers.find(
-      (u) => u.email === email && u.password === password
-    );
+      const role = (claims.role as string) === "admin" ? "admin" : "user";
 
-    if (!foundUser) {
+      const user: User = {
+        id: (claims.sub as string) || (claims.id as string) || "",
+        email: (claims.email as string) || email,
+        name: (claims.name as string) || email.split("@")[0],
+        role,
+      };
+
+      storage.setToken(token);
+      storage.setUser(user);
+      setUser(user);
+
+      return user;
+    } finally {
       setIsLoading(false);
-      throw new Error("Email ou senha inválidos");
     }
+  }, []);
 
-    const { password: _, ...userWithoutPassword } = foundUser;
-    const token = generateToken(foundUser.id);
-
-    storage.setToken(token);
-    storage.setUser(userWithoutPassword);
-
-    setUser(userWithoutPassword);
-    setIsLoading(false);
-
-    return userWithoutPassword;
+  const register = useCallback(async (payload: RegisterPayload): Promise<void> => {
+    await api.post(apiEndpoints.auth.register, payload);
   }, []);
 
   const logout = useCallback(() => {
@@ -62,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         login,
+        register,
         logout,
       }}
     >

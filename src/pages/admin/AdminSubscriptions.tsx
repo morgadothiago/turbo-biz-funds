@@ -18,7 +18,8 @@ import {
   RefreshCw,
   ArrowUpDown,
   Calendar,
-  ArrowRight
+  ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -59,85 +60,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-
-const mockSubscriptions = [
-  {
-    id: "sub_1",
-    user: { name: "João Silva", email: "joao.silva@email.com", avatar: "JS" },
-    plan: "Pro",
-    amount: 29.90,
-    interval: "mensal",
-    status: "ativa",
-    startDate: "10/01/2025",
-    nextBilling: "10/02/2025",
-    paymentMethod: "Cartão ****4242",
-    autoRenew: true
-  },
-  {
-    id: "sub_2",
-    user: { name: "Maria Santos", email: "maria.santos@email.com", avatar: "MS" },
-    plan: "Business",
-    amount: 99.90,
-    interval: "mensal",
-    status: "ativa",
-    startDate: "15/01/2025",
-    nextBilling: "15/02/2025",
-    paymentMethod: "Pix",
-    autoRenew: true
-  },
-  {
-    id: "sub_3",
-    user: { name: "Pedro Costa", email: "pedro.costa@email.com", avatar: "PC" },
-    plan: "Pro",
-    amount: 29.90,
-    interval: "mensal",
-    status: "cancelada",
-    startDate: "20/12/2024",
-    nextBilling: "-",
-    paymentMethod: "Cartão ****1234",
-    autoRenew: false
-  },
-  {
-    id: "sub_4",
-    user: { name: "Ana Oliveira", email: "ana.oliveira@email.com", avatar: "AO" },
-    plan: "Business",
-    amount: 99.90,
-    interval: "mensal",
-    status: "trial",
-    startDate: "05/02/2025",
-    nextBilling: "12/02/2025",
-    paymentMethod: "Cartão ****5678",
-    autoRenew: true
-  },
-  {
-    id: "sub_5",
-    user: { name: "Carlos Mendes", email: "carlos.mendes@email.com", avatar: "CM" },
-    plan: "Free",
-    amount: 0,
-    interval: "-",
-    status: "inativa",
-    startDate: "12/01/2025",
-    nextBilling: "-",
-    paymentMethod: "-",
-    autoRenew: false
-  },
-  {
-    id: "sub_6",
-    user: { name: "Fernanda Lima", email: "fernanda.lima@email.com", avatar: "FL" },
-    plan: "Pro",
-    amount: 29.90,
-    interval: "mensal",
-    status: "atrasada",
-    startDate: "18/01/2025",
-    nextBilling: "18/01/2025",
-    paymentMethod: "Cartão ****9012",
-    autoRenew: true
-  },
-];
-
-const totalRevenue = mockSubscriptions
-  .filter(s => s.status === "ativa" && s.amount > 0)
-  .reduce((acc, s) => acc + s.amount, 0);
+import { useAdminSubscriptions } from "@/features/admin/hooks/use-admin-subscriptions";
 
 const statusConfig = {
   ativa: { label: "Ativa", color: "emerald", bg: "emerald-500/10", border: "emerald-200", icon: CheckCircle },
@@ -152,13 +75,45 @@ export default function AdminSubscriptions() {
   const [selectedPlan, setSelectedPlan] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
-  const filteredSubscriptions = mockSubscriptions.filter(sub => {
+  const { subscriptions, stats, isLoading, isError, error } = useAdminSubscriptions();
+
+  const filteredSubscriptions = subscriptions.filter(sub => {
     const matchesSearch = sub.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           sub.user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPlan = selectedPlan === "all" || sub.plan === selectedPlan;
     const matchesStatus = selectedStatus === "all" || sub.status === selectedStatus;
     return matchesSearch && matchesPlan && matchesStatus;
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full">
+        <AdminHeader title="Assinaturas" subtitle="Gerencie as assinaturas da plataforma" />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Carregando assinaturas...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    const msg = error instanceof Error ? error.message : "Erro desconhecido";
+    return (
+      <div className="flex flex-col h-full">
+        <AdminHeader title="Assinaturas" subtitle="Gerencie as assinaturas da plataforma" />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="text-center space-y-2">
+            <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+            <p className="text-destructive font-medium">Falha ao carregar assinaturas</p>
+            <p className="text-sm text-muted-foreground">{msg}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -177,7 +132,7 @@ export default function AdminSubscriptions() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Receita Mensal</p>
-                  <p className="text-xl font-bold">R$ {totalRevenue.toFixed(2)}</p>
+                  <p className="text-xl font-bold">R$ {stats.totalRevenue.toFixed(2)}</p>
                 </div>
               </div>
             </CardContent>
@@ -190,7 +145,7 @@ export default function AdminSubscriptions() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Ativas</p>
-                  <p className="text-xl font-bold">{mockSubscriptions.filter(s => s.status === "ativa").length}</p>
+                  <p className="text-xl font-bold">{stats.active}</p>
                 </div>
               </div>
             </CardContent>
@@ -203,7 +158,7 @@ export default function AdminSubscriptions() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Em Trial</p>
-                  <p className="text-xl font-bold">{mockSubscriptions.filter(s => s.status === "trial").length}</p>
+                  <p className="text-xl font-bold">{stats.trial}</p>
                 </div>
               </div>
             </CardContent>
@@ -216,7 +171,7 @@ export default function AdminSubscriptions() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Atrasadas</p>
-                  <p className="text-xl font-bold text-red-500">{mockSubscriptions.filter(s => s.status === "atrasada").length}</p>
+                  <p className="text-xl font-bold text-red-500">{stats.overdue}</p>
                 </div>
               </div>
             </CardContent>
@@ -376,7 +331,7 @@ export default function AdminSubscriptions() {
 
           <div className="flex items-center justify-between p-4 border-t border-muted/50">
             <p className="text-sm text-muted-foreground">
-              Mostrando {filteredSubscriptions.length} de {mockSubscriptions.length} assinaturas
+              Mostrando {filteredSubscriptions.length} de {subscriptions.length} assinaturas
             </p>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-foreground">

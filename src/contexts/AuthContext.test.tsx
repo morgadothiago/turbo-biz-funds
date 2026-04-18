@@ -3,6 +3,45 @@ import { renderHook, act, waitFor, cleanup } from "@testing-library/react";
 import { AuthProvider, useAuth, useAuthLoading } from "@/contexts/AuthContext";
 import React from "react";
 
+const makeToken = (payload: object) => {
+  const encoded = btoa(JSON.stringify(payload))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+  return `header.${encoded}.signature`;
+};
+
+const ADMIN_TOKEN = makeToken({
+  sub: "1",
+  email: "admin@doutocash.com",
+  name: "Administrador",
+  role: "admin",
+});
+
+const USER_TOKEN = makeToken({
+  sub: "2",
+  email: "usuario@doutocash.com",
+  name: "João Silva",
+  role: "user",
+});
+
+vi.mock("@/lib/api/client", () => ({
+  api: {
+    post: vi.fn((_endpoint: string, body: { email: string; password: string }) => {
+      if (body.email === "admin@doutocash.com" && body.password === "admin123") {
+        return Promise.resolve({ data: { token: ADMIN_TOKEN } });
+      }
+      if (body.email === "usuario@doutocash.com" && body.password === "user123") {
+        return Promise.resolve({ data: { token: USER_TOKEN } });
+      }
+      return Promise.reject({ message: "Email ou senha inválidos", status: 401 });
+    }),
+  },
+  apiEndpoints: {
+    auth: { login: "/v1/auth/login", register: "/v1/auth/register" },
+  },
+}));
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <AuthProvider>{children}</AuthProvider>
 );
@@ -19,23 +58,23 @@ describe("AuthContext - Core Functionality", () => {
 
   it("should login successfully with admin credentials", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await result.current.login("admin@financeai.com", "admin123");
+      await result.current.login("admin@doutocash.com", "admin123");
     });
-    
+
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.user?.role).toBe("admin");
-    expect(result.current.user?.email).toBe("admin@financeai.com");
+    expect(result.current.user?.email).toBe("admin@doutocash.com");
   });
 
   it("should login successfully with user credentials", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await result.current.login("usuario@financeai.com", "user123");
+      await result.current.login("usuario@doutocash.com", "user123");
     });
-    
+
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.user?.role).toBe("user");
     expect(result.current.user?.name).toBe("João Silva");
@@ -43,16 +82,16 @@ describe("AuthContext - Core Functionality", () => {
 
   it("should throw error for invalid credentials", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
-    let error: Error | null = null;
+
+    let error: { message?: string } | null = null;
     await act(async () => {
       try {
         await result.current.login("invalid@email.com", "wrongpassword");
       } catch (e) {
-        error = e as Error;
+        error = e as { message?: string };
       }
     });
-    
+
     expect(error).not.toBeNull();
     expect(error?.message).toBe("Email ou senha inválidos");
     expect(result.current.isAuthenticated).toBe(false);
@@ -60,36 +99,36 @@ describe("AuthContext - Core Functionality", () => {
 
   it("should logout successfully", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await result.current.login("admin@financeai.com", "admin123");
+      await result.current.login("admin@doutocash.com", "admin123");
     });
-    
+
     act(() => {
       result.current.logout();
     });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
   });
 
   it("should set loading state during login", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     act(() => {
-      result.current.login("admin@financeai.com", "admin123");
+      result.current.login("admin@doutocash.com", "admin123");
     });
-    
+
     expect(result.current.isLoading).toBe(true);
   });
 
   it("should return user name correctly after login", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await result.current.login("admin@financeai.com", "admin123");
+      await result.current.login("admin@doutocash.com", "admin123");
     });
-    
+
     expect(result.current.user?.name).toBe("Administrador");
   });
 });
@@ -106,19 +145,18 @@ describe("AuthContext - Initialization", () => {
 
   it("should initialize with no user", () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
-    expect(result.current.isLoading).toBe(false);
   });
 
   it("should remain unauthenticated if no token in localStorage", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
-    
+
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
   });
@@ -136,7 +174,7 @@ describe("AuthContext - useAuthLoading Hook", () => {
 
   it("should return loading state correctly", async () => {
     const { result } = renderHook(() => useAuthLoading(), { wrapper });
-    
+
     await waitFor(() => {
       expect(result.current).toBe(false);
     });
@@ -144,11 +182,11 @@ describe("AuthContext - useAuthLoading Hook", () => {
 
   it("should show loading during login", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     act(() => {
-      result.current.login("admin@financeai.com", "admin123");
+      result.current.login("admin@doutocash.com", "admin123");
     });
-    
+
     expect(result.current.isLoading).toBe(true);
   });
 });
@@ -165,21 +203,21 @@ describe("AuthContext - Error Handling", () => {
 
   it("should handle localStorage errors gracefully on login", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    
+
     vi.spyOn(localStorage, "setItem").mockImplementation(() => {
       throw new Error("Storage error");
     });
-    
+
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
       try {
-        await result.current.login("admin@financeai.com", "admin123");
+        await result.current.login("admin@doutocash.com", "admin123");
       } catch {
         // Expected to throw
       }
     });
-    
+
     expect(result.current.isLoading).toBe(false);
     consoleSpy.mockRestore();
   });
@@ -197,22 +235,22 @@ describe("AuthContext - User Data", () => {
 
   it("should have userId in user data after login", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await result.current.login("admin@financeai.com", "admin123");
+      await result.current.login("admin@doutocash.com", "admin123");
     });
-    
+
     expect(result.current.user?.id).toBe("1");
-    expect(result.current.user?.email).toBe("admin@financeai.com");
+    expect(result.current.user?.email).toBe("admin@doutocash.com");
   });
 
   it("should handle different user roles", async () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
-    
+
     await act(async () => {
-      await result.current.login("usuario@financeai.com", "user123");
+      await result.current.login("usuario@doutocash.com", "user123");
     });
-    
+
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.user?.role).toBe("user");
     expect(result.current.user?.id).toBe("2");

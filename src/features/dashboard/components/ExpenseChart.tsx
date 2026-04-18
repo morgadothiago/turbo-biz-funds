@@ -32,6 +32,11 @@ export const ExpenseChart = ({ data }: ExpenseChartProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {data.length === 0 ? (
+          <div className="h-[250px] flex items-center justify-center text-sm text-muted-foreground">
+            Nenhuma despesa registrada neste período
+          </div>
+        ) : (
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -64,6 +69,7 @@ export const ExpenseChart = ({ data }: ExpenseChartProps) => {
             />
           </LineChart>
         </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   );
