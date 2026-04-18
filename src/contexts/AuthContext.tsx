@@ -23,6 +23,7 @@ interface RegisterPayload {
   email: string;
   password: string;
   plan: string;
+  phone?: string;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Mail, Lock, User, ArrowRight, Check, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowRight, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
@@ -14,6 +14,10 @@ const logoWeb = "/logoweb.png";
 const registerSchema = z
   .object({
     name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
+    phone: z
+      .string()
+      .min(10, "Telefone inválido")
+      .regex(/^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/, "Formato: (11) 99999-9999"),
     email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
     password: z
       .string()
@@ -31,6 +35,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface FormErrors {
   name?: string;
+  phone?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
@@ -43,6 +48,7 @@ const Cadastro = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<RegisterFormData & { plan: string }>({
     name: "",
+    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -91,6 +97,7 @@ const Cadastro = () => {
         email: formData.email,
         password: formData.password,
         plan: formData.plan,
+        phone: formData.phone.replace(/\D/g, ""),
       });
 
       analytics.signup("email");
@@ -240,6 +247,41 @@ const Cadastro = () => {
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-destructive" />
                       {errors.name}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-medium">
+                    Telefone / WhatsApp
+                  </Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="(11) 99999-9999"
+                      value={formData.phone}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, "").slice(0, 11);
+                        let masked = raw;
+                        if (raw.length > 2) masked = `(${raw.slice(0, 2)}) ${raw.slice(2)}`;
+                        if (raw.length > 7) masked = `(${raw.slice(0, 2)}) ${raw.slice(2, 7)}-${raw.slice(7)}`;
+                        setFormData({ ...formData, phone: masked });
+                        if (errors.phone) setErrors({ ...errors, phone: undefined });
+                      }}
+                      className={`pl-11 h-11 ${
+                        errors.phone
+                          ? "border-destructive focus:border-destructive"
+                          : "focus:border-primary focus:ring-primary/20"
+                      }`}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  {errors.phone && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-destructive" />
+                      {errors.phone}
                     </p>
                   )}
                 </div>
