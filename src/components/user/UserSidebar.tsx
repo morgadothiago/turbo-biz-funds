@@ -8,9 +8,8 @@ import {
   MessageCircle,
   CreditCard,
   LucideIcon,
-  Sparkles,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -26,9 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -70,15 +67,15 @@ function MenuItemLink({ item, end = false, isCollapsed = false }: MenuItemLinkPr
         to={item.url}
         end={end}
         className={cn(
-          "flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200 mx-auto",
+          "flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-150 mx-auto",
           isActive
-            ? "bg-primary/20 text-primary font-medium"
-            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            ? "bg-primary/15 text-primary"
+            : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
         )}
         title={item.title}
         aria-label={item.title}
       >
-        <Icon className="h-5 w-5" />
+        <Icon className="h-[18px] w-[18px]" />
       </NavLink>
     );
   }
@@ -88,24 +85,17 @@ function MenuItemLink({ item, end = false, isCollapsed = false }: MenuItemLinkPr
       to={item.url}
       end={end}
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+        "relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 group/item",
         isActive
-          ? "bg-primary/20 text-primary font-medium"
-          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          ? "bg-primary/10 text-primary font-medium"
+          : "text-sidebar-foreground/55 hover:bg-sidebar-accent hover:text-sidebar-foreground/90"
       )}
     >
-      <div
-        className={cn(
-          "flex items-center justify-center w-8 h-8 rounded-lg transition-colors",
-          isActive ? "bg-primary/20" : "bg-sidebar-accent/50"
-        )}
-      >
-        <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-sidebar-foreground/70")} />
-      </div>
-      <span className={cn("flex-1", isActive ? "text-primary" : "text-sidebar-foreground/70")}>
-        {item.title}
-      </span>
-      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+      {isActive && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
+      )}
+      <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive ? "text-primary" : "text-sidebar-foreground/50 group-hover/item:text-sidebar-foreground/80")} />
+      <span className="flex-1 truncate">{item.title}</span>
     </NavLink>
   );
 }
@@ -133,37 +123,36 @@ export function UserSidebar() {
   };
 
   return (
-    <Sidebar
-      collapsible="icon"
-      className="border-r border-sidebar-border bg-sidebar"
-    >
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
+    <Sidebar collapsible="icon" className="border-r-0 border-sidebar-border bg-sidebar">
+      <SidebarHeader className={cn("pt-5 pb-4", isCollapsed ? "px-3" : "px-4")}>
+        <div className={cn("flex items-center gap-2.5", isCollapsed && "justify-center")}>
           <img
             src="/logoweb.png"
             alt="doutorcash"
-            className="h-8 w-auto flex-shrink-0 object-contain"
+            className="h-7 w-auto shrink-0 object-contain"
           />
           {!isCollapsed && (
-            <p className="text-xs text-sidebar-foreground/60 truncate">Minhas Finanças</p>
+            <span className="text-[13px] font-medium text-sidebar-foreground/70 truncate">
+              doutorcash
+            </span>
           )}
         </div>
       </SidebarHeader>
 
-      <Separator className="mx-4 w-auto bg-sidebar-border" />
+      <div className={cn("h-px bg-sidebar-border", isCollapsed ? "mx-3" : "mx-4")} />
 
-      <SidebarContent className="px-2 py-4">
-        <SidebarGroup>
+      <SidebarContent className={cn("py-4", isCollapsed ? "px-2" : "px-3")}>
+        <SidebarGroup className="p-0">
           {!isCollapsed && (
-            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-sidebar-foreground/50 mb-3 px-3">
-              Menu Principal
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-sidebar-foreground/30 mb-1 px-3 h-auto pb-1.5">
+              Principal
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {mainMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
+                  <SidebarMenuButton asChild tooltip={item.title} className="h-auto p-0">
                     <MenuItemLink
                       item={item}
                       end={item.url === "/dashboard"}
@@ -176,17 +165,18 @@ export function UserSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-4">
+        <SidebarGroup className="mt-5 p-0">
           {!isCollapsed && (
-            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-sidebar-foreground/50 mb-3 px-3">
-              Integrações
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-sidebar-foreground/30 mb-1 px-3 h-auto pb-1.5">
+              Mais
             </SidebarGroupLabel>
           )}
+          {isCollapsed && <div className="h-px bg-sidebar-border mx-1 mb-3" />}
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {secondaryMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
+                  <SidebarMenuButton asChild tooltip={item.title} className="h-auto p-0">
                     <MenuItemLink item={item} isCollapsed={isCollapsed} />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -196,30 +186,32 @@ export function UserSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto">
-        <Separator className="mb-4 bg-sidebar-border" />
-        <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
-          <Avatar className="h-9 w-9 bg-primary/20">
-            <AvatarFallback className="bg-primary/20 text-primary font-medium text-sm">
+      <SidebarFooter className={cn("pb-4", isCollapsed ? "px-2" : "px-3")}>
+        <div className="h-px bg-sidebar-border mb-3" />
+        <div className={cn("flex items-center gap-2.5", isCollapsed && "justify-center")}>
+          <Avatar className="h-8 w-8 shrink-0">
+            <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
               {getUserInitials()}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                <p className="text-[13px] font-medium text-sidebar-foreground/90 truncate leading-tight">
                   {user?.name || "Usuário"}
                 </p>
-                <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
+                <p className="text-[11px] text-sidebar-foreground/40 truncate leading-tight mt-0.5">
+                  {user?.email}
+                </p>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                className="h-7 w-7 shrink-0 text-sidebar-foreground/35 hover:text-sidebar-foreground/70 hover:bg-sidebar-accent"
                 onClick={handleLogout}
                 aria-label="Sair"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3.5 w-3.5" />
               </Button>
             </>
           )}

@@ -1,10 +1,10 @@
-# Especificação Técnica – Alterações Landing Page Planeja Aí
+# Especificação Técnica – Alterações Landing Page doutorcash
 
 ## Informações do Projeto
 
 | Campo | Valor |
 |-------|-------|
-| **Projeto** | Planeja Aí – Landing Page |
+| **Projeto** | doutorcash – Landing Page |
 | **Versão** | 1.0 |
 | **Data** | Fevereiro/2026 |
 | **PO** | Product Owner |
@@ -16,7 +16,7 @@
 
 Cliente solicitou alterações visuais e de conteúdo na landing page atual. Esta especificação detalha os requisitos funcionais e restrições técnicas para implementação.
 
-**Objetivo estratégico**: Posicionar o Planeja Aí como "assessor financeiro pessoal 24h no WhatsApp – simples como mandar mensagem – inteligente como uma fintech"
+**Objetivo estratégico**: Posicionar o doutorcash como "assessor financeiro pessoal 24h no WhatsApp – simples como mandar mensagem – inteligente como uma fintech"
 
 ---
 
@@ -135,7 +135,7 @@ Já levou um susto com a fatura do cartão?
 
 **Fechamento**:
 ```
-O Planeja Aí resolve isso.
+O doutorcash resolve isso.
 Organização financeira simples e direta pelo WhatsApp.
 ```
 
