@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { 
-  Search, 
-  MoreHorizontal, 
+import {
+  Search,
+  MoreHorizontal,
   Building2,
   Users,
   CreditCard,
@@ -13,7 +13,9 @@ import {
   Eye,
   Mail,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,13 +23,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import {
   DropdownMenu,
@@ -46,87 +48,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
-
-const mockCompanies = [
-  { 
-    id: "1", 
-    name: "Tech Solutions LTDA", 
-    cnpj: "12.345.678/0001-90",
-    email: "contato@techsolutions.com", 
-    plan: "Pro", 
-    status: "Ativo",
-    users: 12,
-    mrr: 199,
-    usage: 78,
-    createdAt: "10/01/2025",
-    owner: "João Silva"
-  },
-  { 
-    id: "2", 
-    name: "Inovação Digital ME", 
-    cnpj: "98.765.432/0001-10",
-    email: "admin@inovdigital.com", 
-    plan: "Business", 
-    status: "Ativo",
-    users: 25,
-    mrr: 499,
-    usage: 92,
-    createdAt: "15/01/2025",
-    owner: "Maria Santos"
-  },
-  { 
-    id: "3", 
-    name: "Startup Hub", 
-    cnpj: "11.222.333/0001-44",
-    email: "hello@startuphub.io", 
-    plan: "Free", 
-    status: "Trial",
-    users: 3,
-    mrr: 0,
-    usage: 45,
-    createdAt: "20/01/2025",
-    owner: "Pedro Costa"
-  },
-  { 
-    id: "4", 
-    name: "Finance Corp", 
-    cnpj: "55.666.777/0001-88",
-    email: "suporte@financecorp.com", 
-    plan: "Pro", 
-    status: "Ativo",
-    users: 8,
-    mrr: 199,
-    usage: 65,
-    createdAt: "05/01/2025",
-    owner: "Ana Oliveira"
-  },
-  { 
-    id: "5", 
-    name: "E-commerce Plus", 
-    cnpj: "33.444.555/0001-22",
-    email: "vendas@ecommerceplus.com", 
-    plan: "Business", 
-    status: "Inadimplente",
-    users: 18,
-    mrr: 499,
-    usage: 88,
-    createdAt: "12/01/2025",
-    owner: "Carlos Mendes"
-  },
-  { 
-    id: "6", 
-    name: "Digital Marketing Co", 
-    cnpj: "77.888.999/0001-55",
-    email: "contato@digitalmkt.com", 
-    plan: "Pro", 
-    status: "Ativo",
-    users: 6,
-    mrr: 199,
-    usage: 52,
-    createdAt: "18/01/2025",
-    owner: "Fernanda Lima"
-  },
-];
+import { useAdminCompanies } from "@/features/admin/hooks/use-admin-companies";
 
 const planColors: Record<string, string> = {
   Free: "bg-muted text-muted-foreground",
@@ -147,7 +69,9 @@ export default function AdminCompanies() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
 
-  const filteredCompanies = mockCompanies.filter(company => {
+  const { companies, stats: companyStats, isLoading, isError, error } = useAdminCompanies();
+
+  const filteredCompanies = companies.filter(company => {
     const matchesSearch = company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           company.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           company.cnpj.includes(searchTerm);
@@ -175,13 +99,43 @@ export default function AdminCompanies() {
   const totalMRR = filteredCompanies.reduce((sum, c) => sum + c.mrr, 0);
   const totalUsers = filteredCompanies.reduce((sum, c) => sum + c.users, 0);
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full">
+        <AdminHeader title="Gestão de Empresas" subtitle="Gerencie todas as empresas cadastradas" />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Carregando empresas...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    const msg = error instanceof Error ? error.message : "Erro desconhecido";
+    return (
+      <div className="flex flex-col h-full">
+        <AdminHeader title="Gestão de Empresas" subtitle="Gerencie todas as empresas cadastradas" />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="text-center space-y-2">
+            <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+            <p className="text-destructive font-medium">Falha ao carregar empresas</p>
+            <p className="text-sm text-muted-foreground">{msg}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
-      <AdminHeader 
-        title="Gestão de Empresas" 
+      <AdminHeader
+        title="Gestão de Empresas"
         subtitle="Gerencie todas as empresas cadastradas"
       />
-      
+
       <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -192,7 +146,7 @@ export default function AdminCompanies() {
                   <Building2 className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">234</div>
+                  <div className="text-2xl font-bold">{companyStats.total.toLocaleString("pt-BR")}</div>
                   <p className="text-sm text-muted-foreground">Total de empresas</p>
                 </div>
               </div>
@@ -205,7 +159,7 @@ export default function AdminCompanies() {
                   <CheckCircle className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-success">198</div>
+                  <div className="text-2xl font-bold text-success">{companyStats.active.toLocaleString("pt-BR")}</div>
                   <p className="text-sm text-muted-foreground">Empresas ativas</p>
                 </div>
               </div>
@@ -231,7 +185,7 @@ export default function AdminCompanies() {
                   <AlertTriangle className="h-5 w-5 text-destructive" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-destructive">12</div>
+                  <div className="text-2xl font-bold text-destructive">{companyStats.defaulting.toLocaleString("pt-BR")}</div>
                   <p className="text-sm text-muted-foreground">Inadimplentes</p>
                 </div>
               </div>
@@ -394,7 +348,7 @@ export default function AdminCompanies() {
             {/* Pagination */}
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm text-muted-foreground">
-                Mostrando {filteredCompanies.length} de {mockCompanies.length} empresas
+                Mostrando {filteredCompanies.length} de {companies.length} empresas
               </p>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" disabled>

@@ -1,48 +1,182 @@
 import { memo, useState } from "react";
-import { Receipt, Plus, Search, Filter, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Receipt, Plus, Search, ArrowUpRight, ArrowDownRight, Loader2, Trash2, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/user/PageHeader";
-import {
-  PageHeaderSkeleton,
-  TransactionsListSkeleton
-} from "@/components/ui/page-skeletons";
+import { TransactionsListSkeleton, PageHeaderSkeleton } from "@/components/ui/page-skeletons";
 import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, apiEndpoints } from "@/lib/api/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
-const TRANSACTIONS = [
-  { id: 1, description: "Supermercado Extra", category: "Alimentação", date: "06/02/2026", amount: -245.50, type: "expense", icon: "🛒" },
-  { id: 2, description: "Salário", category: "Renda", date: "05/02/2026", amount: 5200.00, type: "income", icon: "💰" },
-  { id: 3, description: "Uber - Centro", category: "Transporte", date: "05/02/2026", amount: -28.90, type: "expense", icon: "🚗" },
-  { id: 4, description: "Netflix", category: "Lazer", date: "04/02/2026", amount: -39.90, type: "expense", icon: "🎬" },
-  { id: 5, description: "Conta de Luz", category: "Contas", date: "03/02/2026", amount: -180.00, type: "expense", icon: "💡" },
-  { id: 6, description: "Freelance Design", category: "Renda", date: "02/02/2026", amount: 850.00, type: "income", icon: "💻" },
+interface ApiTransaction {
+  id: string;
+  categoryId: string;
+  type: "INCOME" | "EXPENSE";
+  amount: number;
+  description: string | null;
+  occurredAt: string;
+}
+
+interface ApiCategory {
+  id: string;
+  name: string;
+}
+
+type Period = "weekly" | "15d" | "30d";
+type TypeFilter = "ALL" | "INCOME" | "EXPENSE";
+
+const SUGGESTED_CATEGORIES = [
+  "Alimentação", "Transporte", "Moradia", "Saúde", "Educação",
+  "Lazer", "Vestuário", "Salário", "Freelance", "Investimentos", "Outros",
+];
+
+const PERIOD_OPTIONS: { value: Period; label: string }[] = [
+  { value: "weekly", label: "7 dias" },
+  { value: "15d", label: "15 dias" },
+  { value: "30d", label: "30 dias" },
 ];
 
 const TransactionsPageSkeleton = () => (
   <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-pulse">
     <PageHeaderSkeleton />
-    <div className="h-16 rounded-lg bg-muted" />
+    <div className="grid grid-cols-3 gap-4">
+      {[0, 1, 2].map((i) => <div key={i} className="h-24 rounded-xl bg-muted" />)}
+    </div>
+    <div className="h-14 rounded-lg bg-muted" />
     <TransactionsListSkeleton />
   </div>
 );
 
 const TransactionsPage = memo(() => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [transactions, setTransactions] = useState(TRANSACTIONS);
+  const queryClient = useQueryClient();
+  const [period, setPeriod] = useState<Period>("30d");
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [form, setForm] = useState({
+    categoryId: "",
+    type: "EXPENSE" as "INCOME" | "EXPENSE",
+    amount: "",
+    description: "",
+    occurredAt: new Date().toISOString().split("T")[0],
+  });
 
-  const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success("Transações atualizadas");
-    }, 1000);
+  const { data: transactionsRes, isLoading } = useQuery({
+    queryKey: ["transactions", period],
+    queryFn: () =>
+      api.get<{ data: ApiTransaction[] }>(`${apiEndpoints.transactions.list}?period=${period}`),
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const { data: categoriesRes, isLoading: isCategoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => api.get<{ data: ApiCategory[] }>(apiEndpoints.categories.list),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const transactions = transactionsRes?.data ?? [];
+  const categories = categoriesRes?.data ?? [];
+  const catMap = new Map(categories.map((c) => [c.id, c.name]));
+
+  const totalIncome = transactions.filter((t) => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
+  const totalExpense = transactions.filter((t) => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
+  const balance = totalIncome - totalExpense;
+
+  const createCategoryMutation = useMutation({
+    mutationFn: (name: string) =>
+      api.post<{ data: ApiCategory }>(apiEndpoints.categories.create, { name }),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      setForm((f) => ({ ...f, categoryId: res.data.id }));
+      setNewCategoryName("");
+      setShowNewCategory(false);
+      toast.success(`Categoria "${res.data.name}" criada!`);
+    },
+    onError: () => toast.error("Erro ao criar categoria"),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: {
+      categoryId: string;
+      type: "INCOME" | "EXPENSE";
+      amount: number;
+      description?: string;
+      occurredAt: string;
+    }) => api.post<{ data: ApiTransaction }>(apiEndpoints.transactions.create, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success("Transação criada com sucesso!");
+      setIsDialogOpen(false);
+      setForm({
+        categoryId: "",
+        type: "EXPENSE",
+        amount: "",
+        description: "",
+        occurredAt: new Date().toISOString().split("T")[0],
+      });
+    },
+    onError: () => toast.error("Erro ao criar transação"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      api.delete<{ data: { removed: boolean } }>(apiEndpoints.transactions.delete(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      toast.success("Transação removida");
+    },
+    onError: () => toast.error("Erro ao remover transação"),
+  });
+
+  const handleCreate = () => {
+    if (!form.categoryId || !form.amount) {
+      toast.error("Preencha categoria e valor");
+      return;
+    }
+    createMutation.mutate({
+      categoryId: form.categoryId,
+      type: form.type,
+      amount: parseFloat(form.amount),
+      description: form.description || undefined,
+      occurredAt: new Date(form.occurredAt).toISOString(),
+    });
   };
 
-  if (isLoading) {
-    return <TransactionsPageSkeleton />;
-  }
+  const handleCreateCategory = () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    createCategoryMutation.mutate(name);
+  };
+
+  const filtered = transactions.filter((t) => {
+    if (typeFilter !== "ALL" && t.type !== typeFilter) return false;
+    if (!search) return true;
+    const catName = catMap.get(t.categoryId) ?? "";
+    const desc = t.description ?? "";
+    return (
+      desc.toLowerCase().includes(search.toLowerCase()) ||
+      catName.toLowerCase().includes(search.toLowerCase())
+    );
+  });
+
+  const fmt = (v: number) =>
+    v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  if (isLoading) return <TransactionsPageSkeleton />;
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
@@ -51,72 +185,346 @@ const TransactionsPage = memo(() => {
         subtitle="Gerencie todas as suas movimentações"
         action={{
           label: "Nova Transação",
-          onClick: () => toast.info("Em breve: adicionar transação")
+          onClick: () => setIsDialogOpen(true),
         }}
       />
 
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="border-border shadow-sm">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Receitas</p>
+              <p className="text-xl font-bold text-emerald-500">R$ {fmt(totalIncome)}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border shadow-sm">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+              <TrendingDown className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Despesas</p>
+              <p className="text-xl font-bold text-red-500">R$ {fmt(totalExpense)}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border shadow-sm">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${balance >= 0 ? "bg-primary/10" : "bg-red-500/10"}`}>
+              <Wallet className={`w-5 h-5 ${balance >= 0 ? "text-primary" : "text-red-500"}`} />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Saldo</p>
+              <p className={`text-xl font-bold ${balance >= 0 ? "text-primary" : "text-red-500"}`}>
+                R$ {fmt(Math.abs(balance))}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filters */}
-      <Card className="border-border shadow-sm transition-shadow hover:shadow-md">
+      <Card className="border-border shadow-sm">
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar transações..."
-                className="pl-10 bg-background border-input text-foreground placeholder:text-muted-foreground transition-all focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                placeholder="Buscar por descrição ou categoria..."
+                className="pl-10"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button variant="outline" className="gap-2 transition-all hover:bg-accent">
-              <Filter className="w-4 h-4" />
-              Filtros
-            </Button>
+            <div className="flex gap-2 shrink-0">
+              {/* Type filter */}
+              {(["ALL", "INCOME", "EXPENSE"] as TypeFilter[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTypeFilter(t)}
+                  className={`px-3 py-1.5 text-sm rounded-lg border transition-colors font-medium ${
+                    typeFilter === t
+                      ? t === "INCOME"
+                        ? "bg-emerald-500 text-white border-emerald-500"
+                        : t === "EXPENSE"
+                        ? "bg-red-500 text-white border-red-500"
+                        : "bg-primary text-primary-foreground border-primary"
+                      : "border-border bg-muted/50 hover:border-primary/60 hover:bg-primary/5 text-muted-foreground"
+                  }`}
+                >
+                  {t === "ALL" ? "Todos" : t === "INCOME" ? "Receitas" : "Despesas"}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-1.5 shrink-0 bg-muted/50 rounded-lg p-1 border border-border">
+              {PERIOD_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setPeriod(opt.value)}
+                  className={`px-3 py-1 text-sm rounded-md transition-colors font-medium ${
+                    period === opt.value
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Transactions List */}
-      <Card className="border-border shadow-sm transition-shadow hover:shadow-md">
+      {/* Transaction list */}
+      <Card className="border-border shadow-sm">
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Receipt className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-foreground">Histórico de Transações</h3>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <Receipt className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Histórico</h3>
+            </div>
+            <span className="text-sm text-muted-foreground">{filtered.length} transaç{filtered.length === 1 ? "ão" : "ões"}</span>
           </div>
 
-          <div className="space-y-3">
-            {transactions.map((transaction) => (
-              <div
-                key={transaction.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-accent/50 hover:bg-accent transition-all duration-200 border border-border cursor-pointer hover:scale-[1.01]"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center text-xl transition-transform hover:scale-110">
-                    {transaction.icon}
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">{transaction.description}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Badge variant="outline" className="bg-background">
-                        {transaction.category}
-                      </Badge>
-                      <span>{transaction.date}</span>
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <Receipt className="w-12 h-12 mx-auto mb-3 opacity-20" />
+              <p className="font-medium">Nenhuma transação encontrada</p>
+              <p className="text-sm mt-1 opacity-70">Tente ajustar os filtros ou adicione uma nova transação</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filtered.map((transaction) => {
+                const isIncome = transaction.type === "INCOME";
+                const catName = catMap.get(transaction.categoryId) ?? "Sem categoria";
+                const date = new Date(transaction.occurredAt).toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                });
+                return (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-accent/40 transition-all duration-150 group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        isIncome ? "bg-emerald-500/10" : "bg-red-500/10"
+                      }`}>
+                        {isIncome
+                          ? <ArrowUpRight className="w-5 h-5 text-emerald-500" />
+                          : <ArrowDownRight className="w-5 h-5 text-red-500" />
+                        }
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground leading-tight">
+                          {transaction.description ?? "Sem descrição"}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Badge variant="outline" className="text-xs px-2 py-0 h-5 bg-background font-normal">
+                            {catName}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">{date}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <span className={`font-bold text-base ${isIncome ? "text-emerald-500" : "text-foreground"}`}>
+                          {isIncome ? "+" : "−"}R$ {fmt(transaction.amount)}
+                        </span>
+                        <p className="text-xs text-muted-foreground capitalize">{isIncome ? "receita" : "despesa"}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                        onClick={() => deleteMutation.mutate(transaction.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`font-semibold ${transaction.type === "income" ? "text-success" : "text-foreground"}`}>
-                    {transaction.type === "income" ? "+" : ""}R$ {Math.abs(transaction.amount).toFixed(2)}
-                  </span>
-                  {transaction.type === "income" ? (
-                    <ArrowUpRight className="w-4 h-4 text-success" />
-                  ) : (
-                    <ArrowDownRight className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) {
+          setShowNewCategory(false);
+          setNewCategoryName("");
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nova Transação</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 py-2">
+            {/* Type toggle */}
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {(["EXPENSE", "INCOME"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setForm({ ...form, type: t })}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                      form.type === t
+                        ? t === "INCOME"
+                          ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"
+                          : "bg-red-500 text-white border-red-500 shadow-sm"
+                        : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {t === "INCOME"
+                      ? <><TrendingUp className="w-4 h-4" /> Receita</>
+                      : <><TrendingDown className="w-4 h-4" /> Despesa</>
+                    }
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Categoria</Label>
+              {!showNewCategory ? (
+                <>
+                  {isCategoriesLoading ? (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm py-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Carregando categorias...
+                    </div>
+                  ) : categories.length === 0 ? (
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-muted-foreground">Sugestões — clique para criar:</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {SUGGESTED_CATEGORIES.map((name) => (
+                          <button
+                            key={name}
+                            type="button"
+                            onClick={() => createCategoryMutation.mutate(name)}
+                            disabled={createCategoryMutation.isPending}
+                            className="px-2.5 py-1 text-xs rounded-full border border-border bg-muted/50 hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
+                          >
+                            {createCategoryMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin inline" /> : name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                      {categories.map((c) => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setForm({ ...form, categoryId: c.id })}
+                          className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                            form.categoryId === c.id
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-muted/50 hover:border-primary/60 hover:bg-primary/5"
+                          }`}
+                        >
+                          {c.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowNewCategory(true)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    + Nova categoria
+                  </button>
+                </>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Nome da categoria"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleCreateCategory()}
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleCreateCategory}
+                    disabled={createCategoryMutation.isPending || !newCategoryName.trim()}
+                  >
+                    {createCategoryMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Criar"}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => { setShowNewCategory(false); setNewCategoryName(""); }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Valor (R$)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">R$</span>
+                <Input
+                  type="number"
+                  placeholder="0,00"
+                  className="pl-9"
+                  value={form.amount}
+                  onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Descrição <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+              <Input
+                placeholder="Ex: Supermercado"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Data</Label>
+              <Input
+                type="date"
+                value={form.occurredAt}
+                onChange={(e) => setForm({ ...form, occurredAt: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1 sm:flex-none">
+              Cancelar
+            </Button>
+            <Button onClick={handleCreate} disabled={createMutation.isPending} className="flex-1 sm:flex-none">
+              {createMutation.isPending ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Salvando...</>
+              ) : (
+                <><Plus className="w-4 h-4 mr-2" />Criar transação</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });

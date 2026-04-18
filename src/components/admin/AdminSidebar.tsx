@@ -127,16 +127,13 @@ export function AdminSidebar() {
     <Sidebar collapsible="icon" className="border-r border-[#25D366]/10 bg-[#1a3d35]">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#25D366] to-[#128C7E] flex items-center justify-center shadow-lg shadow-[#25D366]/20">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <img
+            src="/logoweb.png"
+            alt="doutorcash"
+            className="h-8 w-auto flex-shrink-0 object-contain brightness-0 invert"
+          />
           {!isCollapsed && (
-            <div>
-              <h2 className="font-bold text-lg text-[#F6F4EF]">
-                Planeja<span className="text-[#25D366]"> Aí</span>
-              </h2>
-              <p className="text-xs text-[#F6F4EF]/60">Painel Admin</p>
-            </div>
+            <p className="text-xs text-[#F6F4EF]/60">Painel Admin</p>
           )}
         </div>
       </SidebarHeader>
@@ -190,7 +187,7 @@ export function AdminSidebar() {
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-[#F6F4EF] truncate">{user?.name || "Admin"}</p>
-              <p className="text-xs text-[#F6F4EF]/60 truncate">{user?.email || "admin@financeai.com"}</p>
+              <p className="text-xs text-[#F6F4EF]/60 truncate">{user?.email || "admin@doutocash.com"}</p>
             </div>
           )}
           {!isCollapsed && (

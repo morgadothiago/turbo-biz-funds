@@ -10,7 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
-  X
+  X,
+  AlertCircle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -42,25 +43,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AdminUsersSkeleton } from "@/components/ui/admin-skeletons";
-
-const mockUsers = [
-  { id: "1", name: "João Silva", email: "joao.silva@email.com", plan: "Pro", status: "Ativo", lastLogin: "5 min", createdAt: "10/01/2025" },
-  { id: "2", name: "Maria Santos", email: "maria.santos@email.com", plan: "Business", status: "Ativo", lastLogin: "1 hora", createdAt: "15/01/2025" },
-  { id: "3", name: "Pedro Costa", email: "pedro.costa@email.com", plan: "Free", status: "Pendente", lastLogin: "2 dias", createdAt: "20/01/2025" },
-  { id: "4", name: "Ana Oliveira", email: "ana.oliveira@email.com", plan: "Pro", status: "Ativo", lastLogin: "30 min", createdAt: "05/01/2025" },
-  { id: "5", name: "Carlos Mendes", email: "carlos.mendes@email.com", plan: "Free", status: "Bloqueado", lastLogin: "1 semana", createdAt: "12/01/2025" },
-  { id: "6", name: "Fernanda Lima", email: "fernanda.lima@email.com", plan: "Business", status: "Ativo", lastLogin: "Hoje", createdAt: "18/01/2025" },
-  { id: "7", name: "Roberto Alves", email: "roberto.alves@email.com", plan: "Pro", status: "Ativo", lastLogin: "3 horas", createdAt: "08/01/2025" },
-  { id: "8", name: "Juliana Reis", email: "juliana.reis@email.com", plan: "Free", status: "Ativo", lastLogin: "Ontem", createdAt: "22/01/2025" },
-];
+import { useAdminUsers } from "@/features/admin/hooks/use-admin-users";
 
 export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [isLoading] = useState(false);
 
-  const filteredUsers = mockUsers.filter(user => {
+  const { users, stats, isLoading, isError, error } = useAdminUsers();
+
+  const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPlan = selectedPlan === "all" || user.plan === selectedPlan;
@@ -76,10 +68,26 @@ export default function AdminUsers() {
 
   const hasActiveFilters = searchTerm || selectedPlan !== "all" || selectedStatus !== "all";
 
+  if (isError) {
+    const msg = error instanceof Error ? error.message : "Erro desconhecido";
+    return (
+      <div className="flex flex-col h-full">
+        <AdminHeader title="Clientes" subtitle="Gerencie os clientes da plataforma" />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="text-center space-y-2">
+            <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+            <p className="text-destructive font-medium">Falha ao carregar clientes</p>
+            <p className="text-sm text-muted-foreground">{msg}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
-      <AdminHeader 
-        title="Clientes" 
+      <AdminHeader
+        title="Clientes"
         subtitle="Gerencie os clientes da plataforma"
       />
 
@@ -92,25 +100,25 @@ export default function AdminUsers() {
               <Card className="border-0 shadow-sm bg-card/50">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold">1.429</p>
+                  <p className="text-2xl font-bold">{stats.total.toLocaleString("pt-BR")}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm bg-card/50">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Ativos</p>
-                  <p className="text-2xl font-bold text-emerald-500">1.256</p>
+                  <p className="text-2xl font-bold text-emerald-500">{stats.active.toLocaleString("pt-BR")}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm bg-card/50">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Pendentes</p>
-                  <p className="text-2xl font-bold text-amber-500">145</p>
+                  <p className="text-2xl font-bold text-amber-500">{stats.pending.toLocaleString("pt-BR")}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm bg-card/50">
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground">Bloqueados</p>
-                  <p className="text-2xl font-bold text-red-500">28</p>
+                  <p className="text-2xl font-bold text-red-500">{stats.blocked.toLocaleString("pt-BR")}</p>
                 </CardContent>
               </Card>
             </div>
@@ -285,7 +293,7 @@ export default function AdminUsers() {
 
                 <div className="flex items-center justify-between p-4 border-t border-muted/50">
                   <p className="text-sm text-muted-foreground">
-                    Mostrando {filteredUsers.length} de {mockUsers.length} clientes
+                    Mostrando {filteredUsers.length} de {users.length} clientes
                   </p>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="icon" className="h-8 w-8" disabled>

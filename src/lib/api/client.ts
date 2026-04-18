@@ -1,6 +1,9 @@
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { storage } from "../storage";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// Em dev: VITE_API_URL vazio → URL relativa → proxy do Vite encaminha para a API real (sem CORS)
+// Em produção: VITE_API_URL deve ser a URL completa da API
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 export interface ApiError {
   message: string;
@@ -8,142 +11,126 @@ export interface ApiError {
   code?: string;
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
-}
-
-class ApiClient {
-  private baseUrl: string;
-
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
-  }
-
-  private getToken(): string | null {
-    return storage.getToken();
-  }
-
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const token = this.getToken();
-
-    const headers: HeadersInit = {
+function createApiClient(): AxiosInstance {
+  const instance = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
       "Content-Type": "application/json",
-      ...options.headers,
-    };
+    },
+  });
 
-    if (token) {
-      (headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers,
-    });
-
-    if (!response.ok) {
-      const error: ApiError = {
-        message: response.statusText,
-        status: response.status,
-      };
-
-      try {
-        const data = await response.json();
-        error.message = data.message || error.message;
-        error.code = data.code;
-      } catch {
-        // Response is not JSON
+  instance.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
+      const token = storage.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
-      // Handle 401 - Unauthorized
-      if (response.status === 401) {
+  instance.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError<{ message?: string; code?: string }>) => {
+      const status = error.response?.status;
+      const message =
+        error.response?.data?.message || error.message || "Erro desconhecido";
+      const code = error.response?.data?.code;
+
+      if (status === 401) {
         storage.clear();
         window.location.href = "/login";
       }
 
-      throw error;
+      const apiError: ApiError = { message, status: status ?? 0, code };
+      return Promise.reject(apiError);
     }
+  );
 
-    // Handle 204 No Content
-    if (response.status === 204) {
-      return {} as T;
-    }
-
-    return response.json();
-  }
-
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: "GET" });
-  }
-
-  async post<T>(endpoint: string, data?: unknown): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: "POST",
-      body: data ? JSON.stringify(data) : undefined,
-    });
-  }
-
-  async put<T>(endpoint: string, data: unknown): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async patch<T>(endpoint: string, data: unknown): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: "DELETE" });
-  }
+  return instance;
 }
 
-export const api = new ApiClient(API_BASE_URL);
+export const http = createApiClient();
 
-// API endpoints
+export const api = {
+  get<T>(endpoint: string) {
+    return http.get<T>(endpoint).then((r) => r.data);
+  },
+  post<T>(endpoint: string, data?: unknown) {
+    return http.post<T>(endpoint, data).then((r) => r.data);
+  },
+  put<T>(endpoint: string, data: unknown) {
+    return http.put<T>(endpoint, data).then((r) => r.data);
+  },
+  patch<T>(endpoint: string, data: unknown) {
+    return http.patch<T>(endpoint, data).then((r) => r.data);
+  },
+  delete<T>(endpoint: string) {
+    return http.delete<T>(endpoint).then((r) => r.data);
+  },
+};
+
 export const apiEndpoints = {
   auth: {
-    login: "/auth/login",
-    logout: "/auth/logout",
-    register: "/auth/register",
-    me: "/auth/me",
-  },
-  users: {
-    list: "/users",
-    get: (id: string) => `/users/${id}`,
-    update: (id: string) => `/users/${id}`,
-    delete: (id: string) => `/users/${id}`,
-  },
-  transactions: {
-    list: "/transactions",
-    create: "/transactions",
-    get: (id: string) => `/transactions/${id}`,
-    update: (id: string) => `/transactions/${id}`,
-    delete: (id: string) => `/transactions/${id}`,
+    login: "/v1/auth/login",
+    register: "/v1/auth/register",
   },
   categories: {
-    list: "/categories",
-    create: "/categories",
-    get: (id: string) => `/categories/${id}`,
-    update: (id: string) => `/categories/${id}`,
-    delete: (id: string) => `/categories/${id}`,
+    list: "/v1/categories",
+    create: "/v1/categories",
+    update: (id: string) => `/v1/categories/${id}`,
+    delete: (id: string) => `/v1/categories/${id}`,
+  },
+  transactions: {
+    list: "/v1/transactions",
+    create: "/v1/transactions",
+    update: (id: string) => `/v1/transactions/${id}`,
+    delete: (id: string) => `/v1/transactions/${id}`,
+  },
+  summary: {
+    balance: "/v1/summary/balance",
+    categories: "/v1/summary/categories",
+  },
+  recurrences: {
+    create: "/v1/recurrences",
+    update: (id: string) => `/v1/recurrences/${id}`,
+    active: "/v1/recurrences/active",
+    generate: "/v1/recurrences/generate",
+  },
+  lgpd: {
+    export: "/v1/lgpd/export",
+    delete: "/v1/lgpd",
   },
   goals: {
-    list: "/goals",
-    create: "/goals",
-    get: (id: string) => `/goals/${id}`,
-    update: (id: string) => `/goals/${id}`,
-    delete: (id: string) => `/goals/${id}`,
+    list: "/v1/goals",
+    create: "/v1/goals",
+    update: (id: string) => `/v1/goals/${id}`,
+    delete: (id: string) => `/v1/goals/${id}`,
   },
-  dashboard: {
-    stats: "/dashboard/stats",
-    recent: "/dashboard/recent",
+  cards: {
+    list: "/v1/cards",
+    create: "/v1/cards",
+    update: (id: string) => `/v1/cards/${id}`,
+    delete: (id: string) => `/v1/cards/${id}`,
+  },
+  plans: {
+    list: "/v1/plans",
+    get: (id: string) => `/v1/plans/${id}`,
+  },
+  payments: {
+    intent: "/v1/payments/intent",
+    confirm: (paymentId: string) => `/v1/payments/${paymentId}/confirm`,
+    status: (paymentId: string) => `/v1/payments/${paymentId}/status`,
+  },
+  admin: {
+    stats: "/v1/admin/stats",
+    revenue: "/v1/admin/revenue",
+    clients: "/v1/admin/clients",
+    activity: "/v1/admin/activity",
+    users: "/v1/admin/users",
+    companies: "/v1/admin/companies",
+    subscriptions: "/v1/admin/subscriptions",
+    plans: "/v1/admin/plans",
   },
 } as const;
