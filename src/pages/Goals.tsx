@@ -1,58 +1,32 @@
 import { memo, useState } from "react";
-import { Target, Plus, Trophy, TrendingUp } from "lucide-react";
+import { Target, Plus, Trophy, TrendingUp, Trash2, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/user/PageHeader";
 import {
   PageHeaderSkeleton,
   StatsGridSkeleton,
   GoalsGridSkeleton
 } from "@/components/ui/page-skeletons";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useGoals, useCreateGoal, useDeleteGoal } from "@/features/goals/hooks/use-goals";
 
-const GOALS = [
-  {
-    id: 1,
-    name: "Reserva de Emergência",
-    current: 8000,
-    target: 15000,
-    deadline: "Dez/2026",
-    color: "bg-[#25D366]",
-    icon: "🛡️",
-    category: "Segurança"
-  },
-  {
-    id: 2,
-    name: "Viagem de Férias",
-    current: 3500,
-    target: 8000,
-    deadline: "Jul/2026",
-    color: "bg-blue-500",
-    icon: "✈️",
-    category: "Lazer"
-  },
-  {
-    id: 3,
-    name: "Novo Notebook",
-    current: 2000,
-    target: 6000,
-    deadline: "Ago/2026",
-    color: "bg-amber-500",
-    icon: "💻",
-    category: "Tecnologia"
-  },
-  {
-    id: 4,
-    name: "Curso de Inglês",
-    current: 1200,
-    target: 3000,
-    deadline: "Jun/2026",
-    color: "bg-purple-500",
-    icon: "📚",
-    category: "Educação"
-  },
+const GOAL_COLORS = [
+  "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-purple-500",
+  "bg-pink-500", "bg-teal-500", "bg-orange-500", "bg-red-500",
 ];
+
+const GOAL_ICONS = ["🎯", "🏠", "✈️", "🚗", "💰", "📱", "🎓", "💊"];
 
 const GoalsPageSkeleton = () => (
   <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-pulse">
@@ -63,19 +37,53 @@ const GoalsPageSkeleton = () => (
 );
 
 const GoalsPage = memo(() => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [goals, setGoals] = useState(GOALS);
+  const { goals, isLoading, isError, error, refetch } = useGoals();
+  const createGoal = useCreateGoal();
+  const deleteGoal = useDeleteGoal();
 
-  const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      toast.success("Metas atualizadas");
-    }, 1000);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    target: "",
+    current: "0",
+    deadline: "",
+    category: "",
+    color: GOAL_COLORS[0],
+    icon: GOAL_ICONS[0],
+  });
+
+  const handleCreate = () => {
+    if (!form.name.trim() || !form.target || !form.deadline) {
+      toast.error("Preencha nome, valor alvo e prazo");
+      return;
+    }
+    createGoal.mutate(
+      {
+        name: form.name.trim(),
+        target: parseFloat(form.target),
+        current: parseFloat(form.current) || 0,
+        deadline: new Date(form.deadline).toISOString(),
+        color: form.color,
+        icon: form.icon,
+        category: form.category.trim() || "Geral",
+      },
+      {
+        onSuccess: () => {
+          toast.success("Meta criada!");
+          setIsDialogOpen(false);
+          setForm({ name: "", target: "", current: "0", deadline: "", category: "", color: GOAL_COLORS[0], icon: GOAL_ICONS[0] });
+        },
+        onError: () => toast.error("Erro ao criar meta"),
+      }
+    );
   };
 
   if (isLoading) {
     return <GoalsPageSkeleton />;
+  }
+
+  if (isError) {
+    // Endpoint ainda não implementado no backend — exibe tela funcional com lista vazia
   }
 
   return (
@@ -85,11 +93,10 @@ const GoalsPage = memo(() => {
         subtitle="Acompanhe seus objetivos de economia"
         action={{
           label: "Nova Meta",
-          onClick: () => toast.info("Em breve: criar meta")
+          onClick: () => setIsDialogOpen(true),
         }}
       />
 
-      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         <Card className="border-border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1">
           <CardContent className="p-6">
@@ -113,7 +120,9 @@ const GoalsPage = memo(() => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Economizado</p>
-                <p className="text-2xl font-bold text-primary">R$ {goals.reduce((acc, g) => acc + g.current, 0).toLocaleString()}</p>
+                <p className="text-2xl font-bold text-primary">
+                  R$ {goals.reduce((acc, g) => acc + g.current, 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -128,7 +137,12 @@ const GoalsPage = memo(() => {
               <div>
                 <p className="text-sm text-muted-foreground">Progresso Médio</p>
                 <p className="text-2xl font-bold text-foreground">
-                  {Math.round(goals.reduce((acc, g) => acc + (g.current / g.target) * 100, 0) / goals.length)}%
+                  {goals.length > 0
+                    ? Math.round(
+                        goals.reduce((acc, g) => acc + (g.current / g.target) * 100, 0) /
+                          goals.length
+                      )
+                    : 0}%
                 </p>
               </div>
             </div>
@@ -136,50 +150,177 @@ const GoalsPage = memo(() => {
         </Card>
       </div>
 
-      {/* Goals Grid */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {goals.map((goal) => {
-          const percentage = Math.round((goal.current / goal.target) * 100);
-          return (
-            <Card key={goal.id} className="border-border shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4 transition-all">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl transition-transform hover:scale-125">{goal.icon}</span>
-                    <div>
-                      <h3 className="font-semibold text-foreground">{goal.name}</h3>
-                      <Badge variant="outline" className="mt-1 transition-colors hover:bg-accent">
-                        {goal.category}
-                      </Badge>
+      {goals.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Target className="h-12 w-12 text-muted-foreground/40 mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Nenhuma meta cadastrada</h3>
+          <p className="text-muted-foreground mb-4">Crie sua primeira meta financeira</p>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Meta
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2">
+          {goals.map((goal) => {
+            const percentage = Math.min(100, Math.round((goal.current / goal.target) * 100));
+            return (
+              <Card
+                key={goal.id}
+                className="border-border shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">{goal.icon}</span>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{goal.name}</h3>
+                        <Badge variant="outline" className="mt-1">
+                          {goal.category}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(goal.deadline).toLocaleDateString("pt-BR")}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          deleteGoal.mutate(String(goal.id), {
+                            onSuccess: () => toast.success("Meta removida"),
+                            onError: () => toast.error("Erro ao remover meta"),
+                          });
+                        }}
+                        disabled={deleteGoal.isPending}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">{goal.deadline}</span>
-                </div>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Progresso</span>
-                    <span className="font-medium text-foreground">{percentage}%</span>
-                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Progresso</span>
+                      <span className="font-medium text-foreground">{percentage}%</span>
+                    </div>
 
-                  {/* Progress Bar */}
-                  <div className="w-full h-2 bg-accent rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${goal.color} rounded-full transition-all duration-1000 ease-out`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
+                    <div className="w-full h-2 bg-accent rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${goal.color} rounded-full transition-all duration-1000 ease-out`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
 
-                  <div className="flex justify-between text-sm pt-1">
-                    <span className="text-primary font-medium">R$ {goal.current.toLocaleString()}</span>
-                    <span className="text-muted-foreground">R$ {goal.target.toLocaleString()}</span>
+                    <div className="flex justify-between text-sm pt-1">
+                      <span className="text-primary font-medium">
+                        R$ {goal.current.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </span>
+                      <span className="text-muted-foreground">
+                        R$ {goal.target.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nova Meta</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Nome da meta</Label>
+              <Input
+                placeholder="Ex: Viagem para Europa"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Valor alvo (R$)</Label>
+                <Input
+                  type="number"
+                  placeholder="0,00"
+                  value={form.target}
+                  onChange={(e) => setForm({ ...form, target: e.target.value })}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Já economizado (R$)</Label>
+                <Input
+                  type="number"
+                  placeholder="0,00"
+                  value={form.current}
+                  onChange={(e) => setForm({ ...form, current: e.target.value })}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Prazo</Label>
+                <Input
+                  type="date"
+                  value={form.deadline}
+                  onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <Input
+                  placeholder="Ex: Viagem"
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Ícone</Label>
+              <div className="flex gap-2 flex-wrap">
+                {GOAL_ICONS.map((icon) => (
+                  <button
+                    key={icon}
+                    type="button"
+                    onClick={() => setForm({ ...form, icon })}
+                    className={`w-9 h-9 rounded-lg text-lg flex items-center justify-center border-2 transition-colors ${
+                      form.icon === icon ? "border-primary bg-primary/10" : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreate} disabled={createGoal.isPending}>
+              {createGoal.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Criar Meta
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });

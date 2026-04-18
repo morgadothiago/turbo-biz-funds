@@ -9,6 +9,8 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const Login = lazy(() => import(/* webpackChunkName: "auth-login" */ "./pages/Login"));
 const Cadastro = lazy(() => import(/* webpackChunkName: "auth-cadastro" */ "./pages/Cadastro"));
+const Pagamento = lazy(() => import(/* webpackChunkName: "auth-pagamento" */ "./pages/Pagamento"));
+const PagamentoSucesso = lazy(() => import(/* webpackChunkName: "auth-pagamento-sucesso" */ "./pages/PagamentoSucesso"));
 const NotFound = lazy(() => import(/* webpackChunkName: "pages-notfound" */ "./pages/NotFound"));
 const UserDashboard = lazy(() => import(/* webpackChunkName: "dashboard-user" */ "./pages/UserDashboard"));
 
@@ -16,6 +18,7 @@ const UserLayout = lazy(() => import(/* webpackChunkName: "layout-user" */ "./la
 const AdminLayout = lazy(() => import(/* webpackChunkName: "layout-admin" */ "./layouts/AdminLayout"));
 const AdminDashboard = lazy(() => import(/* webpackChunkName: "dashboard-admin" */ "./pages/admin/AdminDashboard"));
 const AdminClients = lazy(() => import(/* webpackChunkName: "pages-admin-clients" */ "./pages/admin/AdminUsers"));
+const AdminCompanies = lazy(() => import(/* webpackChunkName: "pages-admin-companies" */ "./pages/admin/AdminCompanies"));
 const AdminPlans = lazy(() => import(/* webpackChunkName: "pages-admin-plans" */ "./pages/admin/AdminPlans"));
 const AdminSubscriptions = lazy(() => import(/* webpackChunkName: "pages-admin-subscriptions" */ "./pages/admin/AdminSubscriptions"));
 
@@ -128,6 +131,8 @@ function AppRoutes() {
             <Cadastro />
           </PublicRoute>
         } />
+        <Route path="/pagamento" element={<Pagamento />} />
+        <Route path="/pagamento-sucesso" element={<PagamentoSucesso />} />
 
         <Route 
           path="/dashboard" 
@@ -156,6 +161,7 @@ function AppRoutes() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="clientes" element={<AdminClients />} />
+          <Route path="empresas" element={<AdminCompanies />} />
           <Route path="assinaturas" element={<AdminSubscriptions />} />
           <Route path="planos" element={<AdminPlans />} />
         </Route>

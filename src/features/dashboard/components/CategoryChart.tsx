@@ -1,7 +1,3 @@
-/**
- * Componente de gráfico de pizza para展示 gastos por categoria.
- */
-
 import {
   PieChart as RePieChart,
   Pie,
@@ -19,56 +15,67 @@ interface CategoryChartProps {
 
 export const CategoryChart = ({ data }: CategoryChartProps) => {
   return (
-    <Card className="lg:col-span-3">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <PieChart className="h-5 w-5 text-accent" />
-          Gastos por Categoria
+    <Card className="border-border/60 shadow-[var(--shadow-card)]">
+      <CardHeader className="pt-5 px-5 pb-3">
+        <CardTitle className="text-[15px] font-semibold flex items-center gap-2">
+          <PieChart className="h-4 w-4 text-primary" />
+          Gastos por categoria
         </CardTitle>
-        <CardDescription>
-          Distribuição dos seus gastos
-        </CardDescription>
+        <CardDescription className="text-xs mt-0.5">Distribuição das despesas</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
-          <RePieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={60}
-              outerRadius={80}
-              paddingAngle={5}
-              dataKey="value"
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+      <CardContent className="px-5 pb-5">
+        {data.length === 0 ? (
+          <div className="h-56 flex flex-col items-center justify-center gap-2">
+            <PieChart className="h-8 w-8 text-muted-foreground/20" />
+            <p className="text-sm text-muted-foreground">Nenhuma categoria com despesas</p>
+          </div>
+        ) : (
+          <>
+            <ResponsiveContainer width="100%" height={180}>
+              <RePieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={52}
+                  outerRadius={72}
+                  paddingAngle={3}
+                  dataKey="value"
+                  strokeWidth={0}
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    borderRadius: "10px",
+                    border: "1px solid hsl(220 13% 90%)",
+                    boxShadow: "0 4px 16px -2px rgb(0 0 0 / 0.08)",
+                    fontSize: 12,
+                    padding: "8px 12px",
+                  }}
+                  formatter={(value: number, name: string) => [
+                    `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+                    name,
+                  ]}
+                />
+              </RePieChart>
+            </ResponsiveContainer>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 justify-center">
+              {data.map((cat, index) => (
+                <div key={index} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <div
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: cat.color }}
+                  />
+                  <span className="truncate max-w-24">{cat.name}</span>
+                </div>
               ))}
-            </Pie>
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                border: "1px solid #e2e8f0",
-              }}
-              formatter={(value: number, name: string) => [
-                `R$ ${value}`,
-                name,
-              ]}
-            />
-          </RePieChart>
-        </ResponsiveContainer>
-        <div className="flex flex-wrap gap-2 mt-4 justify-center">
-          {data.map((cat, index) => (
-            <div key={index} className="flex items-center gap-1 text-xs">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: cat.color }}
-              />
-              <span>{cat.name}</span>
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

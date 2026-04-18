@@ -1,124 +1,87 @@
 import { memo } from "react";
-import { 
-  Users, 
-  DollarSign, 
-  TrendingUp,
+import {
   ArrowUpRight,
   ArrowDownRight,
-  Activity,
-  CreditCard,
   UserPlus,
+  CreditCard,
+  TrendingUp,
   AlertCircle,
-  Sparkles
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   BarChart,
-  Bar
+  Bar,
 } from "recharts";
+import { useAdminDashboard } from "@/features/admin/hooks/use-admin-dashboard";
 
-// Dados estáticos memoizados para evitar recriação
-const STATS_CARDS = [
-  {
-    title: "Receita Mensal (MRR)",
-    value: "R$ 47.890",
-    change: "+12.5%",
-    trend: "up" as const,
-    icon: DollarSign,
-    color: "text-success",
-    bgColor: "bg-success/10"
-  },
-  {
-    title: "Total de Clientes",
-    value: "1.234",
-    change: "+45",
-    trend: "up" as const,
-    icon: Users,
-    color: "text-primary",
-    bgColor: "bg-primary/10"
-  },
-  {
-    title: "Clientes Ativos",
-    value: "1.089",
-    change: "+67",
-    trend: "up" as const,
-    icon: Sparkles,
-    color: "text-accent",
-    bgColor: "bg-accent/10"
-  },
-  {
-    title: "Taxa de Conversão",
-    value: "24.8%",
-    change: "-2.1%",
-    trend: "down" as const,
-    icon: TrendingUp,
-    color: "text-warning",
-    bgColor: "bg-warning/10"
-  }
-];
-
-const REVENUE_DATA = [
-  { month: "Jan", receita: 32000, clientes: 980 },
-  { month: "Fev", receita: 35000, clientes: 1050 },
-  { month: "Mar", receita: 38500, clientes: 1120 },
-  { month: "Abr", receita: 41200, clientes: 1150 },
-  { month: "Mai", receita: 44800, clientes: 1190 },
-  { month: "Jun", receita: 47890, clientes: 1234 },
-];
-
-const PLAN_DISTRIBUTION = [
-  { name: "Free", value: 89, color: "#94a3b8" },
-  { name: "Pro", value: 98, color: "#3b82f6" },
-  { name: "Business", value: 47, color: "#10b981" },
-];
-
-const RECENT_CLIENTS = [
-  { name: "João Silva", email: "joao.silva@email.com", plan: "Pro", status: "Ativo", date: "Hoje" },
-  { name: "Maria Santos", email: "maria.santos@email.com", plan: "Business", status: "Ativo", date: "Hoje" },
-  { name: "Pedro Costa", email: "pedro.costa@email.com", plan: "Free", status: "Trial", date: "Ontem" },
-  { name: "Ana Oliveira", email: "ana.oliveira@email.com", plan: "Pro", status: "Ativo", date: "Ontem" },
-  { name: "Carlos Mendes", email: "carlos.mendes@email.com", plan: "Business", status: "Pendente", date: "2 dias" },
-];
-
-const RECENT_ACTIVITY = [
-  { type: "signup" as const, message: "Novo cliente: João Silva", time: "5 min" },
-  { type: "payment" as const, message: "Pagamento recebido: R$ 199,00", time: "1h" },
-  { type: "upgrade" as const, message: "Upgrade de plano: Maria Santos (Free → Pro)", time: "2h" },
-  { type: "support" as const, message: "Novo ticket de suporte #1234", time: "3h" },
-  { type: "signup" as const, message: "Novo cliente: Ana Oliveira", time: "4h" },
-];
-
-function AdminDashboard() {
+function AdminDashboardSkeleton() {
   return (
     <div className="flex flex-col h-full">
-      <AdminHeader 
-        title="Dashboard" 
-        subtitle="Visão geral da plataforma FinanceAI"
-      />
-      
+      <AdminHeader title="Dashboard" subtitle="Visão geral da plataforma DoutoCash" />
+      <div className="flex-1 overflow-auto p-6 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Carregando dados...</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminDashboardError({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col h-full">
+      <AdminHeader title="Dashboard" subtitle="Visão geral da plataforma DoutoCash" />
+      <div className="flex-1 overflow-auto p-6 flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+          <p className="text-destructive font-medium">Falha ao carregar dados</p>
+          <p className="text-sm text-muted-foreground">{message}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AdminDashboard() {
+  const { data, isLoading, isError, error } = useAdminDashboard();
+
+  if (isLoading) return <AdminDashboardSkeleton />;
+  if (isError || !data) {
+    const msg = error instanceof Error ? error.message : "Erro desconhecido";
+    return <AdminDashboardError message={msg} />;
+  }
+
+  const { stats, revenueData, planDistribution, recentClients, recentActivity } = data;
+
+  return (
+    <div className="flex flex-col h-full">
+      <AdminHeader title="Dashboard" subtitle="Visão geral da plataforma DoutoCash" />
+
       <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {STATS_CARDS.map((stat) => (
+          {stats.map((stat) => (
             <Card key={stat.title} className="relative overflow-hidden">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
@@ -157,22 +120,25 @@ function AdminDashboard() {
             <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={REVENUE_DATA}>
+                  <LineChart data={revenueData}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis dataKey="month" className="text-xs" />
-                    <YAxis className="text-xs" tickFormatter={(value) => `R$${value/1000}k`} />
-                    <Tooltip 
+                    <YAxis
+                      className="text-xs"
+                      tickFormatter={(value) => `R$${value / 1000}k`}
+                    />
+                    <Tooltip
                       formatter={(value: number) => [`R$ ${value.toLocaleString()}`, "Receita"]}
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
                       }}
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="receita" 
-                      stroke="hsl(var(--primary))" 
+                    <Line
+                      type="monotone"
+                      dataKey="receita"
+                      stroke="hsl(var(--primary))"
                       strokeWidth={3}
                       dot={{ fill: "hsl(var(--primary))", strokeWidth: 2 }}
                     />
@@ -189,23 +155,29 @@ function AdminDashboard() {
               <CardDescription>Clientes por tipo de plano</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={PLAN_DISTRIBUTION} layout="vertical">
-                    <XAxis type="number" className="text-xs" />
-                    <YAxis type="category" dataKey="name" className="text-xs" width={70} />
-                    <Tooltip 
-                      formatter={(value: number) => [`${value} clientes`, "Total"]}
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              {planDistribution.length > 0 ? (
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={planDistribution} layout="vertical">
+                      <XAxis type="number" className="text-xs" />
+                      <YAxis type="category" dataKey="name" className="text-xs" width={70} />
+                      <Tooltip
+                        formatter={(value: number) => [`${value} clientes`, "Total"]}
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "8px",
+                        }}
+                      />
+                      <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm">
+                  Sem dados de distribuição
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -219,7 +191,9 @@ function AdminDashboard() {
                 <CardTitle className="text-lg">Clientes Recentes</CardTitle>
                 <CardDescription>Últimos cadastros na plataforma</CardDescription>
               </div>
-              <Button variant="outline" size="sm">Ver todos</Button>
+              <Button variant="outline" size="sm">
+                Ver todos
+              </Button>
             </CardHeader>
             <CardContent>
               <Table>
@@ -232,7 +206,7 @@ function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {RECENT_CLIENTS.map((client) => (
+                  {recentClients.map((client) => (
                     <TableRow key={client.email}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -248,12 +222,33 @@ function AdminDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={client.plan === "Business" ? "default" : client.plan === "Pro" ? "secondary" : "outline"}>
+                        <Badge
+                          variant={
+                            client.plan === "Business"
+                              ? "default"
+                              : client.plan === "Pro"
+                              ? "secondary"
+                              : "outline"
+                          }
+                        >
                           {client.plan}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={client.status === "Ativo" ? "default" : client.status === "Trial" ? "secondary" : "outline"} className={client.status === "Ativo" ? "bg-success/10 text-success hover:bg-success/20" : ""}>
+                        <Badge
+                          variant={
+                            client.status === "Ativo"
+                              ? "default"
+                              : client.status === "Trial"
+                              ? "secondary"
+                              : "outline"
+                          }
+                          className={
+                            client.status === "Ativo"
+                              ? "bg-success/10 text-success hover:bg-success/20"
+                              : ""
+                          }
+                        >
                           {client.status}
                         </Badge>
                       </TableCell>
@@ -275,18 +270,31 @@ function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {RECENT_ACTIVITY.map((activity, index) => (
+                {recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      activity.type === "signup" ? "bg-primary/10" :
-                      activity.type === "payment" ? "bg-success/10" :
-                      activity.type === "upgrade" ? "bg-accent/10" :
-                      "bg-warning/10"
-                    }`}>
-                      {activity.type === "signup" && <UserPlus className="h-4 w-4 text-primary" />}
-                      {activity.type === "payment" && <CreditCard className="h-4 w-4 text-success" />}
-                      {activity.type === "upgrade" && <TrendingUp className="h-4 w-4 text-accent" />}
-                      {activity.type === "support" && <AlertCircle className="h-4 w-4 text-warning" />}
+                    <div
+                      className={`p-2 rounded-lg ${
+                        activity.type === "signup"
+                          ? "bg-primary/10"
+                          : activity.type === "payment"
+                          ? "bg-success/10"
+                          : activity.type === "upgrade"
+                          ? "bg-accent/10"
+                          : "bg-warning/10"
+                      }`}
+                    >
+                      {activity.type === "signup" && (
+                        <UserPlus className="h-4 w-4 text-primary" />
+                      )}
+                      {activity.type === "payment" && (
+                        <CreditCard className="h-4 w-4 text-success" />
+                      )}
+                      {activity.type === "upgrade" && (
+                        <TrendingUp className="h-4 w-4 text-accent" />
+                      )}
+                      {activity.type === "support" && (
+                        <AlertCircle className="h-4 w-4 text-warning" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm">{activity.message}</p>

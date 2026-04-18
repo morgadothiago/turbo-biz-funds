@@ -1,16 +1,7 @@
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface AdminHeaderProps {
   title: string;
@@ -38,35 +29,9 @@ export function AdminHeader({ title, subtitle }: AdminHeaderProps) {
           />
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]">
-                3
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>Notificações</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">Nova empresa cadastrada</span>
-              <span className="text-xs text-muted-foreground">Tech Solutions LTDA se cadastrou no plano Pro</span>
-              <span className="text-xs text-muted-foreground">Há 5 minutos</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">Pagamento recebido</span>
-              <span className="text-xs text-muted-foreground">R$ 199,00 - Inovação Digital ME</span>
-              <span className="text-xs text-muted-foreground">Há 1 hora</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">Ticket de suporte</span>
-              <span className="text-xs text-muted-foreground">Novo ticket aguardando resposta</span>
-              <span className="text-xs text-muted-foreground">Há 2 horas</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button variant="ghost" size="icon" aria-label="Notificações">
+          <Bell className="h-5 w-5" />
+        </Button>
       </div>
     </header>
   );

@@ -1,8 +1,8 @@
 import type { User } from "../types/auth";
 
 const STORAGE_KEYS = {
-  TOKEN: "financeai_token",
-  USER: "financeai_user",
+  TOKEN: "doutocash_token",
+  USER: "doutocash_user",
 } as const;
 
 export interface StorageUtils {
@@ -75,26 +75,3 @@ export const storage: StorageUtils = {
   },
 };
 
-export const generateToken = (userId: string): string => {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  const token = Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
-  return `token_${userId}_${Date.now()}_${token}`;
-};
-
-export const getMockUsers = (): import("../types/auth").MockUser[] => [
-  {
-    id: "1",
-    email: import.meta.env.VITE_TEST_ADMIN_EMAIL || "admin@financeai.com",
-    password: import.meta.env.VITE_TEST_ADMIN_PASSWORD || "admin123",
-    name: "Administrador",
-    role: "admin",
-  },
-  {
-    id: "2",
-    email: import.meta.env.VITE_TEST_USER_EMAIL || "usuario@financeai.com",
-    password: import.meta.env.VITE_TEST_USER_PASSWORD || "user123",
-    name: "João Silva",
-    role: "user",
-  },
-];

@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Instagram, Youtube, Mail } from "lucide-react";
+import { Instagram, Youtube, Mail } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
+const logoWeb = "/logoweb.png";
 
 interface FooterLink {
   name: string;
@@ -62,12 +63,11 @@ const Footer = memo(() => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <span className="text-xl font-bold">
-                Planeja<span className="text-[#6FAF8E]"> Aí</span>
-              </span>
+              <img
+                src={logoWeb}
+                alt="doutorcash"
+                className="h-10 w-auto"
+              />
             </Link>
             <p className="text-white/80 text-sm mb-6 max-w-xs leading-relaxed">
               {t("landing", "footerDescription")}
@@ -93,7 +93,7 @@ const Footer = memo(() => {
 
         <div className="pt-6 border-t border-white/20 flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="text-sm text-white/60">
-            © {CURRENT_YEAR} Planeja Aí. {t("landing", "footerCopyright")}
+            © {CURRENT_YEAR} doutorcash. {t("landing", "footerCopyright")}
           </p>
           <p className="text-sm text-white/60">
             {t("landing", "footerMadeInBrazil")}
