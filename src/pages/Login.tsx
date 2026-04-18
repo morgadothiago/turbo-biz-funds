@@ -225,7 +225,7 @@ const Login = () => {
           Não tem uma conta?{" "}
           <Link
             to="/cadastro"
-            className="text-accent font-medium hover:text-primary transition-colors"
+            className="text-primary font-medium hover:text-primary/80 transition-colors"
           >
             Criar conta grátis
           </Link>

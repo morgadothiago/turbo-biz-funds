@@ -1,4 +1,4 @@
-# Especificação de Alterações – Landing Page Planeja Aí
+# Especificação de Alterações – Landing Page doutorcash
 
 ## Visão Geral
 
@@ -167,7 +167,7 @@ Já levou um susto com a fatura do cartão?
 ### Fechamento
 
 ```
-O Planeja Aí resolve isso.
+O doutorcash resolve isso.
 Organização financeira simples e direta pelo WhatsApp.
 ```
 
@@ -261,4 +261,4 @@ Manter posicionamento:
 
 **Documento criado em**: Fevereiro/2026
 **Para**: Equipe de Desenvolvimento
-**Projeto**: Planeja Aí – Landing Page
+**Projeto**: doutorcash – Landing Page

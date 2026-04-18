@@ -478,7 +478,7 @@ const Cadastro = () => {
 
         <p className="text-center text-muted-foreground mt-6">
           Já tem uma conta?{" "}
-          <Link to="/login" className="text-accent font-medium hover:text-primary transition-colors">
+          <Link to="/login" className="text-primary font-medium hover:text-primary/80 transition-colors">
             Entrar
           </Link>
         </p>

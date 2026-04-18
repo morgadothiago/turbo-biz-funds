@@ -1,8 +1,8 @@
-# Arquitetura do OrganizaAI
+# Arquitetura do doutorcash
 
 ## Visão Geral
 
-O OrganizaAI é uma aplicação web de gestão financeira pessoal/despesas, construída com as melhores práticas de desenvolvimento React moderno.
+O doutorcash é uma aplicação web de gestão financeira pessoal/despesas, construída com as melhores práticas de desenvolvimento React moderno.
 
 ## Stack Tecnológica
 
