@@ -59,7 +59,7 @@ class Analytics {
 
     // Mixpanel initialization would go here
     // For now, we'll use a simple console log fallback
-    console.log('[Analytics] Mixpanel token:', MIXPANEL_TOKEN);
+    if (import.meta.env.DEV) console.log('[Analytics] Mixpanel initialized');
   }
 
   pageView(pageName: string, pagePath: string) {
@@ -80,9 +80,6 @@ class Analytics {
       window.gtag('event', eventName, params);
     }
 
-    if (MIXPANEL_TOKEN) {
-      console.log('[Analytics] Track:', eventName, params);
-    }
 
     // Always log in development
     if (import.meta.env.DEV) {

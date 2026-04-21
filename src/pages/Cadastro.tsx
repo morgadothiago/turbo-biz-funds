@@ -62,6 +62,7 @@ const Cadastro = () => {
   const validateStep1 = (): boolean => {
     const result = registerSchema.safeParse({
       name: formData.name,
+      phone: formData.phone,
       email: formData.email,
       password: formData.password,
       confirmPassword: formData.confirmPassword,
@@ -97,7 +98,7 @@ const Cadastro = () => {
         email: formData.email,
         password: formData.password,
         plan: formData.plan,
-        phone: formData.phone.replace(/\D/g, ""),
+        phone: formData.phone,
       });
 
       analytics.signup("email");
@@ -105,7 +106,7 @@ const Cadastro = () => {
       toast.success("Conta criada com sucesso!");
 
       if (formData.plan === "free") {
-        navigate("/login");
+        navigate("/dashboard");
       } else {
         navigate("/pagamento", { state: { plan: formData.plan } });
       }
@@ -129,18 +130,28 @@ const Cadastro = () => {
       name: "Gratuito",
       price: "R$ 0",
       period: "para sempre",
-      description: "1 empresa, recursos básicos",
-      features: ["Categorização básica", "Relatórios simples", "Suporte por email"],
+      description: "Ideal para começar",
+      features: [
+        "3 transações por mês",
+        "1 meta financeira",
+        "1 cartão de crédito",
+        "1 recorrência",
+        "Categorias básicas",
+        "Suporte por email",
+      ],
     },
     {
       id: "pro",
       name: "Pro",
       price: "R$ 97",
       period: "/mês",
-      description: "3 empresas, IA + WhatsApp",
+      description: "Para quem leva finanças a sério",
       popular: true,
       features: [
-        "Tudo do Gratuito",
+        "Transações ilimitadas",
+        "Metas ilimitadas",
+        "Cartões ilimitados",
+        "Recorrências ilimitadas",
         "Categorização por IA",
         "Registro por WhatsApp",
         "Relatórios avançados",
@@ -152,13 +163,15 @@ const Cadastro = () => {
       name: "Business",
       price: "R$ 297",
       period: "/mês",
-      description: "Ilimitado, API + Suporte VIP",
+      description: "Para empresas e power users",
       features: [
         "Tudo do Pro",
         "Empresas ilimitadas",
+        "Chat com IA financeira",
+        "Previsão de gastos",
+        "Detecção de anomalias",
         "API de integração",
         "Suporte VIP",
-        "Treinamento dedicado",
       ],
     },
   ];

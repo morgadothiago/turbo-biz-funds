@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "light";
+type Theme = "light" | "dark";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -13,52 +13,45 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: "light";
+  toggleTheme: () => void;
+  isDark: boolean;
 };
 
-const initialState: ThemeProviderState = {
+const ThemeProviderContext = createContext<ThemeProviderState>({
   theme: "light",
   setTheme: () => null,
-  resolvedTheme: "light",
-};
-
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+  toggleTheme: () => null,
+  isDark: false,
+});
 
 export function ThemeProvider({
   children,
   defaultTheme = "light",
-  storageKey = "organizaai-theme",
+  storageKey = "doutorcash-theme",
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<"light">("light");
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>(() => {
+    try {
+      return (localStorage.getItem(storageKey) as Theme) ?? defaultTheme;
+    } catch {
+      return defaultTheme;
+    }
+  });
 
   useEffect(() => {
-    setMounted(true);
-    // Always force light theme
-    setThemeState("light");
-  }, [storageKey, defaultTheme]);
-
-  useEffect(() => {
-    if (!mounted) return;
-
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
-    root.classList.add("light");
-    setResolvedTheme("light");
-  }, [theme, mounted]);
+    root.classList.add(theme);
+  }, [theme]);
 
-  const setTheme = (theme: Theme) => {
-    localStorage.setItem(storageKey, theme);
-    setThemeState(theme);
+  const setTheme = (t: Theme) => {
+    localStorage.setItem(storageKey, t);
+    setThemeState(t);
   };
 
-  if (!mounted) {
-    return <>{children}</>;
-  }
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
   return (
-    <ThemeProviderContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+    <ThemeProviderContext.Provider value={{ theme, setTheme, toggleTheme, isDark: theme === "dark" }}>
       {children}
     </ThemeProviderContext.Provider>
   );
@@ -66,10 +59,6 @@ export function ThemeProvider({
 
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
-
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-
+  if (context === undefined) throw new Error("useTheme must be used within a ThemeProvider");
   return context;
 };
