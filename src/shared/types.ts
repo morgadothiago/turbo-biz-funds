@@ -75,6 +75,18 @@ export interface PlanInfo {
   features: string[];
 }
 
+export interface Recurrence {
+  id: string;
+  categoryId: string;
+  type: "INCOME" | "EXPENSE";
+  amount: number;
+  description?: string;
+  frequency: "daily" | "weekly" | "monthly" | "yearly";
+  startDate: string;
+  endDate?: string;
+  active: boolean;
+}
+
 export interface RecurrencePayload {
   categoryId: string;
   type: "INCOME" | "EXPENSE";

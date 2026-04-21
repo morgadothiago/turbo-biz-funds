@@ -5,6 +5,18 @@ const STORAGE_KEYS = {
   USER: "doutocash_user",
 } as const;
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = token.split(".")[1];
+    const claims = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    if (!claims.exp) return false;
+    // 10s de margem para evitar race conditions
+    return Date.now() / 1000 >= claims.exp - 10;
+  } catch {
+    return true;
+  }
+}
+
 export interface StorageUtils {
   getToken(): string | null;
   setToken(token: string): void;
@@ -18,7 +30,14 @@ export interface StorageUtils {
 export const storage: StorageUtils = {
   getToken: (): string | null => {
     try {
-      return localStorage.getItem(STORAGE_KEYS.TOKEN);
+      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+      if (!token) return null;
+      if (isTokenExpired(token)) {
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        return null;
+      }
+      return token;
     } catch {
       return null;
     }
@@ -27,23 +46,23 @@ export const storage: StorageUtils = {
   setToken: (token: string): void => {
     try {
       localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-    } catch (error) {
-      console.error("Erro ao salvar token:", error);
+    } catch {
+      if (import.meta.env.DEV) console.error("Erro ao salvar token");
     }
   },
 
   removeToken: (): void => {
     try {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    } catch (error) {
-      console.error("Erro ao remover token:", error);
+    } catch {
+      if (import.meta.env.DEV) console.error("Erro ao remover token");
     }
   },
 
   getUser: (): User | null => {
     try {
       const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-      return userStr ? JSON.parse(userStr) : null;
+      return userStr ? (JSON.parse(userStr) as User) : null;
     } catch {
       return null;
     }
@@ -52,16 +71,16 @@ export const storage: StorageUtils = {
   setUser: (user: User): void => {
     try {
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-    } catch (error) {
-      console.error("Erro ao salvar usuário:", error);
+    } catch {
+      if (import.meta.env.DEV) console.error("Erro ao salvar usuário");
     }
   },
 
   removeUser: (): void => {
     try {
       localStorage.removeItem(STORAGE_KEYS.USER);
-    } catch (error) {
-      console.error("Erro ao remover usuário:", error);
+    } catch {
+      if (import.meta.env.DEV) console.error("Erro ao remover usuário");
     }
   },
 
@@ -69,9 +88,8 @@ export const storage: StorageUtils = {
     try {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER);
-    } catch (error) {
-      console.error("Erro ao limpar storage:", error);
+    } catch {
+      if (import.meta.env.DEV) console.error("Erro ao limpar storage");
     }
   },
 };
-

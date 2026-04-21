@@ -35,6 +35,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   "/dashboard/transacoes": { title: "Transações", subtitle: "Suas movimentações" },
   "/dashboard/categorias": { title: "Categorias", subtitle: "Organize seus gastos" },
   "/dashboard/metas": { title: "Metas", subtitle: "Acompanhe seus objetivos" },
+  "/dashboard/recorrencias": { title: "Recorrências", subtitle: "Receitas e despesas fixas" },
   "/dashboard/cartoes": { title: "Cartões", subtitle: "Seus cartões de crédito" },
   "/dashboard/whatsapp": { title: "WhatsApp", subtitle: "Integração via mensagem" },
   "/dashboard/configuracoes": { title: "Configurações", subtitle: "Sua conta" },

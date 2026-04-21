@@ -43,6 +43,10 @@ function createApiClient(): AxiosInstance {
         window.location.href = "/login";
       }
 
+      if (status === 402) {
+        window.dispatchEvent(new CustomEvent("plan:limit-exceeded", { detail: error.response?.data }));
+      }
+
       const apiError: ApiError = { message, status: status ?? 0, code };
       return Promise.reject(apiError);
     }
@@ -75,6 +79,8 @@ export const apiEndpoints = {
   auth: {
     login: "/v1/auth/login",
     register: "/v1/auth/register",
+    forgotPassword: "/v1/users/forgot-password",
+    resetPassword: "/v1/users/reset-password",
   },
   categories: {
     list: "/v1/categories",
@@ -129,6 +135,7 @@ export const apiEndpoints = {
     clients: "/v1/admin/clients",
     activity: "/v1/admin/activity",
     users: "/v1/admin/users",
+    user: (id: string) => `/v1/admin/users/${id}`,
     companies: "/v1/admin/companies",
     subscriptions: "/v1/admin/subscriptions",
     plans: "/v1/admin/plans",

@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import { PlanLimitListener } from "@/components/upgrade/PlanLimitListener";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -9,6 +11,8 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const Login = lazy(() => import(/* webpackChunkName: "auth-login" */ "./pages/Login"));
 const Cadastro = lazy(() => import(/* webpackChunkName: "auth-cadastro" */ "./pages/Cadastro"));
+const ForgotPassword = lazy(() => import(/* webpackChunkName: "auth-forgot" */ "./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import(/* webpackChunkName: "auth-reset" */ "./pages/ResetPassword"));
 const Pagamento = lazy(() => import(/* webpackChunkName: "auth-pagamento" */ "./pages/Pagamento"));
 const PagamentoSucesso = lazy(() => import(/* webpackChunkName: "auth-pagamento-sucesso" */ "./pages/PagamentoSucesso"));
 const NotFound = lazy(() => import(/* webpackChunkName: "pages-notfound" */ "./pages/NotFound"));
@@ -28,6 +32,7 @@ const GoalsPage = lazy(() => import(/* webpackChunkName: "pages-goals" */ "./pag
 const CardsPage = lazy(() => import(/* webpackChunkName: "pages-cards" */ "./pages/Cards"));
 const WhatsAppPage = lazy(() => import(/* webpackChunkName: "pages-whatsapp" */ "./pages/WhatsApp"));
 const SettingsPage = lazy(() => import(/* webpackChunkName: "pages-settings" */ "./pages/Settings"));
+const RecorrenciasPage = lazy(() => import(/* webpackChunkName: "pages-recorrencias" */ "./pages/Recorrencias"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -131,6 +136,16 @@ function AppRoutes() {
             <Cadastro />
           </PublicRoute>
         } />
+        <Route path="/recuperar-senha" element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        } />
+        <Route path="/redefinir-senha" element={
+          <PublicRoute>
+            <ResetPassword />
+          </PublicRoute>
+        } />
         <Route path="/pagamento" element={<Pagamento />} />
         <Route path="/pagamento-sucesso" element={<PagamentoSucesso />} />
 
@@ -147,6 +162,7 @@ function AppRoutes() {
           <Route path="categorias" element={<CategoriesPage />} />
           <Route path="metas" element={<GoalsPage />} />
           <Route path="cartoes" element={<CardsPage />} />
+          <Route path="recorrencias" element={<RecorrenciasPage />} />
           <Route path="whatsapp" element={<WhatsAppPage />} />
           <Route path="configuracoes" element={<SettingsPage />} />
         </Route>
@@ -173,10 +189,12 @@ function AppRoutes() {
 }
 
 const AppShell = () => (
-  <ThemeProvider defaultTheme="light" storageKey="organizaai-theme">
+  <ThemeProvider storageKey="doutorcash-theme">
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
+          <OfflineBanner />
+          <PlanLimitListener />
           <Toaster />
           <Sonner />
           <AppRoutes />

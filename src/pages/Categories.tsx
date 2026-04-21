@@ -229,6 +229,7 @@ const CategoriesPage = memo(() => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Editar categoria ${cat.name}`}
                           className="h-8 w-8"
                           onClick={() => openEdit(cat)}
                         >
@@ -237,6 +238,7 @@ const CategoriesPage = memo(() => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Remover categoria ${cat.name}`}
                           className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => setDeleteTarget(cat)}
                         >
