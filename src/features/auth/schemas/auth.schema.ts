@@ -51,22 +51,11 @@ export const forgotPasswordSchema = z.object({
 
 export const resetPasswordSchema = z
   .object({
-    email: z
-      .string()
-      .min(1, "Email é obrigatório")
-      .email("Por favor, insira um email válido"),
-    code: z
-      .string()
-      .min(1, "Código é obrigatório")
-      .length(6, "O código deve ter 6 caracteres"),
     password: z
       .string()
-      .min(1, "Senha é obrigatória")
       .min(8, "A senha deve ter no mínimo 8 caracteres")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "A senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número"
-      ),
+      .regex(/[A-Z]/, "Deve conter ao menos 1 letra maiúscula")
+      .regex(/[0-9]/, "Deve conter ao menos 1 número"),
     confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
   })
   .refine((data) => data.password === data.confirmPassword, {
