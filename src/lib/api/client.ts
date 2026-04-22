@@ -79,8 +79,8 @@ export const apiEndpoints = {
   auth: {
     login: "/v1/auth/login",
     register: "/v1/auth/register",
-    forgotPassword: "/v1/users/forgot-password",
-    resetPassword: "/v1/users/reset-password",
+    forgotPassword: "/v1/auth/forgot-password",
+    resetPassword: "/v1/auth/reset-password",
   },
   categories: {
     list: "/v1/categories",

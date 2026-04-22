@@ -9,7 +9,9 @@
 
 | Módulo | Status |
 |---|---|
-| Auth (login, register, forgot/reset password) | ✅ Implementado |
+| Auth (login, register) | ✅ Implementado |
+| Auth (forgot-password) | ✅ Implementado — path: `/v1/auth/forgot-password` |
+| Auth (reset-password) | ⚠️ Implementado mas precisa aceitar `{ email, password }` — ver abaixo |
 | Transactions (CRUD) | ✅ Implementado |
 | Categories (CRUD) | ✅ Implementado |
 | **Goals (Metas)** | ❌ Faltando |
@@ -20,6 +22,48 @@
 | Payments | ⚠️ Verificar |
 | LGPD | ⚠️ Verificar |
 | Admin | ⚠️ Verificar |
+
+---
+
+## 🔴 URGENTE — Auth: Reset Password retornando 500
+
+**Bug confirmado:** `POST /v1/auth/reset-password` com `{ email, password }` retorna **500 Internal Server Error**.
+O backend crasha porque o DTO só aceita `token` e não trata o campo `email`.
+
+**Correção necessária no backend:**
+
+```typescript
+// Atualizar ResetPasswordDto
+export class ResetPasswordDto {
+  @IsEmail()
+  email: string;           // ← ADICIONAR
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+
+  @IsString()
+  @IsOptional()
+  token?: string;          // ← manter opcional
+}
+
+// Controller
+async resetPassword(dto: ResetPasswordDto) {
+  const user = await this.usersService.findByEmail(dto.email);
+  if (!user) throw new BadRequestException({ code: 'USER_NOT_FOUND' });
+  const hash = await bcrypt.hash(dto.password, 12);
+  await this.usersService.updatePassword(user.id, hash);
+  return { message: 'Senha alterada com sucesso' };
+}
+```
+
+**Contrato esperado:**
+```
+POST /v1/auth/reset-password
+Body: { "email": "string", "password": "string" }
+Response 200: { "message": "Senha alterada com sucesso" }
+Response 400: { "code": "USER_NOT_FOUND", "message": "Email não encontrado" }
+```
 
 ---
 
