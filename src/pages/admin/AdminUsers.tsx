@@ -1,17 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
-  Search,
-  MoreHorizontal,
-  Mail,
-  Shield,
-  Ban,
-  Edit,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Users,
-  X,
-  AlertCircle,
+  Search, MoreHorizontal, Mail, Shield, Ban, Trash2,
+  ChevronLeft, ChevronRight, Users, X, AlertCircle,
+  CheckCircle, UserCheck, Phone, Calendar, Activity,
+  CreditCard, Crown, Zap,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -19,54 +11,528 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  DialogFooter, DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
+} from "@/components/ui/sheet";
 import { AdminUsersSkeleton } from "@/components/ui/admin-skeletons";
-import { useAdminUsers } from "@/features/admin/hooks/use-admin-users";
+import {
+  useAdminUsers, useUpdateAdminUser, useDeleteAdminUser,
+  type AdminUser,
+} from "@/features/admin/hooks/use-admin-users";
+import { toast } from "sonner";
+
+const PAGE_SIZE = 10;
+
+const PLAN_CONFIG = {
+  free:     { label: "Free",     className: "bg-muted text-muted-foreground border-muted-foreground/20", icon: Users },
+  pro:      { label: "Pro",      className: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800", icon: Zap },
+  business: { label: "Business", className: "bg-violet-500/10 text-violet-600 border-violet-200 dark:border-violet-800", icon: Crown },
+  Free:     { label: "Free",     className: "bg-muted text-muted-foreground border-muted-foreground/20", icon: Users },
+  Pro:      { label: "Pro",      className: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800", icon: Zap },
+  Business: { label: "Business", className: "bg-violet-500/10 text-violet-600 border-violet-200 dark:border-violet-800", icon: Crown },
+} as Record<string, { label: string; className: string; icon: typeof Users }>;
+
+const STATUS_CONFIG = {
+  Ativo:     { className: "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-800" },
+  Pendente:  { className: "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-800" },
+  Bloqueado: { className: "bg-red-500/10 text-red-600 border-red-200 dark:border-red-800" },
+  active:    { className: "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-800" },
+  suspended: { className: "bg-red-500/10 text-red-600 border-red-200 dark:border-red-800" },
+} as Record<string, { className: string }>;
+
+function getInitials(name: string) {
+  return name.split(" ").map((n) => n[0] || "").join("").substring(0, 2).toUpperCase();
+}
+
+function PlanBadge({ plan }: { plan: string }) {
+  const cfg = PLAN_CONFIG[plan] ?? PLAN_CONFIG["free"];
+  return (
+    <Badge variant="outline" className={cfg.className}>
+      {cfg.label}
+    </Badge>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG["Pendente"];
+  const label = status === "active" ? "Ativo" : status === "suspended" ? "Bloqueado" : status;
+  return (
+    <Badge variant="outline" className={cfg.className}>
+      {label}
+    </Badge>
+  );
+}
+
+// ── User Detail Sheet ────────────────────────────────────────────────────────
+
+function UserDetailSheet({
+  user,
+  open,
+  onClose,
+  onChangePlan,
+  onChangeStatus,
+  onChangeRole,
+  onDelete,
+}: {
+  user: AdminUser | null;
+  open: boolean;
+  onClose: () => void;
+  onChangePlan: (user: AdminUser) => void;
+  onChangeStatus: (user: AdminUser) => void;
+  onChangeRole: (user: AdminUser) => void;
+  onDelete: (user: AdminUser) => void;
+}) {
+  if (!user) return null;
+  const isBlocked = user.status === "Bloqueado" || user.status === "suspended";
+  const isAdmin = user.role === "admin";
+
+  return (
+    <Sheet open={open} onOpenChange={onClose}>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader className="pb-4">
+          <SheetTitle>Detalhes do Usuário</SheetTitle>
+          <SheetDescription>Informações e ações para este cliente</SheetDescription>
+        </SheetHeader>
+
+        {/* Avatar + name */}
+        <div className="flex items-center gap-4 mb-6">
+          <Avatar className="h-16 w-16">
+            <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
+              {getInitials(user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <h3 className="text-lg font-semibold truncate">{user.name}</h3>
+            <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <PlanBadge plan={user.plan} />
+              <StatusBadge status={user.status} />
+              {isAdmin && (
+                <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-200">
+                  Admin
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <Separator className="mb-6" />
+
+        {/* Info rows */}
+        <div className="space-y-4 mb-6">
+          {user.phone && (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <Phone className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Telefone / WhatsApp</p>
+                <p className="text-sm font-medium">{user.phone}</p>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Membro desde</p>
+              <p className="text-sm font-medium">{user.createdAt}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <Activity className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Último acesso</p>
+              <p className="text-sm font-medium">{user.lastLogin || "Nunca"}</p>
+            </div>
+          </div>
+          {user.totalTransactions !== undefined && (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <CreditCard className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total de transações</p>
+                <p className="text-sm font-medium">{user.totalTransactions.toLocaleString("pt-BR")}</p>
+              </div>
+            </div>
+          )}
+          {user.planExpiresAt && (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <Crown className="w-4 h-4 text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Plano expira em</p>
+                <p className="text-sm font-medium">{user.planExpiresAt}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <Separator className="mb-6" />
+
+        {/* Actions */}
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Ações</p>
+
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={() => { onClose(); onChangePlan(user); }}
+          >
+            <Crown className="w-4 h-4 mr-2 text-violet-500" />
+            Alterar Plano
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={() => { onClose(); onChangeStatus(user); }}
+          >
+            {isBlocked ? (
+              <><CheckCircle className="w-4 h-4 mr-2 text-emerald-500" />Desbloquear usuário</>
+            ) : (
+              <><Ban className="w-4 h-4 mr-2 text-amber-500" />Bloquear usuário</>
+            )}
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={() => { onClose(); onChangeRole(user); }}
+          >
+            <Shield className="w-4 h-4 mr-2 text-blue-500" />
+            {isAdmin ? "Remover acesso admin" : "Promover a admin"}
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={() => window.open(`mailto:${user.email}`)}
+          >
+            <Mail className="w-4 h-4 mr-2" />
+            Enviar email
+          </Button>
+
+          <Separator className="my-2" />
+
+          <Button
+            variant="outline"
+            className="w-full justify-start text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => { onClose(); onDelete(user); }}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Excluir usuário
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+// ── Edit Plan Dialog ─────────────────────────────────────────────────────────
+
+function ChangePlanDialog({
+  user,
+  open,
+  onClose,
+}: {
+  user: AdminUser | null;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const updateUser = useUpdateAdminUser();
+  const [plan, setPlan] = useState(user?.plan ?? "free");
+
+  if (!user) return null;
+
+  const handleSave = () => {
+    updateUser.mutate(
+      { id: user.id, plan },
+      {
+        onSuccess: () => { toast.success(`Plano alterado para ${plan}`); onClose(); },
+        onError: () => toast.error("Erro ao alterar plano"),
+      }
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Alterar Plano</DialogTitle>
+          <DialogDescription>
+            Alterando plano de <strong>{user.name}</strong>
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <Label>Novo plano</Label>
+          <Select value={plan} onValueChange={setPlan}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="free">Free — Gratuito</SelectItem>
+              <SelectItem value="pro">Pro — R$ 97/mês</SelectItem>
+              <SelectItem value="business">Business — R$ 297/mês</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleSave} disabled={updateUser.isPending}>
+            {updateUser.isPending ? "Salvando..." : "Salvar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Change Role Dialog ───────────────────────────────────────────────────────
+
+function ChangeRoleDialog({
+  user,
+  open,
+  onClose,
+}: {
+  user: AdminUser | null;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const updateUser = useUpdateAdminUser();
+  if (!user) return null;
+  const isAdmin = user.role === "admin";
+  const newRole = isAdmin ? "user" : "admin";
+
+  const handleConfirm = () => {
+    updateUser.mutate(
+      { id: user.id, role: newRole },
+      {
+        onSuccess: () => {
+          toast.success(isAdmin ? "Acesso admin removido" : "Usuário promovido a admin");
+          onClose();
+        },
+        onError: () => toast.error("Erro ao alterar papel"),
+      }
+    );
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {isAdmin ? "Remover acesso admin?" : "Promover a admin?"}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {isAdmin
+              ? `${user.name} perderá acesso ao painel administrativo.`
+              : `${user.name} terá acesso total ao painel administrativo. Certifique-se de que isso é intencional.`}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            disabled={updateUser.isPending}
+            className={!isAdmin ? "bg-orange-600 hover:bg-orange-700" : ""}
+          >
+            {updateUser.isPending ? "Aplicando..." : isAdmin ? "Remover admin" : "Confirmar promoção"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// ── Block/Unblock Dialog ─────────────────────────────────────────────────────
+
+function ChangeStatusDialog({
+  user,
+  open,
+  onClose,
+}: {
+  user: AdminUser | null;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const updateUser = useUpdateAdminUser();
+  if (!user) return null;
+  const isBlocked = user.status === "Bloqueado" || user.status === "suspended";
+  const newStatus = isBlocked ? "Ativo" : "Bloqueado";
+
+  const handleConfirm = () => {
+    updateUser.mutate(
+      { id: user.id, status: newStatus },
+      {
+        onSuccess: () => {
+          toast.success(isBlocked ? "Usuário desbloqueado" : "Usuário bloqueado");
+          onClose();
+        },
+        onError: () => toast.error("Erro ao alterar status"),
+      }
+    );
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {isBlocked ? "Desbloquear usuário?" : "Bloquear usuário?"}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {isBlocked
+              ? `${user.name} poderá acessar a plataforma novamente.`
+              : `${user.name} ficará sem acesso à plataforma até ser desbloqueado.`}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            disabled={updateUser.isPending}
+            className={!isBlocked ? "bg-amber-600 hover:bg-amber-700" : "bg-emerald-600 hover:bg-emerald-700"}
+          >
+            {updateUser.isPending ? "Aplicando..." : isBlocked ? "Desbloquear" : "Bloquear"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// ── Delete Dialog ────────────────────────────────────────────────────────────
+
+function DeleteUserDialog({
+  user,
+  open,
+  onClose,
+}: {
+  user: AdminUser | null;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const deleteUser = useDeleteAdminUser();
+  if (!user) return null;
+
+  const handleConfirm = () => {
+    deleteUser.mutate(user.id, {
+      onSuccess: () => { toast.success("Usuário excluído"); onClose(); },
+      onError: () => toast.error("Erro ao excluir usuário"),
+    });
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onClose}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Excluir usuário permanentemente?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Todos os dados de <strong>{user.name}</strong> ({user.email}) serão removidos. Esta ação não pode ser desfeita.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive hover:bg-destructive/90"
+            onClick={handleConfirm}
+            disabled={deleteUser.isPending}
+          >
+            {deleteUser.isPending ? "Excluindo..." : "Excluir permanentemente"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// ── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [page, setPage] = useState(1);
+
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [planDialogOpen, setPlanDialogOpen] = useState(false);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [actionUser, setActionUser] = useState<AdminUser | null>(null);
 
   const { users, stats, isLoading, isError, error } = useAdminUsers();
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPlan = selectedPlan === "all" || user.plan === selectedPlan;
-    const matchesStatus = selectedStatus === "all" || user.status === selectedStatus;
-    return matchesSearch && matchesPlan && matchesStatus;
-  });
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const term = searchTerm.toLowerCase();
+      const matchesSearch =
+        user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term);
+      const matchesPlan =
+        selectedPlan === "all" ||
+        user.plan?.toLowerCase() === selectedPlan.toLowerCase();
+      const matchesStatus =
+        selectedStatus === "all" ||
+        user.status?.toLowerCase() === selectedStatus.toLowerCase();
+      return matchesSearch && matchesPlan && matchesStatus;
+    });
+  }, [users, searchTerm, selectedPlan, selectedStatus]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const paginatedUsers = filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedPlan("all");
     setSelectedStatus("all");
+    setPage(1);
   };
 
   const hasActiveFilters = searchTerm || selectedPlan !== "all" || selectedStatus !== "all";
+
+  const openDetail = (user: AdminUser) => {
+    setSelectedUser(user);
+    setSheetOpen(true);
+  };
+
+  const openAction = (
+    user: AdminUser,
+    action: "plan" | "status" | "role" | "delete"
+  ) => {
+    setActionUser(user);
+    if (action === "plan") setPlanDialogOpen(true);
+    if (action === "status") setStatusDialogOpen(true);
+    if (action === "role") setRoleDialogOpen(true);
+    if (action === "delete") setDeleteDialogOpen(true);
+  };
 
   if (isError) {
     const msg = error instanceof Error ? error.message : "Erro desconhecido";
@@ -86,43 +552,42 @@ export default function AdminUsers() {
 
   return (
     <div className="flex flex-col h-full">
-      <AdminHeader
-        title="Clientes"
-        subtitle="Gerencie os clientes da plataforma"
-      />
+      <AdminHeader title="Clientes" subtitle="Gerencie os clientes da plataforma" />
 
-      <div className="flex-1 overflow-auto p-6 space-y-6">
+      <div className="flex-1 overflow-auto p-6 space-y-5">
         {isLoading ? (
           <AdminUsersSkeleton />
         ) : (
           <>
+            {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card className="border-0 shadow-sm bg-card/50">
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold">{stats.total.toLocaleString("pt-BR")}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Total</p>
+                  <p className="text-2xl font-bold mt-1">{stats.total.toLocaleString("pt-BR")}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm bg-card/50">
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground">Ativos</p>
-                  <p className="text-2xl font-bold text-emerald-500">{stats.active.toLocaleString("pt-BR")}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Ativos</p>
+                  <p className="text-2xl font-bold mt-1 text-emerald-500">{stats.active.toLocaleString("pt-BR")}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm bg-card/50">
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground">Pendentes</p>
-                  <p className="text-2xl font-bold text-amber-500">{stats.pending.toLocaleString("pt-BR")}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Pendentes</p>
+                  <p className="text-2xl font-bold mt-1 text-amber-500">{stats.pending.toLocaleString("pt-BR")}</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm bg-card/50">
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground">Bloqueados</p>
-                  <p className="text-2xl font-bold text-red-500">{stats.blocked.toLocaleString("pt-BR")}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Bloqueados</p>
+                  <p className="text-2xl font-bold mt-1 text-red-500">{stats.blocked.toLocaleString("pt-BR")}</p>
                 </CardContent>
               </Card>
             </div>
 
+            {/* Filters */}
             <Card className="border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -131,40 +596,34 @@ export default function AdminUsers() {
                     <Input
                       placeholder="Buscar por nome ou email..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                       className="pl-9"
-                      aria-label="Buscar clientes"
                     />
                   </div>
-                  <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                    <SelectTrigger className="w-[140px]" aria-label="Filtrar por plano">
+                  <Select value={selectedPlan} onValueChange={(v) => { setSelectedPlan(v); setPage(1); }}>
+                    <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Plano" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos os planos</SelectItem>
-                      <SelectItem value="Free">Free</SelectItem>
-                      <SelectItem value="Pro">Pro</SelectItem>
-                      <SelectItem value="Business">Business</SelectItem>
+                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="pro">Pro</SelectItem>
+                      <SelectItem value="business">Business</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                    <SelectTrigger className="w-[140px]" aria-label="Filtrar por status">
+                  <Select value={selectedStatus} onValueChange={(v) => { setSelectedStatus(v); setPage(1); }}>
+                    <SelectTrigger className="w-[140px]">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="Ativo">Ativo</SelectItem>
-                      <SelectItem value="Pendente">Pendente</SelectItem>
-                      <SelectItem value="Bloqueado">Bloqueado</SelectItem>
+                      <SelectItem value="ativo">Ativo</SelectItem>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="bloqueado">Bloqueado</SelectItem>
                     </SelectContent>
                   </Select>
                   {hasActiveFilters && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={clearFilters}
-                      aria-label="Limpar filtros"
-                    >
+                    <Button variant="ghost" size="icon" onClick={clearFilters} aria-label="Limpar filtros">
                       <X className="h-4 w-4" />
                     </Button>
                   )}
@@ -172,7 +631,8 @@ export default function AdminUsers() {
               </CardContent>
             </Card>
 
-            {filteredUsers.length === 0 ? (
+            {/* Table */}
+            {paginatedUsers.length === 0 ? (
               <Card className="border-0 shadow-sm">
                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                   <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -180,14 +640,10 @@ export default function AdminUsers() {
                   </div>
                   <h3 className="text-lg font-semibold mb-2">Nenhum cliente encontrado</h3>
                   <p className="text-muted-foreground mb-4">
-                    {hasActiveFilters
-                      ? "Tente ajustar os filtros de busca"
-                      : "Ainda não há clientes cadastrados"}
+                    {hasActiveFilters ? "Tente ajustar os filtros" : "Ainda não há clientes"}
                   </p>
                   {hasActiveFilters && (
-                    <Button variant="outline" onClick={clearFilters}>
-                      Limpar filtros
-                    </Button>
+                    <Button variant="outline" onClick={clearFilters}>Limpar filtros</Button>
                   )}
                 </CardContent>
               </Card>
@@ -196,92 +652,98 @@ export default function AdminUsers() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-muted/50 hover:bg-transparent">
-                      <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-                        Cliente
-                      </TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Cliente</TableHead>
                       <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Plano</TableHead>
                       <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Status</TableHead>
-                      <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Último acesso</TableHead>
-                      <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Criado em</TableHead>
-                      <TableHead className="w-12"></TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium hidden md:table-cell">Papel</TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium hidden lg:table-cell">Último acesso</TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium hidden lg:table-cell">Criado em</TableHead>
+                      <TableHead className="w-12" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user.id} className="border-muted/50 hover:bg-muted/30">
+                    {paginatedUsers.map((user) => (
+                      <TableRow
+                        key={user.id}
+                        className="border-muted/50 hover:bg-muted/30 cursor-pointer"
+                        onClick={() => openDetail(user)}
+                      >
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar className="h-9 w-9">
                               <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
-                                {user.name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2)}
+                                {getInitials(user.name)}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
-                              <p className="font-medium text-sm">{user.name}</p>
-                              <p className="text-xs text-muted-foreground">{user.email}</p>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm truncate">{user.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell><PlanBadge plan={user.plan} /></TableCell>
+                        <TableCell><StatusBadge status={user.status} /></TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <Badge
                             variant="outline"
                             className={
-                              user.plan === "Business"
-                                ? "bg-violet-500/10 text-violet-600 border-violet-200"
-                                : user.plan === "Pro"
-                                ? "bg-blue-500/10 text-blue-600 border-blue-200"
+                              user.role === "admin"
+                                ? "bg-orange-500/10 text-orange-600 border-orange-200"
                                 : "bg-muted text-muted-foreground"
                             }
                           >
-                            {user.plan}
+                            {user.role === "admin" ? "Admin" : "Usuário"}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={
-                              user.status === "Ativo"
-                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-200"
-                                : user.status === "Pendente"
-                                ? "bg-amber-500/10 text-amber-600 border-amber-200"
-                                : "bg-red-500/10 text-red-600 border-red-200"
-                            }
-                          >
-                            {user.status}
-                          </Badge>
+                        <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
+                          {user.lastLogin || "—"}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{user.lastLogin}</TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{user.createdAt}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
+                          {user.createdAt}
+                        </TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Ações do cliente">
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuLabel>Ações</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Editar
+                              <DropdownMenuItem onClick={() => openDetail(user)}>
+                                <UserCheck className="h-4 w-4 mr-2" />
+                                Ver detalhes
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openAction(user, "plan")}>
+                                <Crown className="h-4 w-4 mr-2" />
+                                Alterar plano
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => window.open(`mailto:${user.email}`)}>
                                 <Mail className="h-4 w-4 mr-2" />
                                 Enviar email
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openAction(user, "role")}>
                                 <Shield className="h-4 w-4 mr-2" />
-                                Alterar papel
+                                {user.role === "admin" ? "Remover admin" : "Promover a admin"}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-amber-500">
-                                <Ban className="h-4 w-4 mr-2" />
-                                Bloquear
+                              <DropdownMenuItem
+                                className="text-amber-600"
+                                onClick={() => openAction(user, "status")}
+                              >
+                                {user.status === "Bloqueado" || user.status === "suspended" ? (
+                                  <><CheckCircle className="h-4 w-4 mr-2" />Desbloquear</>
+                                ) : (
+                                  <><Ban className="h-4 w-4 mr-2" />Bloquear</>
+                                )}
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => openAction(user, "delete")}
+                              >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
+                                Excluir usuário
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -291,18 +753,44 @@ export default function AdminUsers() {
                   </TableBody>
                 </Table>
 
-                <div className="flex items-center justify-between p-4 border-t border-muted/50">
+                {/* Pagination */}
+                <div className="flex items-center justify-between px-4 py-3 border-t border-muted/50">
                   <p className="text-sm text-muted-foreground">
-                    Mostrando {filteredUsers.length} de {users.length} clientes
+                    {filteredUsers.length === 0
+                      ? "Nenhum resultado"
+                      : `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, filteredUsers.length)} de ${filteredUsers.length} clientes`}
                   </p>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8" disabled>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      disabled={page === 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" className="h-8 w-8 bg-muted">1</Button>
-                    <Button variant="outline" size="sm" className="h-8 w-8">2</Button>
-                    <Button variant="outline" size="sm" className="h-8 w-8">3</Button>
-                    <Button variant="outline" size="icon" className="h-8 w-8">
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                      const p = i + 1;
+                      return (
+                        <Button
+                          key={p}
+                          variant={page === p ? "default" : "outline"}
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => setPage(p)}
+                        >
+                          {p}
+                        </Button>
+                      );
+                    })}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      disabled={page === totalPages}
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -312,6 +800,41 @@ export default function AdminUsers() {
           </>
         )}
       </div>
+
+      {/* Dialogs & Sheet */}
+      <UserDetailSheet
+        user={selectedUser}
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        onChangePlan={(u) => openAction(u, "plan")}
+        onChangeStatus={(u) => openAction(u, "status")}
+        onChangeRole={(u) => openAction(u, "role")}
+        onDelete={(u) => openAction(u, "delete")}
+      />
+
+      <ChangePlanDialog
+        user={actionUser}
+        open={planDialogOpen}
+        onClose={() => setPlanDialogOpen(false)}
+      />
+
+      <ChangeStatusDialog
+        user={actionUser}
+        open={statusDialogOpen}
+        onClose={() => setStatusDialogOpen(false)}
+      />
+
+      <ChangeRoleDialog
+        user={actionUser}
+        open={roleDialogOpen}
+        onClose={() => setRoleDialogOpen(false)}
+      />
+
+      <DeleteUserDialog
+        user={actionUser}
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Mail, Lock, User, ArrowRight, Check, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowRight, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
@@ -14,6 +14,10 @@ const logoWeb = "/logoweb.png";
 const registerSchema = z
   .object({
     name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
+    phone: z
+      .string()
+      .min(10, "Telefone inválido")
+      .regex(/^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/, "Formato: (11) 99999-9999"),
     email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
     password: z
       .string()
@@ -31,6 +35,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface FormErrors {
   name?: string;
+  phone?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
@@ -43,6 +48,7 @@ const Cadastro = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<RegisterFormData & { plan: string }>({
     name: "",
+    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -56,6 +62,7 @@ const Cadastro = () => {
   const validateStep1 = (): boolean => {
     const result = registerSchema.safeParse({
       name: formData.name,
+      phone: formData.phone,
       email: formData.email,
       password: formData.password,
       confirmPassword: formData.confirmPassword,
@@ -91,6 +98,7 @@ const Cadastro = () => {
         email: formData.email,
         password: formData.password,
         plan: formData.plan,
+        phone: formData.phone,
       });
 
       analytics.signup("email");
@@ -98,7 +106,7 @@ const Cadastro = () => {
       toast.success("Conta criada com sucesso!");
 
       if (formData.plan === "free") {
-        navigate("/login");
+        navigate("/dashboard");
       } else {
         navigate("/pagamento", { state: { plan: formData.plan } });
       }
@@ -122,18 +130,28 @@ const Cadastro = () => {
       name: "Gratuito",
       price: "R$ 0",
       period: "para sempre",
-      description: "1 empresa, recursos básicos",
-      features: ["Categorização básica", "Relatórios simples", "Suporte por email"],
+      description: "Ideal para começar",
+      features: [
+        "3 transações por mês",
+        "1 meta financeira",
+        "1 cartão de crédito",
+        "1 recorrência",
+        "Categorias básicas",
+        "Suporte por email",
+      ],
     },
     {
       id: "pro",
       name: "Pro",
       price: "R$ 97",
       period: "/mês",
-      description: "3 empresas, IA + WhatsApp",
+      description: "Para quem leva finanças a sério",
       popular: true,
       features: [
-        "Tudo do Gratuito",
+        "Transações ilimitadas",
+        "Metas ilimitadas",
+        "Cartões ilimitados",
+        "Recorrências ilimitadas",
         "Categorização por IA",
         "Registro por WhatsApp",
         "Relatórios avançados",
@@ -145,13 +163,15 @@ const Cadastro = () => {
       name: "Business",
       price: "R$ 297",
       period: "/mês",
-      description: "Ilimitado, API + Suporte VIP",
+      description: "Para empresas e power users",
       features: [
         "Tudo do Pro",
         "Empresas ilimitadas",
+        "Chat com IA financeira",
+        "Previsão de gastos",
+        "Detecção de anomalias",
         "API de integração",
         "Suporte VIP",
-        "Treinamento dedicado",
       ],
     },
   ];
@@ -240,6 +260,41 @@ const Cadastro = () => {
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-destructive" />
                       {errors.name}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-medium">
+                    Telefone / WhatsApp
+                  </Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="(11) 99999-9999"
+                      value={formData.phone}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, "").slice(0, 11);
+                        let masked = raw;
+                        if (raw.length > 2) masked = `(${raw.slice(0, 2)}) ${raw.slice(2)}`;
+                        if (raw.length > 7) masked = `(${raw.slice(0, 2)}) ${raw.slice(2, 7)}-${raw.slice(7)}`;
+                        setFormData({ ...formData, phone: masked });
+                        if (errors.phone) setErrors({ ...errors, phone: undefined });
+                      }}
+                      className={`pl-11 h-11 ${
+                        errors.phone
+                          ? "border-destructive focus:border-destructive"
+                          : "focus:border-primary focus:ring-primary/20"
+                      }`}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  {errors.phone && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-destructive" />
+                      {errors.phone}
                     </p>
                   )}
                 </div>

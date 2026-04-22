@@ -9,6 +9,7 @@ interface PageHeaderProps {
     label: string;
     onClick: () => void;
     icon?: ReactNode;
+    variant?: "default" | "outline" | "secondary" | "destructive" | "ghost" | "link";
   };
 }
 
@@ -25,9 +26,10 @@ export function PageHeader({ title, subtitle, action }: PageHeaderProps) {
         <Button
           onClick={action.onClick}
           size="sm"
+          variant={action.variant ?? "default"}
           className="gap-1.5 w-full sm:w-auto h-9 text-sm font-medium"
         >
-          {action.icon || <Plus className="w-3.5 h-3.5" />}
+          {action.icon ?? <Plus className="w-3.5 h-3.5" />}
           {action.label}
         </Button>
       )}

@@ -1,10 +1,13 @@
 export type UserRole = "admin" | "user";
+export type UserPlan = "free" | "pro" | "business";
 
 export interface User {
   id: string;
   email: string;
   name: string;
   role: UserRole;
+  plan: UserPlan;
+  phone?: string;
 }
 
 export interface RegisterPayload {
@@ -21,4 +24,6 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<User>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
+  updateProfile: (data: { name?: string; phone?: string }) => Promise<void>;
+  changePassword: (data: { currentPassword: string; newPassword: string }) => Promise<void>;
 }
