@@ -89,17 +89,29 @@ function CardForm({
     e.preventDefault();
     if (!validate()) return;
     const [expiryMonth, expiryYear] = expiry.split("/");
-    onSubmit({
+    const payload = {
       number: cardNumber.replace(/\s/g, ""),
       holderName: cardName,
       expiryMonth,
       expiryYear,
       cvv,
-    });
+    };
+    // Limpar dados sensíveis da memória antes de enviar
+    setCardNumber("");
+    setCvv("");
+    onSubmit(payload);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+      {/* Aviso de segurança */}
+      <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+        <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+        <p className="text-xs text-amber-700 dark:text-amber-300">
+          Seus dados são transmitidos com criptografia. Nenhum número de cartão é armazenado em nossos servidores.
+        </p>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="cardNumber" className="text-sm font-medium">
           Número do cartão
@@ -110,6 +122,7 @@ function CardForm({
             id="cardNumber"
             type="text"
             inputMode="numeric"
+            autoComplete="cc-number"
             placeholder="0000 0000 0000 0000"
             value={cardNumber}
             onChange={(e) => {
@@ -175,9 +188,10 @@ function CardForm({
           </Label>
           <Input
             id="cvv"
-            type="text"
+            type="password"
             inputMode="numeric"
-            placeholder="000"
+            autoComplete="cc-csc"
+            placeholder="•••"
             value={cvv}
             onChange={(e) => {
               setCvv(e.target.value.replace(/\D/g, "").slice(0, 4));

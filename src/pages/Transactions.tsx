@@ -1,5 +1,7 @@
 import { memo, useState } from "react";
-import { Receipt, Plus, Search, ArrowUpRight, ArrowDownRight, Loader2, Trash2, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { Receipt, Plus, Search, ArrowUpRight, ArrowDownRight, Loader2, Trash2, TrendingUp, TrendingDown, Wallet, Lock } from "lucide-react";
+import { usePlanGuard } from "@/hooks/use-plan-guard";
+import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +65,7 @@ const TransactionsPage = memo(() => {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [showNewCategory, setShowNewCategory] = useState(false);
   const [form, setForm] = useState({
@@ -88,6 +91,7 @@ const TransactionsPage = memo(() => {
 
   const transactions = transactionsRes?.data ?? [];
   const categories = categoriesRes?.data ?? [];
+  const planGuard = usePlanGuard("transactions", transactions.length);
   const catMap = new Map(categories.map((c) => [c.id, c.name]));
 
   const totalIncome = transactions.filter((t) => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
@@ -180,12 +184,20 @@ const TransactionsPage = memo(() => {
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+      <UpgradeModal
+        open={isUpgradeOpen}
+        onOpenChange={setIsUpgradeOpen}
+        resource="transactions"
+        limit={planGuard.limit}
+      />
       <PageHeader
         title="Transações"
         subtitle="Gerencie todas as suas movimentações"
         action={{
-          label: "Nova Transação",
-          onClick: () => setIsDialogOpen(true),
+          label: planGuard.limitReached ? "Fazer upgrade" : "Nova Transação",
+          icon: planGuard.limitReached ? <Lock className="w-3.5 h-3.5" /> : undefined,
+          variant: planGuard.limitReached ? "outline" : "default",
+          onClick: () => planGuard.limitReached ? setIsUpgradeOpen(true) : setIsDialogOpen(true),
         }}
       />
 
@@ -343,6 +355,7 @@ const TransactionsPage = memo(() => {
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label="Remover transação"
                         className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
                         onClick={() => deleteMutation.mutate(transaction.id)}
                         disabled={deleteMutation.isPending}

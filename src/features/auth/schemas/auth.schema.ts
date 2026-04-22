@@ -42,5 +42,28 @@ export const registerSchema = z
     path: ["confirmPassword"],
   });
 
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, "Email é obrigatório")
+    .email("Por favor, insira um email válido"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "A senha deve ter no mínimo 8 caracteres")
+      .regex(/[A-Z]/, "Deve conter ao menos 1 letra maiúscula")
+      .regex(/[0-9]/, "Deve conter ao menos 1 número"),
+    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;

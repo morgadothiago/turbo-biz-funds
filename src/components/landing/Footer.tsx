@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
-import { Instagram, Youtube, Mail } from "lucide-react";
+import { Camera, Play, Mail } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 const logoWeb = "/logoweb.png";
 
@@ -32,8 +32,8 @@ const Footer = memo(() => {
   };
 
   const SOCIAL_LINKS = [
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Youtube, href: "#", label: "Youtube" },
+    { icon: Camera, href: "#", label: "Instagram" },
+    { icon: Play, href: "#", label: "Youtube" },
     { icon: Mail, href: "#", label: "Email" },
   ] as const;
 

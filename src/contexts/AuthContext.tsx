@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
-import type { User, AuthContextType } from "@/types/auth";
+import type { User, AuthContextType, UserPlan } from "@/types/auth";
 import { storage } from "@/lib/storage";
 import { api, apiEndpoints } from "@/lib/api/client";
 
@@ -15,7 +15,15 @@ function decodeJwt(token: string): Record<string, unknown> {
 }
 
 interface LoginApiResponse {
-  data: { token: string };
+  data: { token: string; accessToken?: string };
+}
+
+interface RegisterApiResponse {
+  data: {
+    accessToken?: string;
+    token?: string;
+    user?: { name?: string; email?: string; role?: string; plan?: string };
+  };
 }
 
 interface RegisterPayload {
@@ -23,6 +31,22 @@ interface RegisterPayload {
   email: string;
   password: string;
   plan: string;
+  phone?: string;
+}
+
+function userFromClaims(claims: Record<string, unknown>, fallbackEmail: string): User {
+  const role = (claims.role as string) === "admin" ? "admin" : "user";
+  const planClaim = claims.plan as string;
+  const plan = (["free", "pro", "business"].includes(planClaim) ? planClaim : "free") as UserPlan;
+
+  return {
+    id: (claims.sub as string) || (claims.id as string) || "",
+    email: (claims.email as string) || fallbackEmail,
+    name: (claims.name as string) || fallbackEmail.split("@")[0],
+    role,
+    plan,
+    phone: (claims.phone as string) || undefined,
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -33,7 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = storage.getToken();
     const savedUser = storage.getUser();
     if (token && savedUser) {
-      setUser(savedUser);
+      // Re-decode JWT to pick up any new fields (like plan)
+      const claims = decodeJwt(token);
+      const refreshedUser: User = {
+        ...savedUser,
+        plan: savedUser.plan ?? ((["free", "pro", "business"].includes(claims.plan as string) ? claims.plan : "free") as UserPlan),
+      };
+      setUser(refreshedUser);
     }
     setIsLoading(false);
   }, []);
@@ -41,27 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string): Promise<User> => {
     setIsLoading(true);
     try {
-      const response = await api.post<LoginApiResponse>(apiEndpoints.auth.login, {
-        email,
-        password,
-      });
-
-      const token = response.data.token;
+      const response = await api.post<LoginApiResponse>(apiEndpoints.auth.login, { email, password });
+      const token = response.data.token ?? response.data.accessToken ?? "";
       const claims = decodeJwt(token);
-
-      const role = (claims.role as string) === "admin" ? "admin" : "user";
-
-      const user: User = {
-        id: (claims.sub as string) || (claims.id as string) || "",
-        email: (claims.email as string) || email,
-        name: (claims.name as string) || email.split("@")[0],
-        role,
-      };
+      const user = userFromClaims(claims, email);
 
       storage.setToken(token);
       storage.setUser(user);
       setUser(user);
-
       return user;
     } finally {
       setIsLoading(false);
@@ -69,7 +86,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload): Promise<void> => {
-    await api.post(apiEndpoints.auth.register, payload);
+    const response = await api.post<RegisterApiResponse>(apiEndpoints.auth.register, payload);
+    const token = response?.data?.accessToken ?? response?.data?.token;
+    if (token) {
+      const claims = decodeJwt(token);
+      const user = userFromClaims(claims, payload.email);
+      storage.setToken(token);
+      storage.setUser(user);
+      setUser(user);
+    }
+  }, []);
+
+  const updateProfile = useCallback(async (data: { name?: string; phone?: string }): Promise<void> => {
+    await api.patch("/v1/users/me", data);
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...data };
+      storage.setUser(updated);
+      return updated;
+    });
+  }, []);
+
+  const changePassword = useCallback(async (data: { currentPassword: string; newPassword: string }): Promise<void> => {
+    await api.patch("/v1/users/me/password", data);
   }, []);
 
   const logout = useCallback(() => {
@@ -78,16 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        register,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, updateProfile, changePassword }}>
       {children}
     </AuthContext.Provider>
   );
@@ -95,16 +125,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
-  }
+  if (context === undefined) throw new Error("useAuth deve ser usado dentro de um AuthProvider");
   return context;
 }
 
 export function useAuthLoading() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuthLoading deve ser usado dentro de um AuthProvider");
-  }
+  if (context === undefined) throw new Error("useAuthLoading deve ser usado dentro de um AuthProvider");
   return context.isLoading;
 }
