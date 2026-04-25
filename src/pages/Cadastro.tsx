@@ -107,11 +107,11 @@ const Cadastro = () => {
 
       toast.success("Conta criada com sucesso!");
 
-      if (formData.plan === "free") {
-        navigate("/dashboard");
-      } else {
-        navigate("/pagamento", { state: { plan: formData.plan } });
+      if (formData.plan !== "free") {
+        // Plano pago: vai para pagamento. PrivateRoute aguarda o token no storage.
+        navigate("/pagamento", { state: { plan: formData.plan }, replace: true });
       }
+      // Plano free: PublicRoute detecta isAuthenticated=true e redireciona automaticamente.
     } catch (err: unknown) {
       const apiError = err as { message?: string; status?: number };
       if (apiError?.status === 409) {

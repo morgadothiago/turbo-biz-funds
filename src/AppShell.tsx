@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { storage } from "@/lib/storage";
 
 const Login = lazy(() => import(/* webpackChunkName: "auth-login" */ "./pages/Login"));
 const Cadastro = lazy(() => import(/* webpackChunkName: "auth-cadastro" */ "./pages/Cadastro"));
@@ -72,17 +73,14 @@ const AuthLoadingFallback = () => (
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return <AuthLoadingFallback />;
-  }
+  if (isLoading) return <AuthLoadingFallback />;
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  // Token exists but state not yet committed (race condition after register/login)
+  if (!isAuthenticated && storage.getToken()) return <AuthLoadingFallback />;
 
-  if (user?.role !== "admin") {
-    return <Navigate to="/dashboard" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  if (user?.role !== "admin") return <Navigate to="/dashboard" replace />;
 
   return <>{children}</>;
 }
@@ -90,13 +88,12 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return <AuthLoadingFallback />;
-  }
+  if (isLoading) return <AuthLoadingFallback />;
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  // Token exists but state not yet committed (race condition after register/login)
+  if (!isAuthenticated && storage.getToken()) return <AuthLoadingFallback />;
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
 }
