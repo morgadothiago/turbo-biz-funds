@@ -45,7 +45,6 @@ function createApiClient(): AxiosInstance {
       const isAuthEndpoint = error.config?.url?.startsWith("/v1/auth/");
       if (status === 401 && !isAuthEndpoint) {
         storage.clear();
-        // Usa evento customizado para que o React Router faça a navegação
         window.dispatchEvent(new CustomEvent("auth:session-expired"));
       }
 
@@ -61,7 +60,17 @@ function createApiClient(): AxiosInstance {
   return instance;
 }
 
+function createPublicApiClient(): AxiosInstance {
+  return axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
 export const http = createApiClient();
+export const publicHttp = createPublicApiClient();
 
 export const api = {
   get<T>(endpoint: string) {
@@ -78,6 +87,24 @@ export const api = {
   },
   delete<T>(endpoint: string) {
     return http.delete<T>(endpoint).then((r) => r.data);
+  },
+};
+
+export const publicApi = {
+  get<T>(endpoint: string) {
+    return publicHttp.get<T>(endpoint).then((r) => r.data);
+  },
+  post<T>(endpoint: string, data?: unknown) {
+    return publicHttp.post<T>(endpoint, data).then((r) => r.data);
+  },
+  put<T>(endpoint: string, data: unknown) {
+    return publicHttp.put<T>(endpoint, data).then((r) => r.data);
+  },
+  patch<T>(endpoint: string, data: unknown) {
+    return publicHttp.patch<T>(endpoint, data).then((r) => r.data);
+  },
+  delete<T>(endpoint: string) {
+    return publicHttp.delete<T>(endpoint).then((r) => r.data);
   },
 };
 
