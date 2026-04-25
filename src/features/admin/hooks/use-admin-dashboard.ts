@@ -64,15 +64,28 @@ interface ApiAdminStats {
   conversionTrend: "up" | "down";
 }
 
+const PLAN_COLORS = ["#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ef4444"];
+
+interface ApiAdminPlanSummary { id: string; name: string; subscribers: number }
+
 async function fetchAdminDashboard(): Promise<AdminDashboardData> {
-  const [statsRes, revenueRes, clientsRes, activityRes] = await Promise.all([
+  const [statsRes, revenueRes, clientsRes, activityRes, plansRes] = await Promise.all([
     api.get<{ data: ApiAdminStats }>(apiEndpoints.admin.stats),
     api.get<{ data: AdminRevenuePoint[] }>(apiEndpoints.admin.revenue),
     api.get<{ data: AdminRecentClient[] }>(`${apiEndpoints.admin.clients}?limit=5`),
     api.get<{ data: AdminActivityItem[] }>(`${apiEndpoints.admin.activity}?limit=5`),
+    api.get<{ data: ApiAdminPlanSummary[] }>(apiEndpoints.admin.plans).catch(() => ({ data: [] as ApiAdminPlanSummary[] })),
   ]);
 
   const s = statsRes.data;
+
+  const planDistribution: AdminPlanDistribution[] = plansRes.data
+    .filter((p) => p.subscribers > 0)
+    .map((p, i) => ({
+      name: p.name,
+      value: p.subscribers,
+      color: PLAN_COLORS[i % PLAN_COLORS.length],
+    }));
 
   const stats: AdminStat[] = [
     {
@@ -116,7 +129,7 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
   return {
     stats,
     revenueData: revenueRes.data,
-    planDistribution: [],
+    planDistribution,
     recentClients: clientsRes.data,
     recentActivity: activityRes.data,
   };
