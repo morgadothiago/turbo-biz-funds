@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { api, apiEndpoints } from "@/lib/api/client";
+import { api, publicApi, apiEndpoints } from "@/lib/api/client";
 import type { PlanInfo, ApiItemResponse } from "@/shared/types";
 
 export type { PlanInfo };
@@ -71,7 +71,7 @@ export function usePlanInfo(planId: string) {
 export function usePlansList() {
   const query = useQuery({
     queryKey: ["plans"],
-    queryFn: () => api.get<{ data: PlanInfo[] }>(apiEndpoints.plans.list),
+    queryFn: () => publicApi.get<{ data: PlanInfo[] }>(apiEndpoints.plans.list),
     staleTime: 10 * 60 * 1000,
   });
 
