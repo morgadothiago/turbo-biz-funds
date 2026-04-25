@@ -2,14 +2,17 @@ import { memo, useState } from "react";
 import { MessageCircle, Check, Copy, QrCode, Smartphone, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+
+const BOT_PHONE = import.meta.env.VITE_WHATSAPP_NUMBER as string | undefined;
 
 const STEPS = [
   {
     number: 1,
     title: "Adicione o número",
-    description: "Salve o número +55 11 99999-9999 nos seus contatos como 'doutorcash'",
+    description: BOT_PHONE
+      ? `Salve o número ${BOT_PHONE} nos seus contatos como 'doutorcash'`
+      : "Salve o número do doutorcash nos seus contatos",
     icon: "📱"
   },
   {
@@ -28,7 +31,7 @@ const STEPS = [
 
 const WhatsAppPage = memo(() => {
   const [copied, setCopied] = useState(false);
-  const phoneNumber = "+55 11 99999-9999";
+  const phoneNumber = BOT_PHONE ?? "";
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(phoneNumber);
@@ -45,7 +48,7 @@ const WhatsAppPage = memo(() => {
         <p className="text-muted-foreground">Conecte-se e registre despesas pelo WhatsApp</p>
       </div>
 
-      {/* Status Card - Minimalista */}
+      {/* Intro Card */}
       <Card className="bg-gradient-to-r from-[#25D366] to-[#128C7E] border-0 shadow-lg">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
@@ -53,21 +56,11 @@ const WhatsAppPage = memo(() => {
               <MessageCircle className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                <h2 className="text-xl font-bold text-white">WhatsApp Conectado</h2>
-                <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm">Ativo</Badge>
-              </div>
+              <h2 className="text-xl font-bold text-white mb-1">Registre despesas pelo WhatsApp</h2>
               <p className="text-white/90">
-                Seu número está vinculado. Envie despesas pelo WhatsApp!
+                Envie áudio, foto ou texto e o doutorcash registra automaticamente.
               </p>
             </div>
-            <Button
-              variant="secondary"
-              className="bg-white/20 text-white border-0 hover:bg-white/30 backdrop-blur-sm"
-              onClick={() => toast.info("Em breve: desconectar")}
-            >
-              Desconectar
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -86,19 +79,25 @@ const WhatsAppPage = memo(() => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1 p-4 rounded-lg bg-accent border border-input">
-                <span className="text-lg font-mono text-foreground">{phoneNumber}</span>
+            {phoneNumber ? (
+              <div className="flex items-center gap-3">
+                <div className="flex-1 p-4 rounded-lg bg-accent border border-input">
+                  <span className="text-lg font-mono text-foreground">{phoneNumber}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  className="border-primary text-primary hover:bg-primary hover:text-white gap-2 transition-colors"
+                  onClick={copyToClipboard}
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? "Copiado" : "Copiar"}
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                className="border-primary text-primary hover:bg-primary hover:text-white gap-2 transition-colors"
-                onClick={copyToClipboard}
-              >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                {copied ? "Copiado" : "Copiar"}
-              </Button>
-            </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                Número em configuração — consulte o suporte.
+              </p>
+            )}
           </CardContent>
         </Card>
 
