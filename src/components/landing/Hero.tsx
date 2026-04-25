@@ -53,18 +53,18 @@ const Hero = memo(() => {
         >
           <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-primary/5 blur-[80px] -z-10" />
 
-          <motion.div variants={staggerItem} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6 md:mb-8">
+          <motion.div variants={staggerItem} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-cyan-400 text-sm font-medium mb-6 md:mb-8">
             <Sparkles className="w-4 h-4" />
             {t("landing", "heroBadge")}
           </motion.div>
 
-          <motion.h1 variants={staggerItem} className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-4 md:mb-6">
+          <motion.h1 variants={staggerItem} className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4 md:mb-6">
             {t("landing", "heroTitleLine1")}
             <br />
-            <span className="text-primary">{t("landing", "heroTitleLine2")}</span>
+            <span className="text-cyan-400">{t("landing", "heroTitleLine2")}</span>
           </motion.h1>
 
-          <motion.p variants={staggerItem} className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 md:mb-10">
+          <motion.p variants={staggerItem} className="text-base md:text-xl text-white/70 max-w-3xl mx-auto mb-8 md:mb-10">
             {t("landing", "heroSubtitle")}
           </motion.p>
 
@@ -80,11 +80,11 @@ const Hero = memo(() => {
           <motion.div variants={staggerContainer} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-4xl mx-auto mb-12 md:mb-16">
             {HERO_STATS.map((stat, index) => (
               <motion.div key={index} variants={staggerItem} className="text-center">
-                <div className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight flex items-center justify-center gap-1 md:gap-2 text-foreground">
-                  <stat.icon className="w-4 h-4 md:w-6 md:h-6 text-primary" />
+                <div className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight flex items-center justify-center gap-1 md:gap-2 text-white">
+                  <stat.icon className="w-4 h-4 md:w-6 md:h-6 text-cyan-400" />
                   {stat.value}
                 </div>
-                <div className="text-xs md:text-sm text-foreground/55 mt-1">{stat.label}</div>
+                <div className="text-xs md:text-sm text-white/50 mt-1">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -176,26 +176,26 @@ const Hero = memo(() => {
               </div>
             </div>
 
-            <div className="hidden md:block absolute -left-8 top-1/4 bg-card rounded-xl p-3 shadow-lg border border-border/50 -translate-x-4 opacity-0 animate-fade-in">
+            <div className="hidden md:block absolute -left-8 top-1/4 bg-white/10 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-white/10 -translate-x-4 opacity-0 animate-fade-in">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center">
                   <MessageCircle className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-left">
-                  <div className="text-xs text-muted-foreground">{t("landing", "heroSent")}</div>
-                  <div className="text-sm font-medium">"{t("landing", "heroSentExample")}"</div>
+                  <div className="text-xs text-white/50">{t("landing", "heroSent")}</div>
+                  <div className="text-sm font-medium text-white">"{t("landing", "heroSentExample")}"</div>
                 </div>
               </div>
             </div>
 
-            <div className="hidden md:block absolute -right-8 top-1/3 bg-card rounded-xl p-3 shadow-lg border border-border/50 translate-x-4 opacity-0 animate-fade-in [animation-delay:0.3s]">
+            <div className="hidden md:block absolute -right-8 top-1/3 bg-white/10 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-white/10 translate-x-4 opacity-0 animate-fade-in [animation-delay:0.3s]">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary" />
+                <div className="w-8 h-8 rounded-full bg-cyan-400/20 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-cyan-400" />
                 </div>
                 <div className="text-left">
-                  <div className="text-xs text-muted-foreground">{t("landing", "heroCategorized")}</div>
-                  <div className="text-sm font-medium text-primary">{t("landing", "heroCategoryFood")}</div>
+                  <div className="text-xs text-white/50">{t("landing", "heroCategorized")}</div>
+                  <div className="text-sm font-medium text-cyan-400">{t("landing", "heroCategoryFood")}</div>
                 </div>
               </div>
             </div>

@@ -13,23 +13,23 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DashboardSkeleton = () => (
-  <div className="p-6 lg:p-8 space-y-6">
+  <div className="p-5 lg:p-7 space-y-5">
     <div className="space-y-1.5">
-      <Skeleton className="h-6 w-40" />
+      <Skeleton className="h-7 w-44" />
       <Skeleton className="h-4 w-64" />
     </div>
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
       {[1, 2, 3, 4].map((i) => (
-        <Skeleton key={i} className="h-[88px] rounded-xl" />
+        <Skeleton key={i} className="h-[110px] rounded-2xl" />
       ))}
     </div>
-    <div className="grid gap-5 lg:grid-cols-7">
-      <Skeleton className="h-72 lg:col-span-4 rounded-xl" />
-      <Skeleton className="h-72 lg:col-span-3 rounded-xl" />
+    <div className="grid gap-4 lg:grid-cols-7">
+      <Skeleton className="h-72 lg:col-span-4 rounded-2xl" />
+      <Skeleton className="h-72 lg:col-span-3 rounded-2xl" />
     </div>
-    <div className="grid gap-5 lg:grid-cols-3">
-      <Skeleton className="h-60 lg:col-span-2 rounded-xl" />
-      <Skeleton className="h-60 rounded-xl" />
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Skeleton className="h-72 rounded-2xl" />
+      <Skeleton className="h-72 rounded-2xl" />
     </div>
   </div>
 );
@@ -38,9 +38,7 @@ const UserDashboard = memo(() => {
   const { user } = useAuth();
   const { data: dashboardData, isLoading, isError, refetch } = useDashboardData();
 
-  const userName = user?.name?.split(" ")[0]?.trim() || "Usuário";
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const firstName = user?.name?.split(" ")[0]?.trim() || "Usuário";
 
   if (isLoading) return <DashboardSkeleton />;
 
@@ -63,23 +61,26 @@ const UserDashboard = memo(() => {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="space-y-0.5">
-        <h2 className="text-xl font-semibold text-foreground tracking-tight">
-          {greeting}, {userName}
+    <div className="p-5 lg:p-7 space-y-5">
+      {/* Greeting */}
+      <div>
+        <h2 className="text-2xl font-bold text-foreground tracking-tight">
+          Olá, {firstName}! 👋
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Resumo das suas finanças deste mês
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Aqui está o resumo das suas finanças deste mês
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stat cards */}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {dashboardData.stats.map((stat) => (
           <StatCard key={stat.id} stat={stat} />
         ))}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-7">
+      {/* Charts */}
+      <div className="grid gap-4 lg:grid-cols-7">
         <div className="lg:col-span-4">
           <ExpenseChart data={dashboardData.expensesByDay} />
         </div>
@@ -88,13 +89,10 @@ const UserDashboard = memo(() => {
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <TransactionList transactions={dashboardData.recentTransactions} />
-        </div>
-        <div>
-          <GoalsProgress goals={dashboardData.goals} />
-        </div>
+      {/* Transactions + Goals */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <TransactionList transactions={dashboardData.recentTransactions} />
+        <GoalsProgress goals={dashboardData.goals} />
       </div>
     </div>
   );

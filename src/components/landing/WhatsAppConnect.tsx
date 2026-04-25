@@ -7,10 +7,10 @@ const WhatsAppConnect = () => {
   const phoneRef = useReveal(200);
 
   return (
-    <section className="py-24 relative overflow-hidden bg-background">
+    <section className="py-24 relative overflow-hidden bg-transparent">
       {/* Background decoration */}
-      <div className="blob w-96 h-96 bg-success/5 top-0 left-0 animate-blob" />
-      <div className="blob w-72 h-72 bg-primary/5 bottom-0 right-0 animate-blob" style={{ animationDelay: '-5s' }} />
+      <div className="blob w-96 h-96 bg-cyan-400/5 top-0 left-0 animate-blob" />
+      <div className="blob w-72 h-72 bg-blue-600/5 bottom-0 right-0 animate-blob" style={{ animationDelay: '-5s' }} />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -18,16 +18,16 @@ const WhatsAppConnect = () => {
           {/* Text Content */}
           <div ref={contentRef} className="order-2 lg:order-1">
 
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20 text-success text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366]/10 border border-[#25D366]/20 text-[#25D366] text-sm font-medium mb-6">
               <MessageCircle className="w-4 h-4" />
               Integração Total
             </div>
 
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-6">
               Conecte seu WhatsApp à plataforma
             </h2>
 
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-white/60 mb-8">
               Conecte seu WhatsApp e envie imagens, texto e áudio para registrar despesas.
               Tudo fica salvo na plataforma automaticamente. Simplifique a gestão com a ferramenta que você já usa todos os dias.
             </p>
@@ -40,10 +40,10 @@ const WhatsAppConnect = () => {
                 { icon: CheckCircle2, text: "Confirmação instantânea de transações" }
               ].map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center shadow-sm">
-                    <item.icon className="w-5 h-5 text-success" />
+                  <div className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">
+                    <item.icon className="w-5 h-5 text-[#25D366]" />
                   </div>
-                  <span className="text-foreground font-medium">{item.text}</span>
+                  <span className="text-white font-medium">{item.text}</span>
                 </div>
               ))}
             </div>
@@ -139,14 +139,14 @@ const WhatsAppConnect = () => {
               <div className="absolute bottom-20 -left-10 w-24 h-24 bg-primary/20 rounded-full blur-xl animate-float" style={{ animationDelay: "1s" }} />
 
               {/* Floating Cards */}
-              <div className="absolute top-1/3 -right-12 bg-card p-3 rounded-xl shadow-lg border border-border animate-float hidden lg:block" style={{ animationDelay: "0.5s" }}>
+              <div className="absolute top-1/3 -right-12 bg-white/10 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-white/10 animate-float hidden lg:block" style={{ animationDelay: "0.5s" }}>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-blue-300" />
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Nota Fiscal</div>
-                    <div className="text-sm font-bold">Processada</div>
+                    <div className="text-xs text-white/60">Nota Fiscal</div>
+                    <div className="text-sm font-bold text-white">Processada</div>
                   </div>
                 </div>
               </div>

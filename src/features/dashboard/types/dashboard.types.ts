@@ -44,6 +44,8 @@ export interface Goal {
   target: number;
   color: string;
   deadline?: string;
+  icon?: string;
+  category?: string;
 }
 
 export interface DashboardData {

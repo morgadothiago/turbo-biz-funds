@@ -1,34 +1,9 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
-import { UserSidebar } from "@/components/user/UserSidebar";
-import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { UserSidebarContent, MobileSidebarTrigger } from "@/components/user/UserSidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsSheet } from "@/components/user/NotificationsSheet";
-import { useState, useEffect, useRef } from "react";
-
-const useScrollDirection = () => {
-  const [hideBalloon, setHideBalloon] = useState(false);
-  const lastScrollY = useRef(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        setHideBalloon(true);
-      } else {
-        setHideBalloon(false);
-      }
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  return hideBalloon;
-};
 
 const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   "/dashboard": { title: "Dashboard", subtitle: "Visão geral das suas finanças" },
@@ -42,7 +17,6 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
 };
 
 function Header() {
-  const { toggleSidebar } = useSidebar();
   const { user } = useAuth();
   const location = useLocation();
 
@@ -59,44 +33,42 @@ function Header() {
   };
 
   return (
-    <header className="h-14 bg-background border-b border-border flex items-center justify-between px-5 sticky top-0 z-40 gap-4">
+    <header className="rounded-2xl bg-white flex items-center justify-between px-4 py-3 gap-4 shadow-sm shrink-0">
+      {/* Left: mobile trigger + page title */}
       <div className="flex items-center gap-3 min-w-0">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="lg:hidden h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
-          aria-label="Abrir menu"
-        >
-          <Menu className="h-4 w-4" />
-        </Button>
+        <div className="lg:hidden shrink-0">
+          <MobileSidebarTrigger />
+        </div>
         <div className="min-w-0">
-          <h1 className="text-[15px] font-semibold text-foreground truncate leading-tight">
+          <h1 className="text-[15px] font-bold text-gray-900 truncate leading-tight">
             {page.title}
           </h1>
           {page.subtitle && (
-            <p className="text-xs text-muted-foreground/70 truncate leading-tight hidden sm:block">
+            <p className="text-xs text-gray-400 truncate leading-tight mt-0.5 hidden sm:block">
               {page.subtitle}
             </p>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      {/* Right: notifications + user info */}
+      <div className="flex items-center gap-3 shrink-0">
         <NotificationsSheet />
 
-        <div className="flex items-center gap-2.5 pl-2.5 border-l border-border">
-          <Avatar className="h-7 w-7">
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+        <div className="w-px h-8 bg-gray-200" />
+
+        <div className="flex items-center gap-2.5">
+          <Avatar className="h-9 w-9 shrink-0">
+            <AvatarFallback className="bg-[#1a3799] text-white text-sm font-bold">
               {getUserInitials()}
             </AvatarFallback>
           </Avatar>
           <div className="hidden sm:block min-w-0">
-            <p className="text-[13px] font-medium text-foreground truncate max-w-28 leading-tight">
+            <p className="text-[13px] font-semibold text-gray-900 truncate leading-tight max-w-32">
               {user?.name || "Usuário"}
             </p>
-            <p className="text-[11px] text-muted-foreground truncate max-w-28 leading-tight">
-              {user?.email || "-"}
+            <p className="text-[11px] text-gray-400 truncate leading-tight mt-0.5 max-w-32">
+              {user?.email || ""}
             </p>
           </div>
         </div>
@@ -106,33 +78,26 @@ function Header() {
 }
 
 export default function UserLayout() {
-  const hideBalloon = useScrollDirection();
-
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <UserSidebar />
-        <main className="flex-1 flex flex-col overflow-hidden min-w-0">
+    <SidebarProvider className="block">
+      <div
+        className="h-screen flex p-3 gap-3 overflow-hidden"
+        style={{ background: "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)" }}
+      >
+        {/* Desktop sidebar flutuante */}
+        <aside className="hidden lg:flex w-[260px] shrink-0">
+          <UserSidebarContent />
+        </aside>
+
+        {/* Coluna direita */}
+        <div className="flex-1 flex flex-col gap-3 min-w-0 overflow-hidden">
           <Header />
-          <div className="flex-1 overflow-auto scrollbar-thin">
+
+          {/* Card branco principal com scroll */}
+          <div className="flex-1 min-h-0 overflow-auto rounded-2xl bg-white">
             <Outlet />
           </div>
-        </main>
-      </div>
-
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
-        <div className={`bg-white text-gray-800 px-3.5 py-2 rounded-xl shadow-md text-sm font-medium whitespace-nowrap border border-gray-100 transition-all duration-200 ${hideBalloon ? "opacity-0 translate-y-1 pointer-events-none" : "opacity-100 translate-y-0"}`}>
-          Como posso ajudar?
         </div>
-        <a
-          href="https://wa.me/5511999999999"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-0.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-          aria-label="Falar no WhatsApp"
-        >
-          <img src="/whatsapp.png" alt="WhatsApp" className="w-11 h-11" />
-        </a>
       </div>
     </SidebarProvider>
   );

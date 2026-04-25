@@ -21,7 +21,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
+    if (import.meta.env.DEV) {
+      console.error("ErrorBoundary caught an error:", error, errorInfo);
+    }
+    // Em produção: enviar para serviço de monitoramento (ex: Sentry)
   }
 
   private handleReset = () => {
@@ -42,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <p className="text-muted-foreground">
                 Algo deu errado. Tente novamente ou volte para a página inicial.
               </p>
-              {this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <p className="text-xs text-muted-foreground bg-muted p-2 rounded font-mono">
                   {this.state.error.message}
                 </p>

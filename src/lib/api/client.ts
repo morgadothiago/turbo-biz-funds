@@ -5,6 +5,10 @@ import { storage } from "../storage";
 // Em produção: VITE_API_URL deve ser a URL completa da API
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
+if (import.meta.env.PROD && !API_BASE_URL) {
+  console.warn("[config] VITE_API_URL não definida em produção. As chamadas de API usarão URL relativa.");
+}
+
 export interface ApiError {
   message: string;
   status: number;
@@ -38,9 +42,11 @@ function createApiClient(): AxiosInstance {
         error.response?.data?.message || error.message || "Erro desconhecido";
       const code = error.response?.data?.code;
 
-      if (status === 401) {
+      const isAuthEndpoint = error.config?.url?.startsWith("/v1/auth/");
+      if (status === 401 && !isAuthEndpoint) {
         storage.clear();
-        window.location.href = "/login";
+        // Usa evento customizado para que o React Router faça a navegação
+        window.dispatchEvent(new CustomEvent("auth:session-expired"));
       }
 
       if (status === 402) {
@@ -79,6 +85,7 @@ export const apiEndpoints = {
   auth: {
     login: "/v1/auth/login",
     register: "/v1/auth/register",
+    logout: "/v1/auth/logout",
     forgotPassword: "/v1/auth/forgot-password",
     resetPassword: "/v1/auth/reset-password",
   },

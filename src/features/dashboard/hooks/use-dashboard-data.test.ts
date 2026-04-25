@@ -21,9 +21,11 @@ const mockCatSummary = [
 vi.mock("@/lib/api/client", () => ({
   api: {
     get: vi.fn((url: string) => {
+      if (!url) return Promise.reject(new Error("No URL"));
       if (url.includes("/v1/summary/balance")) return Promise.resolve({ data: mockBalance });
       if (url.includes("/v1/transactions")) return Promise.resolve({ data: mockTransactions });
       if (url.includes("/v1/summary/categories")) return Promise.resolve({ data: mockCatSummary });
+      if (url.includes("/v1/goals")) return Promise.resolve({ data: [] });
       if (url.includes("/v1/categories")) return Promise.resolve({ data: mockCategories });
       return Promise.reject(new Error("Unknown endpoint"));
     }),
@@ -32,6 +34,7 @@ vi.mock("@/lib/api/client", () => ({
     summary: { balance: "/v1/summary/balance", categories: "/v1/summary/categories" },
     transactions: { list: "/v1/transactions" },
     categories: { list: "/v1/categories" },
+    goals: { list: "/v1/goals" },
   },
 }));
 

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlansList } from "@/features/payments/hooks/use-plan-info";
 const logoWeb = "/logoweb.png";
 
 const registerSchema = z
@@ -58,6 +59,7 @@ const Cadastro = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { plans, isLoading: isPlansLoading } = usePlansList();
 
   const validateStep1 = (): boolean => {
     const result = registerSchema.safeParse({
@@ -124,112 +126,40 @@ const Cadastro = () => {
     }
   };
 
-  const plans = [
-    {
-      id: "free",
-      name: "Gratuito",
-      price: "R$ 0",
-      period: "para sempre",
-      description: "Ideal para começar",
-      features: [
-        "3 transações por mês",
-        "1 meta financeira",
-        "1 cartão de crédito",
-        "1 recorrência",
-        "Categorias básicas",
-        "Suporte por email",
-      ],
-    },
-    {
-      id: "pro",
-      name: "Pro",
-      price: "R$ 97",
-      period: "/mês",
-      description: "Para quem leva finanças a sério",
-      popular: true,
-      features: [
-        "Transações ilimitadas",
-        "Metas ilimitadas",
-        "Cartões ilimitados",
-        "Recorrências ilimitadas",
-        "Categorização por IA",
-        "Registro por WhatsApp",
-        "Relatórios avançados",
-        "Suporte prioritário",
-      ],
-    },
-    {
-      id: "business",
-      name: "Business",
-      price: "R$ 297",
-      period: "/mês",
-      description: "Para empresas e power users",
-      features: [
-        "Tudo do Pro",
-        "Empresas ilimitadas",
-        "Chat com IA financeira",
-        "Previsão de gastos",
-        "Detecção de anomalias",
-        "API de integração",
-        "Suporte VIP",
-      ],
-    },
-  ];
+  const BG = "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 py-8">
+    <div className="min-h-screen flex items-center justify-center p-4 py-8" style={{ background: BG }}>
       <div className="w-full max-w-lg">
         <div className="text-center mb-6">
           <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
-            <img
-              src={logoWeb}
-              alt="doutorcash"
-              className="h-12 w-auto transition-transform group-hover:scale-105"
-            />
+            <img src={logoWeb} alt="doutorcash" className="h-12 w-auto transition-transform group-hover:scale-105" />
           </Link>
-          <h1 className="text-2xl font-bold text-foreground mb-2">
+          <h1 className="text-2xl font-bold text-white mb-2">
             {step === 1 ? "Crie sua conta" : "Escolha seu plano"}
           </h1>
-          <p className="text-muted-foreground">
-            {step === 1
-              ? "Comece grátis e escale conforme cresce"
-              : "Você pode mudar de plano a qualquer momento"}
+          <p className="text-white/60">
+            {step === 1 ? "Comece grátis e escale conforme cresce" : "Você pode mudar de plano a qualquer momento"}
           </p>
         </div>
 
         <div className="mb-6">
           <div className="flex items-center justify-center gap-2">
-            <div
-              className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-all ${
-                step >= 1
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-all ${step >= 1 ? "bg-[#1a3799] text-white" : "bg-white/20 text-white/50"}`}>
               {step > 1 ? <Check className="w-4 h-4" /> : "1"}
             </div>
-            <div
-              className={`w-16 h-0.5 rounded-full transition-colors ${
-                step >= 2 ? "bg-primary" : "bg-muted"
-              }`}
-            />
-            <div
-              className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-all ${
-                step >= 2
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
+            <div className={`w-16 h-0.5 rounded-full transition-colors ${step >= 2 ? "bg-[#1a3799]" : "bg-white/20"}`} />
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-all ${step >= 2 ? "bg-[#1a3799] text-white" : "bg-white/20 text-white/50"}`}>
               2
             </div>
           </div>
-          <div className="flex justify-center gap-16 mt-2 text-xs text-muted-foreground">
+          <div className="flex justify-center gap-16 mt-2 text-xs text-white/50">
             <span>Dados pessoais</span>
             <span>Plano</span>
           </div>
         </div>
 
-        <div className="bg-card rounded-2xl border border-border/60 shadow-xl p-6">
+        <div className="bg-white rounded-2xl shadow-2xl p-6">
           <form onSubmit={handleSubmit}>
             {step === 1 ? (
               <div className="space-y-4">
@@ -411,6 +341,12 @@ const Cadastro = () => {
               </div>
             ) : (
               <div className="space-y-4">
+                {isPlansLoading ? (
+                  <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Carregando planos...</span>
+                  </div>
+                ) : null}
                 <RadioGroup
                   value={formData.plan}
                   onValueChange={(value) => setFormData({ ...formData, plan: value })}
@@ -500,7 +436,7 @@ const Cadastro = () => {
                   <div className="w-full border-t border-border/60" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-3 text-muted-foreground">
+                  <span className="bg-white px-3 text-gray-400">
                     ou continue com
                   </span>
                 </div>
@@ -531,22 +467,18 @@ const Cadastro = () => {
           )}
         </div>
 
-        <p className="text-center text-muted-foreground mt-6">
+        <p className="text-center text-white/60 mt-6">
           Já tem uma conta?{" "}
-          <Link to="/login" className="text-primary font-medium hover:text-primary/80 transition-colors">
+          <Link to="/login" className="text-cyan-400 font-medium hover:text-cyan-300 transition-colors">
             Entrar
           </Link>
         </p>
 
-        <p className="text-center text-xs text-muted-foreground mt-4">
+        <p className="text-center text-xs text-white/40 mt-4">
           Ao criar uma conta, você concorda com nossos{" "}
-          <a href="#" className="text-primary hover:underline">
-            Termos de Uso
-          </a>{" "}
-          e{" "}
-          <a href="#" className="text-primary hover:underline">
-            Política de Privacidade
-          </a>
+          <a href="#" className="text-cyan-400 hover:underline">Termos de Uso</a>
+          {" "}e{" "}
+          <a href="#" className="text-cyan-400 hover:underline">Política de Privacidade</a>
         </p>
       </div>
     </div>

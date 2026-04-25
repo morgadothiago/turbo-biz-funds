@@ -33,7 +33,7 @@ const Navbar = memo(() => {
         <a
           key={link.name}
           href={link.href}
-          className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+          className="text-sm font-medium text-white/70 hover:text-white transition-colors py-2"
           onClick={closeMenu}
         >
           {link.name}
@@ -42,8 +42,10 @@ const Navbar = memo(() => {
     </>
   );
 
+  const navLinkClass = "text-sm font-medium text-white/70 hover:text-white transition-colors py-2";
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 md:bg-background/80 backdrop-blur-xl border-b border-border/50">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#06091c]/80 backdrop-blur-xl border-b border-white/10">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2 group">
@@ -59,11 +61,10 @@ const Navbar = memo(() => {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <ThemeToggle />
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10" asChild>
               <Link to="/login" onClick={() => handleCTAClick("login")}>{t("landing", "navLogin")}</Link>
             </Button>
-            <Button variant="hero" asChild>
+            <Button className="bg-[#1a3799] hover:bg-[#1a3799]/90 text-white font-semibold rounded-xl" asChild>
               <Link to="/cadastro" onClick={() => handleCTAClick("sign_up")}>{t("landing", "navSignUp")}</Link>
             </Button>
           </div>

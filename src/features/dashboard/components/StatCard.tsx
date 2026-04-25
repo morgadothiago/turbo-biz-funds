@@ -1,7 +1,7 @@
 import { memo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { DashboardStat } from "../types";
 import { cn } from "@/lib/utils";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 interface StatCardProps {
   stat: DashboardStat;
@@ -11,34 +11,31 @@ const StatCardComponent = ({ stat }: StatCardProps) => {
   const Icon = stat.icon;
 
   return (
-    <Card className="border-border/60 shadow-[var(--shadow-card)] hover:shadow-md transition-shadow duration-200">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide truncate">
-              {stat.title}
-            </p>
-            <p className="text-2xl font-bold text-foreground mt-1.5 truncate">
-              {stat.value}
-            </p>
-            {stat.change && (
-              <p className={cn(
-                "text-xs mt-1.5 font-medium",
-                stat.trend === "up" ? "text-success" : "text-destructive"
-              )}>
-                {stat.change}
-              </p>
-            )}
-          </div>
-          <div className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-            stat.bgColor
-          )}>
-            <Icon className={cn("h-5 w-5", stat.color)} />
-          </div>
+    <div className="rounded-2xl bg-[#1a3799] p-4 flex flex-col gap-3 min-h-[110px]">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-medium text-white/70 leading-tight">{stat.title}</p>
+        <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", stat.bgColor)}>
+          <Icon className={cn("h-4 w-4", stat.color)} />
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <p className="text-2xl font-bold text-white leading-none tracking-tight">{stat.value}</p>
+      {stat.change && (
+        <div className="flex items-center gap-1">
+          {stat.trend === "up" ? (
+            <ArrowUpRight className="h-3.5 w-3.5 text-green-400 shrink-0" />
+          ) : (
+            <ArrowDownRight className="h-3.5 w-3.5 text-red-400 shrink-0" />
+          )}
+          <p className={cn(
+            "text-xs font-medium",
+            stat.trend === "up" ? "text-green-400" : "text-red-400"
+          )}>
+            {stat.change}
+          </p>
+          <span className="text-xs text-white/40">vs mês anterior</span>
+        </div>
+      )}
+    </div>
   );
 };
 

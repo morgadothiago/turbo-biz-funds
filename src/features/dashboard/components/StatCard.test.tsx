@@ -11,8 +11,8 @@ describe("StatCard Component", () => {
     change: "+12%",
     trend: "up" as const,
     icon: Wallet,
-    color: "text-success",
-    bgColor: "bg-success/10",
+    color: "text-white",
+    bgColor: "bg-white/20",
   };
 
   it("should render stat card with correct values", () => {
@@ -26,27 +26,19 @@ describe("StatCard Component", () => {
   it("should render trend up correctly", () => {
     render(<StatCard stat={mockStat} />);
 
-    expect(screen.getByText("+12%")).toHaveClass("text-success");
+    expect(screen.getByText("+12%")).toHaveClass("text-green-400");
   });
 
   it("should render trend down correctly", () => {
     const downStat = { ...mockStat, trend: "down" as const, change: "-5%" };
     render(<StatCard stat={downStat} />);
 
-    expect(screen.getByText("-5%")).toHaveClass("text-destructive");
+    expect(screen.getByText("-5%")).toHaveClass("text-red-400");
   });
 
   it("should render with different icon variants", () => {
-    const incomeStat = {
-      ...mockStat,
-      title: "Receitas",
-      icon: TrendingUp,
-    };
-    const expenseStat = {
-      ...mockStat,
-      title: "Despesas",
-      icon: TrendingDown,
-    };
+    const incomeStat = { ...mockStat, title: "Receitas", icon: TrendingUp };
+    const expenseStat = { ...mockStat, title: "Despesas", icon: TrendingDown };
 
     render(
       <div>
@@ -59,10 +51,9 @@ describe("StatCard Component", () => {
     expect(screen.getByText("Despesas")).toBeInTheDocument();
   });
 
-  it("should render card container", () => {
+  it("should render card container with title", () => {
     render(<StatCard stat={mockStat} />);
 
-    const card = screen.getByText("Saldo do Mês").closest("[class*='hover:shadow']");
-    expect(card).toBeInTheDocument();
+    expect(screen.getByText("Saldo do Mês")).toBeInTheDocument();
   });
 });
