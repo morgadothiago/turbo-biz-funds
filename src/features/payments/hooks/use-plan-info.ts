@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api, publicApi, apiEndpoints } from "@/lib/api/client";
 import type { PlanInfo, ApiItemResponse } from "@/shared/types";
+import type { AxiosError } from "axios";
 
 export type { PlanInfo };
 
@@ -71,8 +72,20 @@ export function usePlanInfo(planId: string) {
 export function usePlansList() {
   const query = useQuery({
     queryKey: ["plans"],
-    queryFn: () => publicApi.get<{ data: PlanInfo[] }>(apiEndpoints.plans.list),
+    queryFn: async () => {
+      try {
+        const res = await publicApi.get<{ data: PlanInfo[] }>(apiEndpoints.plans.list);
+        return res;
+      } catch (error) {
+        const axiosError = error as AxiosError;
+        if (axiosError?.response?.status === 401) {
+          return { data: Object.values(PLAN_DEFAULTS) };
+        }
+        throw error;
+      }
+    },
     staleTime: 10 * 60 * 1000,
+    retry: false,
   });
 
   return {
