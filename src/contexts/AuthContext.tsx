@@ -72,7 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     try {
       const response = await api.post<LoginApiResponse>(apiEndpoints.auth.login, { email, password });
-      const token = response.data.token ?? response.data.accessToken ?? "";
+      const raw = response as unknown as Record<string, unknown>;
+      const nested = (raw.data ?? {}) as Record<string, unknown>;
+      const token = (raw.token ?? raw.accessToken ?? nested.token ?? nested.accessToken ?? "") as string;
       const claims = decodeJwt(token);
       const user = userFromClaims(claims, email);
 
@@ -87,15 +89,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (payload: RegisterPayload): Promise<void> => {
     const response = await api.post<RegisterApiResponse>(apiEndpoints.auth.register, payload);
-    const token = response?.data?.accessToken ?? response?.data?.token;
+    // API pode retornar token no nível raiz ou aninhado em `data`
+    const raw = response as unknown as Record<string, unknown>;
+    const nested = (raw.data ?? {}) as Record<string, unknown>;
+    const token = (raw.accessToken ?? raw.token ?? nested.accessToken ?? nested.token) as string | undefined;
     if (token) {
       const claims = decodeJwt(token);
       const user = userFromClaims(claims, payload.email);
       storage.setToken(token);
       storage.setUser(user);
       setUser(user);
+    } else {
+      // API não retornou token no cadastro — faz login automaticamente
+      await login(payload.email, payload.password);
     }
-  }, []);
+  }, [login]);
 
   const updateProfile = useCallback(async (data: { name?: string; phone?: string }): Promise<void> => {
     await api.patch("/v1/users/me", data);
@@ -111,9 +119,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api.patch("/v1/users/me/password", data);
   }, []);
 
-  const logout = useCallback(() => {
-    storage.clear();
-    setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      await api.post(apiEndpoints.auth.logout);
+    } catch {
+      // Logout local continua mesmo se o servidor falhar
+    } finally {
+      storage.clear();
+      setUser(null);
+    }
   }, []);
 
   return (

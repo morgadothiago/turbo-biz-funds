@@ -112,16 +112,16 @@ const FAQ = memo(() => {
   ] as const;
 
   return (
-    <section id="faq" className="py-24 bg-gradient-to-b from-muted/30 to-background">
+    <section id="faq" className="py-24 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-400 text-sm font-medium mb-4">
             {t("landing", "faqBadge")}
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             {t("landing", "faqTitle")}
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-white/60">
             {t("landing", "faqSubtitle")}
           </p>
         </div>
@@ -132,12 +132,12 @@ const FAQ = memo(() => {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-card rounded-xl border border-border px-6"
+                className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/10 px-6"
               >
-                <AccordionTrigger className="hover:text-primary py-5">
+                <AccordionTrigger className="hover:text-cyan-400 text-white py-5">
                   <span>{faq.question}</span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-5">
+                <AccordionContent className="text-white/60 pb-5">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -146,13 +146,13 @@ const FAQ = memo(() => {
         </div>
 
         <div className="mt-12 text-center">
-          <p className="text-muted-foreground">
+          <p className="text-white/60">
             {t("landing", "faqStillQuestions")}{" "}
             <a
               href="https://wa.me/5511999999999"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary font-medium hover:underline"
+              className="text-cyan-400 font-medium hover:text-cyan-300 transition-colors"
             >
               {t("landing", "faqContactWhatsApp")}
             </a>

@@ -88,9 +88,8 @@ const Index = () => {
   const hideBalloon = useScrollDirection();
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="organizaai-theme">
-      <div className="min-h-screen bg-background relative">
-        <BackgroundOrbs isGlobal={true} />
+    <ThemeProvider defaultTheme="dark" storageKey="organizaai-theme">
+      <div className="min-h-screen relative" style={{ background: "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)" }}>
         <Navbar />
         <Hero />
 

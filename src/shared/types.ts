@@ -73,6 +73,7 @@ export interface PlanInfo {
   period: string;
   description: string;
   features: string[];
+  popular?: boolean;
 }
 
 export interface Recurrence {

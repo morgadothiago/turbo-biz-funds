@@ -5,8 +5,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart } from "lucide-react";
+import { TrendingDown } from "lucide-react";
 import { CategoryExpense } from "../types";
 
 interface CategoryChartProps {
@@ -15,18 +14,21 @@ interface CategoryChartProps {
 
 export const CategoryChart = ({ data }: CategoryChartProps) => {
   return (
-    <Card className="border-border/60 shadow-[var(--shadow-card)]">
-      <CardHeader className="pt-5 px-5 pb-3">
-        <CardTitle className="text-[15px] font-semibold flex items-center gap-2">
-          <PieChart className="h-4 w-4 text-primary" />
-          Gastos por categoria
-        </CardTitle>
-        <CardDescription className="text-xs mt-0.5">Distribuição das despesas</CardDescription>
-      </CardHeader>
-      <CardContent className="px-5 pb-5">
+    <div className="rounded-2xl border border-border bg-white shadow-[var(--shadow-card)] overflow-hidden">
+      <div className="px-5 pt-5 pb-3">
+        <div className="flex items-center gap-2 mb-0.5">
+          <div className="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center">
+            <TrendingDown className="h-4 w-4 text-rose-500" />
+          </div>
+          <span className="text-[15px] font-bold text-gray-900">Gastos por Categoria</span>
+        </div>
+        <p className="text-xs text-gray-400 ml-9">Distribuição dos seus gastos</p>
+      </div>
+
+      <div className="px-5 pb-5">
         {data.length === 0 ? (
           <div className="h-56 flex flex-col items-center justify-center gap-2">
-            <PieChart className="h-8 w-8 text-muted-foreground/20" />
+            <TrendingDown className="h-8 w-8 text-muted-foreground/20" />
             <p className="text-sm text-muted-foreground">Nenhuma categoria com despesas</p>
           </div>
         ) : (
@@ -38,7 +40,7 @@ export const CategoryChart = ({ data }: CategoryChartProps) => {
                   cx="50%"
                   cy="50%"
                   innerRadius={52}
-                  outerRadius={72}
+                  outerRadius={78}
                   paddingAngle={3}
                   dataKey="value"
                   strokeWidth={0}
@@ -51,7 +53,7 @@ export const CategoryChart = ({ data }: CategoryChartProps) => {
                   contentStyle={{
                     backgroundColor: "#fff",
                     borderRadius: "10px",
-                    border: "1px solid hsl(220 13% 90%)",
+                    border: "1px solid #e5e7eb",
                     boxShadow: "0 4px 16px -2px rgb(0 0 0 / 0.08)",
                     fontSize: 12,
                     padding: "8px 12px",
@@ -63,11 +65,11 @@ export const CategoryChart = ({ data }: CategoryChartProps) => {
                 />
               </RePieChart>
             </ResponsiveContainer>
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 justify-center">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3 justify-center">
               {data.map((cat, index) => (
-                <div key={index} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div key={index} className="flex items-center gap-1.5 text-xs text-gray-500">
                   <div
-                    className="w-2 h-2 rounded-full shrink-0"
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: cat.color }}
                   />
                   <span className="truncate max-w-24">{cat.name}</span>
@@ -76,7 +78,7 @@ export const CategoryChart = ({ data }: CategoryChartProps) => {
             </div>
           </>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

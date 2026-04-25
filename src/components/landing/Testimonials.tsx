@@ -138,26 +138,26 @@ const Testimonials = memo(() => {
 
   const TestimonialCard = memo(({ testimonial }: { testimonial: typeof TESTIMONIALS[number] }) => {
     return (
-      <div className="bg-card rounded-2xl p-8 border border-border/60 hover:shadow-lg transition-all duration-300">
+      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/15 hover:shadow-lg transition-all duration-300">
         <div className="mb-6">
-          <Quote className="w-10 h-10 text-primary/20" />
+          <Quote className="w-10 h-10 text-white/20" />
         </div>
 
         <div className="flex gap-1 mb-6">
           {[...Array(testimonial.rating)].map((_, i) => (
             <Star
               key={i}
-              className="w-4 h-4 fill-warning text-warning"
+              className="w-4 h-4 fill-yellow-400 text-yellow-400"
             />
           ))}
         </div>
 
-        <p className="text-muted-foreground leading-relaxed mb-8 italic">
+        <p className="text-white/70 leading-relaxed mb-8 italic">
           "{testimonial.content}"
         </p>
 
         <div className="flex items-center gap-4 mt-auto">
-          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20 bg-muted">
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 bg-white/10">
             <img
               src={testimonial.image}
               alt={testimonial.name}
@@ -172,10 +172,10 @@ const Testimonials = memo(() => {
             />
           </div>
           <div>
-            <div className="font-bold text-foreground">
+            <div className="font-bold text-white">
               {testimonial.name}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-white/60">
               {testimonial.role}
             </div>
           </div>
@@ -187,16 +187,16 @@ const Testimonials = memo(() => {
   TestimonialCard.displayName = "TestimonialCard";
 
   return (
-    <section id="depoimentos" className="py-24 bg-gradient-to-b from-background to-primary/5">
+    <section id="depoimentos" className="py-24 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-400 text-sm font-medium mb-4">
             {t("landing", "testimonialsBadge")}
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             {t("landing", "testimonialsTitle")}
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-white/60">
             {t("landing", "testimonialsSubtitle")}
           </p>
         </div>

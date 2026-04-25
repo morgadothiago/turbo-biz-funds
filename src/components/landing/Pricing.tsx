@@ -21,15 +21,15 @@ interface PlanProps {
 const PlanCard = memo(({ plan }: { plan: PlanProps }) => {
   return (
     <div
-      className={`relative bg-card rounded-2xl p-8 border transition-all duration-300 ${
+      className={`relative rounded-2xl p-8 border transition-all duration-300 ${
         plan.highlighted
-          ? "border-primary shadow-xl shadow-primary/10 scale-105 z-10"
-          : "border-border/60 hover:border-primary/30 hover:shadow-lg"
+          ? "bg-[#1a3799] border-blue-400/40 shadow-xl shadow-blue-900/30 scale-105 z-10"
+          : "bg-white/10 backdrop-blur-sm border-white/10 hover:bg-white/15 hover:shadow-lg"
       }`}
     >
       {plan.badge && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-primary-foreground rounded-full text-sm font-medium shadow-lg">
+          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-[#1a3799] text-white rounded-full text-sm font-medium shadow-lg border border-blue-400/30">
             <Zap className="w-4 h-4" />
             {plan.badge}
           </div>
@@ -38,38 +38,36 @@ const PlanCard = memo(({ plan }: { plan: PlanProps }) => {
 
       {plan.savings && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-accent text-accent-foreground rounded-full text-sm font-medium shadow-lg">
+          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-cyan-500 text-white rounded-full text-sm font-medium shadow-lg">
             {plan.savings}
           </div>
         </div>
       )}
 
       <div className="text-center mb-8 pt-2">
-        <h3 className="text-xl font-semibold text-foreground mb-2">
+        <h3 className="text-xl font-semibold text-white mb-2">
           {plan.name}
         </h3>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-white/60 mb-4">
           {plan.description}
         </p>
         <div className="flex items-baseline justify-center gap-0.5">
-          <span className="text-lg text-muted-foreground">R$</span>
-          <span className="text-5xl font-bold text-foreground">
+          <span className="text-lg text-white/60">R$</span>
+          <span className="text-5xl font-bold text-white">
             {plan.price}
           </span>
-          <span className="text-2xl font-bold text-foreground">,{plan.priceDecimal}</span>
-          <span className="text-muted-foreground ml-1">{plan.period}</span>
+          <span className="text-2xl font-bold text-white">,{plan.priceDecimal}</span>
+          <span className="text-white/60 ml-1">{plan.period}</span>
         </div>
       </div>
 
       <ul className="space-y-3 mb-8">
         {plan.features.map((feature, featureIndex) => (
           <li key={featureIndex} className="flex items-start gap-3">
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
-              plan.highlighted ? "bg-primary/20 text-primary" : "bg-primary/10 text-primary"
-            }`}>
+            <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-cyan-400/20 text-cyan-400">
               <Check className="w-3 h-3" />
             </div>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-white/70">
               {feature}
             </span>
           </li>
@@ -138,16 +136,16 @@ const Pricing = memo(() => {
   ] as const;
 
   return (
-    <section id="planos" className="py-24 bg-gradient-to-b from-success/5 to-background">
+    <section id="planos" className="py-24 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-400 text-sm font-medium mb-4">
             {t("landing", "pricingBadge")}
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             {t("landing", "pricingTitle")}
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-white/60">
             {t("landing", "pricingSubtitle")}
           </p>
         </div>
@@ -159,10 +157,10 @@ const Pricing = memo(() => {
         </div>
 
         <div className="mt-16 max-w-2xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-sm text-muted-foreground">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-sm text-white/60">
             {TRUST_BADGES.map((badge, index) => (
               <div key={index} className="flex items-center gap-2">
-                <badge.icon className="w-5 h-5 text-primary" />
+                <badge.icon className="w-5 h-5 text-cyan-400" />
                 <span>{badge.text}</span>
               </div>
             ))}
@@ -170,8 +168,8 @@ const Pricing = memo(() => {
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-            <span className="font-medium text-foreground">{t("landing", "pricingWhyNoFree")}</span>
+          <p className="text-sm text-white/50 max-w-lg mx-auto">
+            <span className="font-medium text-white">{t("landing", "pricingWhyNoFree")}</span>
             {" "}Acreditamos que quem investe no próprio controle financeiro leva a sério.
             Isso nos permite oferecer suporte de qualidade e manter o produto sem anúncios.
           </p>

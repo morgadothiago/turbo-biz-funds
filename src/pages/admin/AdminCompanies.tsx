@@ -17,7 +17,6 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,13 +100,10 @@ export default function AdminCompanies() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full">
-        <AdminHeader title="Gestão de Empresas" subtitle="Gerencie todas as empresas cadastradas" />
-        <div className="flex-1 p-6 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Carregando empresas...</span>
-          </div>
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Carregando empresas...</span>
         </div>
       </div>
     );
@@ -116,27 +112,18 @@ export default function AdminCompanies() {
   if (isError) {
     const msg = error instanceof Error ? error.message : "Erro desconhecido";
     return (
-      <div className="flex flex-col h-full">
-        <AdminHeader title="Gestão de Empresas" subtitle="Gerencie todas as empresas cadastradas" />
-        <div className="flex-1 p-6 flex items-center justify-center">
-          <div className="text-center space-y-2">
-            <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
-            <p className="text-destructive font-medium">Falha ao carregar empresas</p>
-            <p className="text-sm text-muted-foreground">{msg}</p>
-          </div>
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+          <p className="text-destructive font-medium">Falha ao carregar empresas</p>
+          <p className="text-sm text-muted-foreground">{msg}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <AdminHeader
-        title="Gestão de Empresas"
-        subtitle="Gerencie todas as empresas cadastradas"
-      />
-
-      <div className="flex-1 overflow-auto p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
@@ -364,7 +351,6 @@ export default function AdminCompanies() {
             </div>
           </CardContent>
         </Card>
-      </div>
     </div>
   );
 }

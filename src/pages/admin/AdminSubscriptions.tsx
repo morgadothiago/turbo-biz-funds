@@ -22,7 +22,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -87,13 +86,10 @@ export default function AdminSubscriptions() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full">
-        <AdminHeader title="Assinaturas" subtitle="Gerencie as assinaturas da plataforma" />
-        <div className="flex-1 p-6 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Carregando assinaturas...</span>
-          </div>
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>Carregando assinaturas...</span>
         </div>
       </div>
     );
@@ -102,27 +98,18 @@ export default function AdminSubscriptions() {
   if (isError) {
     const msg = error instanceof Error ? error.message : "Erro desconhecido";
     return (
-      <div className="flex flex-col h-full">
-        <AdminHeader title="Assinaturas" subtitle="Gerencie as assinaturas da plataforma" />
-        <div className="flex-1 p-6 flex items-center justify-center">
-          <div className="text-center space-y-2">
-            <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
-            <p className="text-destructive font-medium">Falha ao carregar assinaturas</p>
-            <p className="text-sm text-muted-foreground">{msg}</p>
-          </div>
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+          <p className="text-destructive font-medium">Falha ao carregar assinaturas</p>
+          <p className="text-sm text-muted-foreground">{msg}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <AdminHeader
-        title="Assinaturas"
-        subtitle="Gerencie as assinaturas da plataforma"
-      />
-
-      <div className="flex-1 overflow-auto p-6 space-y-6">
+    <div className="p-6 space-y-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="border-0 shadow-sm bg-card/50">
             <CardContent className="p-4">
@@ -341,7 +328,6 @@ export default function AdminSubscriptions() {
             </div>
           </div>
         </Card>
-      </div>
     </div>
   );
 }

@@ -6,7 +6,6 @@ import {
   CreditCard, Crown, Zap,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { AdminHeader } from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -537,24 +536,19 @@ export default function AdminUsers() {
   if (isError) {
     const msg = error instanceof Error ? error.message : "Erro desconhecido";
     return (
-      <div className="flex flex-col h-full">
-        <AdminHeader title="Clientes" subtitle="Gerencie os clientes da plataforma" />
-        <div className="flex-1 p-6 flex items-center justify-center">
-          <div className="text-center space-y-2">
-            <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
-            <p className="text-destructive font-medium">Falha ao carregar clientes</p>
-            <p className="text-sm text-muted-foreground">{msg}</p>
-          </div>
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+          <p className="text-destructive font-medium">Falha ao carregar clientes</p>
+          <p className="text-sm text-muted-foreground">{msg}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <AdminHeader title="Clientes" subtitle="Gerencie os clientes da plataforma" />
-
-      <div className="flex-1 overflow-auto p-6 space-y-5">
+    <>
+    <div className="p-6 space-y-5">
         {isLoading ? (
           <AdminUsersSkeleton />
         ) : (
@@ -799,7 +793,7 @@ export default function AdminUsers() {
             )}
           </>
         )}
-      </div>
+    </div>
 
       {/* Dialogs & Sheet */}
       <UserDetailSheet
@@ -835,6 +829,6 @@ export default function AdminUsers() {
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
       />
-    </div>
+    </>
   );
 }

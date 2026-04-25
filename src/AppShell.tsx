@@ -1,11 +1,11 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { PlanLimitListener } from "@/components/upgrade/PlanLimitListener";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
@@ -34,17 +34,19 @@ const WhatsAppPage = lazy(() => import(/* webpackChunkName: "pages-whatsapp" */ 
 const SettingsPage = lazy(() => import(/* webpackChunkName: "pages-settings" */ "./pages/Settings"));
 const RecorrenciasPage = lazy(() => import(/* webpackChunkName: "pages-recorrencias" */ "./pages/Recorrencias"));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-      retry: 1,
+function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+        retry: 1,
+      },
     },
-  },
-});
+  });
+}
 
 const PageLoading = () => (
   <div className="flex items-center justify-center py-12">
@@ -118,10 +120,17 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 function AppRoutes() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handler = () => navigate("/login", { replace: true });
+    window.addEventListener("auth:session-expired", handler);
+    return () => window.removeEventListener("auth:session-expired", handler);
+  }, [navigate]);
 
   return (
     <Suspense fallback={<PageLoading />}>
@@ -146,8 +155,12 @@ function AppRoutes() {
             <ResetPassword />
           </PublicRoute>
         } />
-        <Route path="/pagamento" element={<Pagamento />} />
-        <Route path="/pagamento-sucesso" element={<PagamentoSucesso />} />
+        <Route path="/pagamento" element={
+          <PrivateRoute><Pagamento /></PrivateRoute>
+        } />
+        <Route path="/pagamento-sucesso" element={
+          <PrivateRoute><PagamentoSucesso /></PrivateRoute>
+        } />
 
         <Route 
           path="/dashboard" 
@@ -188,7 +201,9 @@ function AppRoutes() {
   );
 }
 
-const AppShell = () => (
+const AppShell = () => {
+  const [queryClient] = useState(createQueryClient);
+  return (
   <ThemeProvider storageKey="doutorcash-theme">
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -202,6 +217,7 @@ const AppShell = () => (
       </AuthProvider>
     </QueryClientProvider>
   </ThemeProvider>
-);
+  );
+};
 
 export default AppShell;

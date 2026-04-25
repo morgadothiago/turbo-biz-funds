@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api, apiEndpoints } from "@/lib/api/client";
 import { Wallet, TrendingUp, TrendingDown, PieChart } from "lucide-react";
-import type { DashboardData, DashboardStat, ExpenseByDay, CategoryExpense } from "../types";
+import type { DashboardData, DashboardStat, ExpenseByDay, CategoryExpense, Goal } from "../types";
 import type { Transaction } from "@/shared/types";
 
 const CHART_COLORS = [
@@ -20,19 +20,31 @@ interface ApiTransaction {
   description: string | null;
   occurredAt: string;
 }
+interface ApiGoal {
+  id: string;
+  name: string;
+  current: number;
+  target: number;
+  deadline: string;
+  color?: string;
+  icon?: string;
+  category?: string;
+}
 
 async function fetchDashboard(): Promise<DashboardData> {
-  const [balanceRes, transactionsRes, categoriesRes, catSummaryRes] = await Promise.all([
+  const [balanceRes, transactionsRes, categoriesRes, catSummaryRes, goalsRes] = await Promise.all([
     api.get<{ data: BalanceData }>(`${apiEndpoints.summary.balance}?period=30d`),
     api.get<{ data: ApiTransaction[] }>(`${apiEndpoints.transactions.list}?period=30d`),
     api.get<{ data: CategoryItem[] }>(apiEndpoints.categories.list),
     api.get<{ data: CategorySummaryItem[] }>(`${apiEndpoints.summary.categories}?period=30d`),
+    api.get<{ data: ApiGoal[] }>(apiEndpoints.goals.list).catch(() => ({ data: [] as ApiGoal[] })),
   ]);
 
   const balance = balanceRes.data;
   const transactions = transactionsRes.data;
   const categories = categoriesRes.data;
   const catSummary = catSummaryRes.data;
+  const apiGoals = goalsRes.data;
 
   const catMap = new Map(categories.map((c) => [c.id, c.name]));
 
@@ -107,12 +119,23 @@ async function fetchDashboard(): Promise<DashboardData> {
     type: t.type === "INCOME" ? "income" : "expense",
   }));
 
+  const goals: Goal[] = apiGoals.slice(0, 4).map((g) => ({
+    id: g.id,
+    name: g.name,
+    current: g.current,
+    target: g.target,
+    deadline: g.deadline,
+    color: g.color ?? "#10b981",
+    icon: g.icon ?? "🎯",
+    category: g.category ?? "Geral",
+  }));
+
   return {
     stats,
     expensesByDay,
     categoryExpenses,
     recentTransactions,
-    goals: [],
+    goals,
   };
 }
 

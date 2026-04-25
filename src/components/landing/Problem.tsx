@@ -84,19 +84,19 @@ const Problem = memo(() => {
 
   const ProblemCard = memo(({ problem }: { problem: typeof PROBLEMS[number] }) => {
     return (
-      <div className="group bg-card rounded-2xl p-6 md:p-8 border border-border/60 hover:shadow-lg transition-all duration-300">
+      <div className="group bg-white/10 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 hover:bg-white/15 hover:shadow-lg transition-all duration-300">
         <div className="flex items-start gap-4 md:gap-5">
-          <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/20 transition-colors">
-            <problem.icon className="w-6 h-6 md:w-7 md:h-7 text-accent" />
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
+            <problem.icon className="w-6 h-6 md:w-7 md:h-7 text-cyan-400" />
           </div>
           <div>
-            <h3 className="text-lg md:text-xl font-bold text-foreground mb-2 group-hover:text-accent transition-colors">
+            <h3 className="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
               {problem.title}
             </h3>
-            <p className="text-base italic text-foreground/80 mb-2">
+            <p className="text-base italic text-white/80 mb-2">
               {problem.quote}
             </p>
-            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-white/60 leading-relaxed">
               {problem.description}
             </p>
           </div>
@@ -108,29 +108,31 @@ const Problem = memo(() => {
   ProblemCard.displayName = "ProblemCard";
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-background to-primary/5">
+    <section className="py-16 md:py-24 bg-transparent">
       {/* Nova faixa intermediária - Sua vida organizada sem esforço */}
       <div className="mb-16">
-        <div className="bg-gradient-to-r from-green-200 via-green-100 to-green-200 rounded-3xl mx-4 md:mx-8 p-8 md:p-12 border border-green-300">
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl mx-4 md:mx-8 p-8 md:p-12 border border-white/15">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-green-900 mb-6">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
               {t("landing", "organizedLifeTitle")}
             </h2>
-            <p className="text-base md:text-lg text-green-800 mb-6">
+            <p className="text-base md:text-lg text-white/80 mb-6">
               {t("landing", "organizedLifeSubtitle")}
             </p>
-            <p className="text-lg md:text-xl font-semibold text-green-700">
+            <p className="text-lg md:text-xl font-semibold text-cyan-400">
               {t("landing", "organizedLifeClosing")}
             </p>
           </div>
           
           {/* Imagem do wireframe */}
           <div className="mt-8 max-w-4xl mx-auto">
-            <img 
-              src="/wirefrane.png" 
-              alt="Demo do aplicativo" 
+            <img
+              src="/wirefrane.png"
+              alt="Demo do aplicativo"
               className="rounded-xl w-full h-auto"
               style={{ maxHeight: '500px', objectFit: 'contain' }}
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
@@ -138,13 +140,13 @@ const Problem = memo(() => {
 
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-400 text-sm font-medium mb-4">
             {t("landing", "problemSubtitle")}
           </span>
-          <h2 className="text-2xl md:text-4xl font-bold text-foreground mb-4 md:mb-6">
+          <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6">
             {t("landing", "problemTitle")}
           </h2>
-          <p className="text-base md:text-lg text-muted-foreground">
+          <p className="text-base md:text-lg text-white/60">
             {t("landing", "problemDescription")}
           </p>
         </div>

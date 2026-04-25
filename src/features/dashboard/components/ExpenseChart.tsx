@@ -1,13 +1,12 @@
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingDown } from "lucide-react";
 import { ExpenseByDay } from "../types";
 
@@ -17,19 +16,18 @@ interface ExpenseChartProps {
 
 export const ExpenseChart = ({ data }: ExpenseChartProps) => {
   return (
-    <Card className="border-border/60 shadow-[var(--shadow-card)]">
-      <CardHeader className="pt-5 px-5 pb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-[15px] font-semibold flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-rose-500" />
-              Gastos do mês
-            </CardTitle>
-            <CardDescription className="text-xs mt-0.5">Evolução diária das despesas</CardDescription>
+    <div className="rounded-2xl border border-border bg-white shadow-[var(--shadow-card)] overflow-hidden">
+      <div className="px-5 pt-5 pb-3">
+        <div className="flex items-center gap-2 mb-0.5">
+          <div className="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center">
+            <TrendingDown className="h-4 w-4 text-rose-500" />
           </div>
+          <span className="text-[15px] font-bold text-gray-900">Gastos do Mês</span>
         </div>
-      </CardHeader>
-      <CardContent className="px-2 pb-4">
+        <p className="text-xs text-gray-400 ml-9">Evolução dos seus gastos ao longo do mês</p>
+      </div>
+
+      <div className="px-2 pb-4">
         {data.length === 0 ? (
           <div className="h-56 flex flex-col items-center justify-center gap-2">
             <TrendingDown className="h-8 w-8 text-muted-foreground/20" />
@@ -37,26 +35,16 @@ export const ExpenseChart = ({ data }: ExpenseChartProps) => {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={data} margin={{ top: 4, right: 12, left: -16, bottom: 0 }}>
-              <defs>
-                <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.12} />
-                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(220 13% 90%)"
-                vertical={false}
-              />
+            <LineChart data={data} margin={{ top: 4, right: 12, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 13% 93%)" vertical={false} />
               <XAxis
                 dataKey="day"
-                tick={{ fontSize: 11, fill: "hsl(220 9% 60%)" }}
+                tick={{ fontSize: 11, fill: "#9ca3af" }}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: "hsl(220 9% 60%)" }}
+                tick={{ fontSize: 11, fill: "#9ca3af" }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `R$${v}`}
@@ -65,27 +53,29 @@ export const ExpenseChart = ({ data }: ExpenseChartProps) => {
                 contentStyle={{
                   backgroundColor: "#fff",
                   borderRadius: "10px",
-                  border: "1px solid hsl(220 13% 90%)",
+                  border: "1px solid #e5e7eb",
                   boxShadow: "0 4px 16px -2px rgb(0 0 0 / 0.08)",
                   fontSize: 12,
                   padding: "8px 12px",
                 }}
-                formatter={(value: number) => [`R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, "Despesa"]}
-                cursor={{ stroke: "hsl(220 13% 88%)", strokeWidth: 1 }}
+                formatter={(value: number) => [
+                  `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+                  "Despesa",
+                ]}
+                cursor={{ stroke: "#e5e7eb", strokeWidth: 1 }}
               />
-              <Area
+              <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#f43f5e"
-                strokeWidth={2}
-                fill="url(#expenseGradient)"
-                dot={false}
-                activeDot={{ r: 4, fill: "#f43f5e", strokeWidth: 0 }}
+                stroke="#ef4444"
+                strokeWidth={2.5}
+                dot={{ fill: "#ef4444", r: 3, strokeWidth: 0 }}
+                activeDot={{ r: 5, fill: "#ef4444", strokeWidth: 0 }}
               />
-            </AreaChart>
+            </LineChart>
           </ResponsiveContainer>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

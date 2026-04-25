@@ -7,6 +7,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+const NOTIFICATION_COUNT = 2;
+
 export function NotificationsSheet() {
   return (
     <Sheet>
@@ -14,10 +16,15 @@ export function NotificationsSheet() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 hover:bg-accent"
+          className="relative h-10 w-10 rounded-full bg-[#1a3799]/8 hover:bg-[#1a3799]/12 text-[#1a3799]"
           aria-label="Notificações"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 fill-[#1a3799] text-[#1a3799]" />
+          {NOTIFICATION_COUNT > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-green-500 text-[10px] font-bold text-white leading-none px-1">
+              {NOTIFICATION_COUNT}
+            </span>
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent
