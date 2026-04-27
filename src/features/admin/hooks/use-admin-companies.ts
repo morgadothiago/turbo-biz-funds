@@ -25,8 +25,26 @@ interface ApiAdminCompaniesResponse {
 }
 
 async function fetchAdminCompanies(): Promise<ApiAdminCompaniesResponse> {
-  const res = await api.get<ApiAdminCompaniesResponse>(apiEndpoints.admin.companies);
-  return res;
+  const res = await api.get<ApiAdminCompaniesResponse>(`${apiEndpoints.admin.companies}?limit=200`);
+  const data = (res.data ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    status: c.status === "active" ? "Ativo" : c.status,
+    createdAt: c.createdAt,
+    cnpj: c.cnpj ?? "-",
+    email: c.email ?? "-",
+    plan: c.plan ?? "-",
+    users: c.users ?? 0,
+    mrr: c.mrr ?? 0,
+    usage: c.usage ?? 0,
+    owner: c.owner ?? "-",
+  }));
+  const total = data.length;
+  const active = data.filter((c) => c.status === "Ativo").length;
+  return {
+    data,
+    stats: res.stats ?? { total, active, defaulting: 0 },
+  };
 }
 
 export function useAdminCompanies() {

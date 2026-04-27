@@ -71,7 +71,7 @@ interface ApiAdminPlanSummary { id: string; name: string; subscribers: number }
 async function fetchAdminDashboard(): Promise<AdminDashboardData> {
   const [statsRes, revenueRes, clientsRes, activityRes, plansRes] = await Promise.all([
     api.get<{ data: ApiAdminStats }>(apiEndpoints.admin.stats),
-    api.get<{ data: AdminRevenuePoint[] }>(apiEndpoints.admin.revenue),
+    api.get<{ data: AdminRevenuePoint[] }>(`${apiEndpoints.admin.revenue}?months=6`),
     api.get<{ data: AdminRecentClient[] }>(`${apiEndpoints.admin.clients}?limit=5`),
     api.get<{ data: AdminActivityItem[] }>(`${apiEndpoints.admin.activity}?limit=5`),
     api.get<{ data: ApiAdminPlanSummary[] }>(apiEndpoints.admin.plans).catch(() => ({ data: [] as ApiAdminPlanSummary[] })),
