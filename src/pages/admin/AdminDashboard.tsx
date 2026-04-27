@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState, useMemo } from "react";
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -9,9 +9,18 @@ import {
   Loader2,
   Users,
   Activity,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -29,11 +38,344 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
 } from "recharts";
-import { useAdminDashboard, AdminStat } from "@/features/admin/hooks/use-admin-dashboard";
+import { useQuery } from "@tanstack/react-query";
+import { useAdminDashboard, AdminStat, type AdminActivityItem } from "@/features/admin/hooks/use-admin-dashboard";
+import { useAdminUsers } from "@/features/admin/hooks/use-admin-users";
+import { api, apiEndpoints } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
+
+const PAGE_SIZE = 5;
+
+const PLAN_BADGE: Record<string, { label: string; className: string }> = {
+  free:       { label: "Free",       className: "bg-gray-100 text-gray-600 border-gray-200" },
+  pro:        { label: "Pro",        className: "bg-blue-50 text-blue-600 border-blue-200" },
+  business:   { label: "Business",   className: "bg-violet-50 text-violet-600 border-violet-200" },
+  enterprise: { label: "Enterprise", className: "bg-amber-50 text-amber-600 border-amber-200" },
+};
+
+function getPlanBadge(plan: string) {
+  return PLAN_BADGE[plan?.toLowerCase()] ?? { label: plan, className: "bg-gray-100 text-gray-600" };
+}
+
+function getInitials(name: string) {
+  return name.split(" ").map((n) => n[0] || "").join("").substring(0, 2).toUpperCase();
+}
+
+function UsersByPlanCard() {
+  const { users } = useAdminUsers();
+  const [planFilter, setPlanFilter] = useState("all");
+  const [page, setPage] = useState(1);
+
+  const plans = useMemo(() => {
+    const set = new Set(users.map((u) => u.plan?.toLowerCase()).filter(Boolean));
+    return ["all", ...Array.from(set)];
+  }, [users]);
+
+  const filtered = useMemo(() => {
+    if (planFilter === "all") return users;
+    return users.filter((u) => u.plan?.toLowerCase() === planFilter);
+  }, [users, planFilter]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleFilter = (value: string) => {
+    setPlanFilter(value);
+    setPage(1);
+  };
+
+  return (
+    <div className="rounded-2xl border border-border bg-white shadow-[var(--shadow-card)] overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="px-5 pt-5 pb-3 flex items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+              <Users className="h-4 w-4 text-[#1a3799]" />
+            </div>
+            <span className="text-[15px] font-bold text-gray-900">Usuários por Plano</span>
+          </div>
+          <p className="text-xs text-gray-400 ml-9">{filtered.length} cliente{filtered.length !== 1 ? "s" : ""}</p>
+        </div>
+        <Select value={planFilter} onValueChange={handleFilter}>
+          <SelectTrigger className="h-8 w-32 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os planos</SelectItem>
+            {plans.filter((p) => p !== "all").map((p) => (
+              <SelectItem key={p} value={p}>{getPlanBadge(p).label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* List */}
+      <div className="flex-1 divide-y divide-border">
+        {paginated.length === 0 ? (
+          <div className="h-[220px] flex items-center justify-center text-gray-400 text-sm">
+            Nenhum usuário encontrado
+          </div>
+        ) : (
+          paginated.map((user) => {
+            const badge = getPlanBadge(user.plan);
+            return (
+              <div key={user.id} className="flex items-center gap-3 px-5 py-2.5">
+                <Avatar className="h-8 w-8 shrink-0">
+                  <AvatarFallback className="bg-[#1a3799]/10 text-[#1a3799] text-xs font-semibold">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                  <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                </div>
+                <Badge variant="outline" className={cn("text-xs shrink-0", badge.className)}>
+                  {badge.label}
+                </Badge>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-5 py-2.5 border-t bg-gray-50/50">
+          <span className="text-xs text-gray-400">
+            Página {page} de {totalPages}
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RevenueChartCard({ revenueData }: { revenueData: { month: string; receita: number; clientes: number }[] }) {
+  const [showReceita, setShowReceita] = useState(true);
+  const [showClientes, setShowClientes] = useState(true);
+
+  return (
+    <div className="lg:col-span-2 rounded-2xl border border-border bg-white shadow-[var(--shadow-card)] overflow-hidden">
+      <div className="px-5 pt-5 pb-2 flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
+            </div>
+            <span className="text-[15px] font-bold text-gray-900">Evolução da Receita e Usuários</span>
+          </div>
+          <p className="text-xs text-gray-400 ml-9">MRR e usuários ativos dos últimos 6 meses</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setShowReceita((v) => !v)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
+              showReceita
+                ? "bg-[#1a3799] text-white border-[#1a3799]"
+                : "bg-white text-gray-400 border-gray-200 hover:border-[#1a3799]/40"
+            )}
+          >
+            <span className="w-2 h-2 rounded-full bg-current" />
+            Receita
+          </button>
+          <button
+            onClick={() => setShowClientes((v) => !v)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
+              showClientes
+                ? "bg-[#25D366] text-white border-[#25D366]"
+                : "bg-white text-gray-400 border-gray-200 hover:border-[#25D366]/40"
+            )}
+          >
+            <span className="w-2 h-2 rounded-full bg-current" />
+            Usuários
+          </button>
+        </div>
+      </div>
+      <div className="px-2 pb-4">
+        <ResponsiveContainer width="100%" height={240}>
+          <LineChart data={revenueData} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
+            {showReceita && (
+              <YAxis
+                yAxisId="receita"
+                orientation="left"
+                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => `R$${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`}
+              />
+            )}
+            {showClientes && (
+              <YAxis
+                yAxisId="clientes"
+                orientation="right"
+                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v) => `${v}`}
+                width={28}
+              />
+            )}
+            <Tooltip
+              contentStyle={{ backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: "10px", fontSize: 12, padding: "8px 12px" }}
+              formatter={(value: number, name: string) => {
+                if (name === "receita") return [`R$ ${value.toLocaleString("pt-BR")}`, "Receita (MRR)"];
+                return [`${value}`, "Usuários ativos"];
+              }}
+            />
+            {showReceita && (
+              <Line
+                yAxisId="receita"
+                type="monotone"
+                dataKey="receita"
+                stroke="#1a3799"
+                strokeWidth={2.5}
+                dot={{ fill: "#1a3799", r: 3, strokeWidth: 0 }}
+                activeDot={{ r: 5, fill: "#1a3799", strokeWidth: 0 }}
+              />
+            )}
+            {showClientes && (
+              <Line
+                yAxisId="clientes"
+                type="monotone"
+                dataKey="clientes"
+                stroke="#25D366"
+                strokeWidth={2.5}
+                strokeDasharray="5 3"
+                dot={{ fill: "#25D366", r: 3, strokeWidth: 0 }}
+                activeDot={{ r: 5, fill: "#25D366", strokeWidth: 0 }}
+              />
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+const ACTIVITY_CFG: Record<string, { bg: string; icon: typeof UserPlus; color: string; label: string }> = {
+  signup:  { bg: "bg-blue-50",   icon: UserPlus,    color: "text-[#1a3799]",  label: "Cadastro" },
+  payment: { bg: "bg-green-50",  icon: CreditCard,  color: "text-green-600",  label: "Pagamento" },
+  upgrade: { bg: "bg-purple-50", icon: TrendingUp,  color: "text-purple-600", label: "Upgrade" },
+  support: { bg: "bg-amber-50",  icon: AlertCircle, color: "text-amber-600",  label: "Suporte" },
+};
+
+function RecentActivityCard() {
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [page, setPage] = useState(1);
+
+  const { data: activities = [] } = useQuery({
+    queryKey: ["admin", "activity-full"],
+    queryFn: async (): Promise<AdminActivityItem[]> => {
+      const res = await api.get<{ data: AdminActivityItem[] }>(
+        `${apiEndpoints.admin.activity}?limit=50`
+      );
+      return res.data ?? [];
+    },
+    staleTime: 60_000,
+  });
+
+  const filtered = useMemo(() => {
+    if (typeFilter === "all") return activities;
+    return activities.filter((a) => a.type === typeFilter);
+  }, [activities, typeFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleFilter = (value: string) => { setTypeFilter(value); setPage(1); };
+
+  return (
+    <div className="rounded-2xl border border-border overflow-hidden shadow-[var(--shadow-card)] flex flex-col">
+      {/* Header */}
+      <div className="bg-[#25D366] px-5 py-4 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+          <Activity className="h-6 w-6 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-bold text-lg leading-tight">Atividade Recente</p>
+          <p className="text-white/75 text-xs leading-tight mt-0.5">Últimas ações na plataforma</p>
+        </div>
+        <Select value={typeFilter} onValueChange={handleFilter}>
+          <SelectTrigger className="h-7 w-28 text-xs bg-white/20 border-white/30 text-white [&>svg]:text-white">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos</SelectItem>
+            {Object.entries(ACTIVITY_CFG).map(([key, cfg]) => (
+              <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* List */}
+      <div className="bg-white flex-1 divide-y divide-border/60">
+        {paginated.length === 0 ? (
+          <div className="h-[220px] flex items-center justify-center text-gray-400 text-sm">
+            Nenhuma atividade encontrada
+          </div>
+        ) : (
+          paginated.map((activity, i) => {
+            const cfg = ACTIVITY_CFG[activity.type] ?? ACTIVITY_CFG.signup;
+            const Icon = cfg.icon;
+            return (
+              <div key={`${activity.type}-${activity.message}-${i}`} className="flex items-start gap-3 px-5 py-3">
+                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5", cfg.bg)}>
+                  <Icon className={cn("h-4 w-4", cfg.color)} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-800 leading-tight">{activity.message}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{activity.time}</p>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-5 py-2.5 border-t bg-gray-50/50">
+        <span className="text-xs text-gray-400">
+          {filtered.length} atividade{filtered.length !== 1 ? "s" : ""} · página {page} de {totalPages}
+        </span>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" className="h-7 w-7" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7" disabled={page === totalPages} onClick={() => setPage((p) => p + 1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const AdminStatCard = memo(function AdminStatCard({ stat }: { stat: AdminStat }) {
   const Icon = stat.icon;
@@ -117,66 +459,10 @@ function AdminDashboard() {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Revenue Chart */}
-          <div className="lg:col-span-2 rounded-2xl border border-border bg-white shadow-[var(--shadow-card)] overflow-hidden">
-            <div className="px-5 pt-5 pb-3">
-              <div className="flex items-center gap-2 mb-0.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
-                  <TrendingUp className="h-4 w-4 text-emerald-500" />
-                </div>
-                <span className="text-[15px] font-bold text-gray-900">Evolução da Receita</span>
-              </div>
-              <p className="text-xs text-gray-400 ml-9">MRR dos últimos 6 meses</p>
-            </div>
-            <div className="px-2 pb-4">
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={revenueData} margin={{ top: 4, right: 12, left: -16, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v / 1000}k`} />
-                  <Tooltip
-                    formatter={(value: number) => [`R$ ${value.toLocaleString("pt-BR")}`, "Receita"]}
-                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: "10px", fontSize: 12, padding: "8px 12px" }}
-                  />
-                  <Line type="monotone" dataKey="receita" stroke="#1a3799" strokeWidth={2.5}
-                    dot={{ fill: "#1a3799", r: 3, strokeWidth: 0 }}
-                    activeDot={{ r: 5, fill: "#1a3799", strokeWidth: 0 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <RevenueChartCard revenueData={revenueData} />
 
-          {/* Plan Distribution */}
-          <div className="rounded-2xl border border-border bg-white shadow-[var(--shadow-card)] overflow-hidden">
-            <div className="px-5 pt-5 pb-3">
-              <div className="flex items-center gap-2 mb-0.5">
-                <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <Users className="h-4 w-4 text-[#1a3799]" />
-                </div>
-                <span className="text-[15px] font-bold text-gray-900">Distribuição de Planos</span>
-              </div>
-              <p className="text-xs text-gray-400 ml-9">Clientes por tipo de plano</p>
-            </div>
-            <div className="px-2 pb-4">
-              {planDistribution.length > 0 ? (
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={planDistribution} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                    <XAxis type="number" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} width={60} />
-                    <Tooltip
-                      formatter={(value: number) => [`${value} clientes`, "Total"]}
-                      contentStyle={{ backgroundColor: "#fff", border: "1px solid #e5e7eb", borderRadius: "10px", fontSize: 12, padding: "8px 12px" }}
-                    />
-                    <Bar dataKey="value" fill="#1a3799" radius={[0, 6, 6, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[240px] flex items-center justify-center text-gray-400 text-sm">
-                  Sem dados de distribuição
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Users by Plan */}
+          <UsersByPlanCard />
         </div>
 
         {/* Tables */}
@@ -243,38 +529,7 @@ function AdminDashboard() {
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-2xl border border-border overflow-hidden shadow-[var(--shadow-card)]">
-            <div className="bg-[#25D366] px-5 py-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                <Activity className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-white font-bold text-lg leading-tight">Atividade</p>
-                <p className="text-white/75 text-xs leading-tight mt-0.5">Últimas ações na plataforma</p>
-              </div>
-            </div>
-            <div className="bg-white divide-y divide-border/60">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3 px-5 py-3">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5",
-                    activity.type === "signup" ? "bg-blue-50"
-                    : activity.type === "payment" ? "bg-green-50"
-                    : activity.type === "upgrade" ? "bg-purple-50"
-                    : "bg-amber-50"
-                  )}>
-                    {activity.type === "signup" && <UserPlus className="h-4 w-4 text-[#1a3799]" />}
-                    {activity.type === "payment" && <CreditCard className="h-4 w-4 text-green-600" />}
-                    {activity.type === "upgrade" && <TrendingUp className="h-4 w-4 text-purple-600" />}
-                    {activity.type === "support" && <AlertCircle className="h-4 w-4 text-amber-600" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 leading-tight">{activity.message}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Há {activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <RecentActivityCard />
         </div>
       </div>
   );

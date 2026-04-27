@@ -33,9 +33,28 @@ export interface UpdateAdminUserPayload {
   role?: string;
 }
 
+const STATUS_MAP: Record<string, AdminUser["status"]> = {
+  active: "Ativo",
+  inactive: "Pendente",
+  blocked: "Bloqueado",
+};
+
 async function fetchAdminUsers(): Promise<ApiAdminUsersResponse> {
-  const res = await api.get<ApiAdminUsersResponse>(apiEndpoints.admin.users);
-  return res;
+  const res = await api.get<ApiAdminUsersResponse>(`${apiEndpoints.admin.users}?limit=200`);
+  const data = (res.data ?? []).map((u) => ({
+    ...u,
+    status: STATUS_MAP[u.status] ?? u.status,
+    role: u.role ?? "user",
+    lastLogin: u.lastLogin ?? "",
+  }));
+  const total = data.length;
+  const active = data.filter((u) => u.status === "Ativo").length;
+  const blocked = data.filter((u) => u.status === "Bloqueado").length;
+  const pending = total - active - blocked;
+  return {
+    data,
+    stats: res.stats ?? { total, active, pending, blocked },
+  };
 }
 
 export function useAdminUsers() {

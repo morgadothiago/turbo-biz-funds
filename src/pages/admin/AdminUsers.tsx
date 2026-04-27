@@ -34,23 +34,34 @@ import {
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
+import {
+  Tooltip, TooltipContent, TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AdminUsersSkeleton } from "@/components/ui/admin-skeletons";
 import {
   useAdminUsers, useUpdateAdminUser, useDeleteAdminUser,
   type AdminUser,
 } from "@/features/admin/hooks/use-admin-users";
+import { useAdminWriteCapability } from "@/features/admin/hooks/use-admin-write-capability";
 import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
 
-const PLAN_CONFIG = {
-  free:     { label: "Free",     className: "bg-muted text-muted-foreground border-muted-foreground/20", icon: Users },
-  pro:      { label: "Pro",      className: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800", icon: Zap },
-  business: { label: "Business", className: "bg-violet-500/10 text-violet-600 border-violet-200 dark:border-violet-800", icon: Crown },
-  Free:     { label: "Free",     className: "bg-muted text-muted-foreground border-muted-foreground/20", icon: Users },
-  Pro:      { label: "Pro",      className: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800", icon: Zap },
-  Business: { label: "Business", className: "bg-violet-500/10 text-violet-600 border-violet-200 dark:border-violet-800", icon: Crown },
-} as Record<string, { label: string; className: string; icon: typeof Users }>;
+const PLAN_CONFIG: Record<string, { label: string; className: string; icon: typeof Users }> = {
+  free:       { label: "Free",       className: "bg-muted text-muted-foreground border-muted-foreground/20", icon: Users },
+  pro:        { label: "Pro",        className: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800", icon: Zap },
+  business:   { label: "Business",   className: "bg-violet-500/10 text-violet-600 border-violet-200 dark:border-violet-800", icon: Crown },
+  enterprise: { label: "Enterprise", className: "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-800", icon: Crown },
+};
+
+function getPlanConfig(plan: string) {
+  return PLAN_CONFIG[plan?.toLowerCase()] ?? PLAN_CONFIG["free"];
+}
+
+function formatDate(iso: string) {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
 
 const STATUS_CONFIG = {
   Ativo:     { className: "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-800" },
@@ -65,7 +76,7 @@ function getInitials(name: string) {
 }
 
 function PlanBadge({ plan }: { plan: string }) {
-  const cfg = PLAN_CONFIG[plan] ?? PLAN_CONFIG["free"];
+  const cfg = getPlanConfig(plan);
   return (
     <Badge variant="outline" className={cfg.className}>
       {cfg.label}
@@ -85,6 +96,49 @@ function StatusBadge({ status }: { status: string }) {
 
 // ── User Detail Sheet ────────────────────────────────────────────────────────
 
+const PENDING_BACKEND_TOOLTIP = "Aguardando implementação no backend";
+
+function WriteActionButton({
+  canWrite,
+  isChecking,
+  children,
+  onClick,
+  className,
+  variant = "outline",
+  destructive = false,
+}: {
+  canWrite: boolean;
+  isChecking: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+  className?: string;
+  variant?: "outline" | "ghost";
+  destructive?: boolean;
+}) {
+  const disabled = isChecking || !canWrite;
+  const btn = (
+    <Button
+      variant={variant}
+      className={className}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {children}
+    </Button>
+  );
+  if (!disabled) return btn;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="w-full">{btn}</span>
+      </TooltipTrigger>
+      <TooltipContent side="left">
+        {isChecking ? "Verificando disponibilidade..." : PENDING_BACKEND_TOOLTIP}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function UserDetailSheet({
   user,
   open,
@@ -102,6 +156,7 @@ function UserDetailSheet({
   onChangeRole: (user: AdminUser) => void;
   onDelete: (user: AdminUser) => void;
 }) {
+  const { canWrite, isChecking } = useAdminWriteCapability();
   if (!user) return null;
   const isBlocked = user.status === "Bloqueado" || user.status === "suspended";
   const isAdmin = user.role === "admin";
@@ -140,6 +195,16 @@ function UserDetailSheet({
 
         {/* Info rows */}
         <div className="space-y-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <Mail className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Email</p>
+              <p className="text-sm font-medium truncate">{user.email}</p>
+            </div>
+          </div>
+
           {user.phone && (
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
@@ -151,24 +216,39 @@ function UserDetailSheet({
               </div>
             </div>
           )}
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <Shield className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Perfil</p>
+              <p className="text-sm font-medium">{isAdmin ? "Administrador" : "Usuário"}</p>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
               <Calendar className="w-4 h-4 text-muted-foreground" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Membro desde</p>
-              <p className="text-sm font-medium">{user.createdAt}</p>
+              <p className="text-sm font-medium">{formatDate(user.createdAt)}</p>
             </div>
           </div>
+
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
               <Activity className="w-4 h-4 text-muted-foreground" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Último acesso</p>
-              <p className="text-sm font-medium">{user.lastLogin || "Nunca"}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                {user.lastLogin ? formatDate(user.lastLogin) : "Não disponível"}
+              </p>
             </div>
           </div>
+
           {user.totalTransactions !== undefined && (
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
@@ -180,6 +260,7 @@ function UserDetailSheet({
               </div>
             </div>
           )}
+
           {user.planExpiresAt && (
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
@@ -187,7 +268,7 @@ function UserDetailSheet({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Plano expira em</p>
-                <p className="text-sm font-medium">{user.planExpiresAt}</p>
+                <p className="text-sm font-medium">{formatDate(user.planExpiresAt)}</p>
               </div>
             </div>
           )}
@@ -199,17 +280,19 @@ function UserDetailSheet({
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Ações</p>
 
-          <Button
-            variant="outline"
+          <WriteActionButton
+            canWrite={canWrite}
+            isChecking={isChecking}
             className="w-full justify-start"
             onClick={() => { onClose(); onChangePlan(user); }}
           >
             <Crown className="w-4 h-4 mr-2 text-violet-500" />
             Alterar Plano
-          </Button>
+          </WriteActionButton>
 
-          <Button
-            variant="outline"
+          <WriteActionButton
+            canWrite={canWrite}
+            isChecking={isChecking}
             className="w-full justify-start"
             onClick={() => { onClose(); onChangeStatus(user); }}
           >
@@ -218,16 +301,17 @@ function UserDetailSheet({
             ) : (
               <><Ban className="w-4 h-4 mr-2 text-amber-500" />Bloquear usuário</>
             )}
-          </Button>
+          </WriteActionButton>
 
-          <Button
-            variant="outline"
+          <WriteActionButton
+            canWrite={canWrite}
+            isChecking={isChecking}
             className="w-full justify-start"
             onClick={() => { onClose(); onChangeRole(user); }}
           >
             <Shield className="w-4 h-4 mr-2 text-blue-500" />
             {isAdmin ? "Remover acesso admin" : "Promover a admin"}
-          </Button>
+          </WriteActionButton>
 
           <Button
             variant="outline"
@@ -240,14 +324,15 @@ function UserDetailSheet({
 
           <Separator className="my-2" />
 
-          <Button
-            variant="outline"
+          <WriteActionButton
+            canWrite={canWrite}
+            isChecking={isChecking}
             className="w-full justify-start text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
             onClick={() => { onClose(); onDelete(user); }}
           >
             <Trash2 className="w-4 h-4 mr-2" />
             Excluir usuário
-          </Button>
+          </WriteActionButton>
         </div>
       </SheetContent>
     </Sheet>
@@ -690,10 +775,10 @@ export default function AdminUsers() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
-                          {user.lastLogin || "—"}
+                          {user.lastLogin ? formatDate(user.lastLogin) : "—"}
                         </TableCell>
                         <TableCell className="text-muted-foreground text-sm hidden lg:table-cell">
-                          {user.createdAt}
+                          {formatDate(user.createdAt)}
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
