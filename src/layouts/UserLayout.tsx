@@ -4,6 +4,7 @@ import { UserSidebarContent, MobileSidebarTrigger } from "@/components/user/User
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsSheet } from "@/components/user/NotificationsSheet";
+import { UserTutorial, useUserTutorial } from "@/components/user/UserTutorial";
 
 const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   "/dashboard": { title: "Dashboard", subtitle: "Visão geral das suas finanças" },
@@ -78,8 +79,12 @@ function Header() {
 }
 
 export default function UserLayout() {
+  const { show, complete, skip } = useUserTutorial();
+
   return (
     <SidebarProvider className="block">
+      {show && <UserTutorial onComplete={complete} onSkip={skip} />}
+
       <div
         className="h-screen flex p-3 gap-3 overflow-hidden"
         style={{ background: "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)" }}
