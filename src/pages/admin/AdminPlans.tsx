@@ -50,7 +50,12 @@ import {
   useAdminPlans,
   getAdminPlanIcon,
   getAdminPlanColor,
+  useCreatePlan,
+  useUpdatePlan,
+  useDeletePlan,
+  type CreatePlanPayload,
 } from "@/features/admin/hooks/use-admin-plans";
+import { toast } from "@/components/ui/use-toast";
 
 const statusColors: Record<string, string> = {
   Ativo: "bg-success/10 text-success",
@@ -61,17 +66,79 @@ const statusColors: Record<string, string> = {
 
 export default function AdminPlans() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
 
   const { plans, subscriptions, isLoading, isError, error } = useAdminPlans();
+  const createPlan = useCreatePlan();
+  const updatePlan = useUpdatePlan();
+  const deletePlan = useDeletePlan();
+
+  const [newPlan, setNewPlan] = useState<Partial<CreatePlanPayload>>({
+    name: "",
+    description: "",
+    price: 0,
+    billingPeriod: "mês",
+    features: [],
+    popular: false,
+  });
+
+  const [editPlanData, setEditPlanData] = useState<Partial<CreatePlanPayload>>({});
 
   const selectedPlan = plans.find((p) => p.id === editingPlanId) ?? null;
   const totalMRR = plans.reduce((sum, plan) => sum + plan.mrr, 0);
   const totalSubscribers = plans.reduce((sum, plan) => sum + plan.subscribers, 0);
 
   const openEditDialog = (planId: string) => {
+    const plan = plans.find((p) => p.id === planId);
+    if (plan) {
+      setEditPlanData({
+        name: plan.name,
+        description: plan.description,
+        price: plan.price,
+        billingPeriod: plan.billingPeriod,
+        features: plan.features,
+        popular: plan.popular,
+      });
+    }
     setEditingPlanId(planId);
     setIsEditDialogOpen(true);
+  };
+
+  const handleCreatePlan = () => {
+    if (!newPlan.name || !newPlan.description) {
+      toast({ title: "Preencha os campos obrigatórios", variant: "destructive" });
+      return;
+    }
+    createPlan.mutate(newPlan as CreatePlanPayload, {
+      onSuccess: () => {
+        toast({ title: "Plano criado com sucesso" });
+        setIsCreateDialogOpen(false);
+        setNewPlan({ name: "", description: "", price: 0, billingPeriod: "mês", features: [], popular: false });
+      },
+      onError: () => toast({ title: "Erro ao criar plano", variant: "destructive" }),
+    });
+  };
+
+  const handleUpdatePlan = () => {
+    if (!editingPlanId) return;
+    updatePlan.mutate(
+      { id: editingPlanId, ...editPlanData } as CreatePlanPayload & { id: string },
+      {
+        onSuccess: () => {
+          toast({ title: "Plano atualizado com sucesso" });
+          setIsEditDialogOpen(false);
+        },
+        onError: () => toast({ title: "Erro ao atualizar plano", variant: "destructive" }),
+      }
+    );
+  };
+
+  const handleDeletePlan = (planId: string) => {
+    deletePlan.mutate(planId, {
+      onSuccess: () => toast({ title: "Plano desativado com sucesso" }),
+      onError: () => toast({ title: "Erro ao desativar plano", variant: "destructive" }),
+    });
   };
 
   if (isLoading) {
@@ -178,9 +245,13 @@ export default function AdminPlans() {
                             <Edit className="h-4 w-4 mr-2" />
                             Editar plano
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeletePlan(plan.id)}
+                            disabled={deletePlan.isPending}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Desativar
+                            {deletePlan.isPending ? "Desativando..." : "Desativar"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -230,7 +301,7 @@ export default function AdminPlans() {
             </div>
 
             <div className="flex justify-center">
-              <Dialog>
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
@@ -247,30 +318,57 @@ export default function AdminPlans() {
                   <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
                       <Label htmlFor="plan-name">Nome do plano</Label>
-                      <Input id="plan-name" placeholder="Ex: Enterprise" />
+                      <Input
+                        id="plan-name"
+                        placeholder="Ex: Enterprise"
+                        value={newPlan.name}
+                        onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })}
+                      />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="plan-description">Descrição</Label>
-                      <Textarea id="plan-description" placeholder="Descreva o plano..." />
+                      <Textarea
+                        id="plan-description"
+                        placeholder="Descreva o plano..."
+                        value={newPlan.description}
+                        onChange={(e) => setNewPlan({ ...newPlan, description: e.target.value })}
+                      />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="plan-price">Preço (R$)</Label>
-                        <Input id="plan-price" type="number" placeholder="0" />
+                        <Input
+                          id="plan-price"
+                          type="number"
+                          placeholder="0"
+                          value={newPlan.price}
+                          onChange={(e) => setNewPlan({ ...newPlan, price: Number(e.target.value) })}
+                        />
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="plan-period">Período</Label>
-                        <Input id="plan-period" placeholder="mês" />
+                        <Input
+                          id="plan-period"
+                          placeholder="mês"
+                          value={newPlan.billingPeriod}
+                          onChange={(e) => setNewPlan({ ...newPlan, billingPeriod: e.target.value })}
+                        />
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="plan-active">Plano ativo</Label>
-                      <Switch id="plan-active" defaultChecked />
+                      <Label htmlFor="plan-popular">Plano popular</Label>
+                      <Switch
+                        id="plan-popular"
+                        checked={newPlan.popular}
+                        onCheckedChange={(checked) => setNewPlan({ ...newPlan, popular: checked })}
+                      />
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline">Cancelar</Button>
-                    <Button>Criar Plano</Button>
+                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancelar</Button>
+                    <Button onClick={handleCreatePlan} disabled={createPlan.isPending}>
+                      {createPlan.isPending ? "Criando..." : "Criar Plano"}
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -347,27 +445,54 @@ export default function AdminPlans() {
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
                   <Label htmlFor="edit-name">Nome do plano</Label>
-                  <Input id="edit-name" defaultValue={selectedPlan.name} />
+                  <Input
+                    id="edit-name"
+                    value={editPlanData.name ?? selectedPlan.name}
+                    onChange={(e) => setEditPlanData({ ...editPlanData, name: e.target.value })}
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="edit-description">Descrição</Label>
-                  <Textarea id="edit-description" defaultValue={selectedPlan.description} />
+                  <Textarea
+                    id="edit-description"
+                    value={editPlanData.description ?? selectedPlan.description}
+                    onChange={(e) => setEditPlanData({ ...editPlanData, description: e.target.value })}
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="edit-price">Preço (R$)</Label>
-                    <Input id="edit-price" type="number" defaultValue={selectedPlan.price} />
+                    <Input
+                      id="edit-price"
+                      type="number"
+                      value={editPlanData.price ?? selectedPlan.price}
+                      onChange={(e) => setEditPlanData({ ...editPlanData, price: Number(e.target.value) })}
+                    />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="edit-period">Período</Label>
-                    <Input id="edit-period" defaultValue={selectedPlan.billingPeriod} />
+                    <Input
+                      id="edit-period"
+                      value={editPlanData.billingPeriod ?? selectedPlan.billingPeriod}
+                      onChange={(e) => setEditPlanData({ ...editPlanData, billingPeriod: e.target.value })}
+                    />
                   </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="edit-popular">Plano popular</Label>
+                  <Switch
+                    id="edit-popular"
+                    checked={editPlanData.popular ?? selectedPlan.popular}
+                    onCheckedChange={(checked) => setEditPlanData({ ...editPlanData, popular: checked })}
+                  />
                 </div>
               </div>
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancelar</Button>
-              <Button onClick={() => setIsEditDialogOpen(false)}>Salvar Alterações</Button>
+              <Button onClick={handleUpdatePlan} disabled={updatePlan.isPending}>
+                {updatePlan.isPending ? "Salvando..." : "Salvar Alterações"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

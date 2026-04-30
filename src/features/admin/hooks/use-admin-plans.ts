@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, apiEndpoints } from "@/lib/api/client";
 import { Sparkles, Zap, Crown } from "lucide-react";
 
@@ -74,4 +74,46 @@ export function useAdminPlans() {
     error: query.error,
     refetch: query.refetch,
   };
+}
+
+export interface CreatePlanPayload {
+  name: string;
+  description: string;
+  price: number;
+  billingPeriod: string;
+  features: AdminPlanFeature[];
+  popular?: boolean;
+}
+
+export function useCreatePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreatePlanPayload) =>
+      api.post(apiEndpoints.admin.plans, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "plans"] });
+    },
+  });
+}
+
+export function useUpdatePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...payload }: CreatePlanPayload & { id: string }) =>
+      api.patch(`${apiEndpoints.admin.plans}/${id}`, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "plans"] });
+    },
+  });
+}
+
+export function useDeletePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.delete(`${apiEndpoints.admin.plans}/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "plans"] });
+    },
+  });
 }

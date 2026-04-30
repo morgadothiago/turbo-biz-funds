@@ -409,26 +409,37 @@ function ChangeRoleDialog({
   open: boolean;
   onClose: () => void;
 }) {
+  const [adminPassword, setAdminPassword] = useState("");
   const updateUser = useUpdateAdminUser();
   if (!user) return null;
   const isAdmin = user.role === "admin";
   const newRole = isAdmin ? "user" : "admin";
+  const isPromoting = !isAdmin;
 
   const handleConfirm = () => {
+    if (isPromoting && !adminPassword) {
+      toast.error("Digite a senha administrativa");
+      return;
+    }
     updateUser.mutate(
-      { id: user.id, role: newRole },
+      { id: user.id, role: newRole, adminPassword: isPromoting ? adminPassword : undefined },
       {
         onSuccess: () => {
           toast.success(isAdmin ? "Acesso admin removido" : "Usuário promovido a admin");
+          setAdminPassword("");
           onClose();
         },
-        onError: () => toast.error("Erro ao alterar papel"),
+        onError: (error: unknown) => {
+          const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "";
+          toast.error(msg || "Erro ao alterar papel");
+          setAdminPassword("");
+        },
       }
     );
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onClose}>
+    <AlertDialog open={open} onOpenChange={(open) => { if (!open) setAdminPassword(""); onClose(); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -440,11 +451,24 @@ function ChangeRoleDialog({
               : `${user.name} terá acesso total ao painel administrativo. Certifique-se de que isso é intencional.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
+        {isPromoting && (
+          <div className="space-y-2 py-2">
+            <Label htmlFor="admin-password">Senha Administrativa</Label>
+            <Input
+              id="admin-password"
+              type="password"
+              placeholder="Digite sua senha administrativa"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleConfirm(); }}
+            />
+          </div>
+        )}
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setAdminPassword("")}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={updateUser.isPending}
+            disabled={updateUser.isPending || (isPromoting && !adminPassword)}
             className={!isAdmin ? "bg-orange-600 hover:bg-orange-700" : ""}
           >
             {updateUser.isPending ? "Aplicando..." : isAdmin ? "Remover admin" : "Confirmar promoção"}
