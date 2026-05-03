@@ -285,20 +285,9 @@ const ACTIVITY_CFG: Record<string, { bg: string; icon: typeof UserPlus; color: s
   support: { bg: "bg-amber-50",  icon: AlertCircle, color: "text-amber-600",  label: "Suporte" },
 };
 
-function RecentActivityCard() {
+function RecentActivityCard({ activities }: { activities: AdminActivityItem[] }) {
   const [typeFilter, setTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
-
-  const { data: activities = [] } = useQuery({
-    queryKey: ["admin", "activity-full"],
-    queryFn: async (): Promise<AdminActivityItem[]> => {
-      const res = await api.get<{ data: AdminActivityItem[] }>(
-        `${apiEndpoints.admin.activity}?limit=50`
-      );
-      return res.data ?? [];
-    },
-    staleTime: 60_000,
-  });
 
   const filtered = useMemo(() => {
     if (typeFilter === "all") return activities;
@@ -529,7 +518,7 @@ function AdminDashboard() {
           </div>
 
           {/* Recent Activity */}
-          <RecentActivityCard />
+          <RecentActivityCard activities={recentActivity} />
         </div>
       </div>
   );

@@ -72,21 +72,8 @@ function toastForItem(item: AdminActivityItem) {
 }
 
 async function fetchActivity(): Promise<AdminNotification[]> {
-  const res = await api.get<{ data: AdminActivityItem[] }>(
-    `${apiEndpoints.admin.activity}?limit=50`
-  );
-  const seen = getSeenIds();
-  const cleared = getClearedKeys();
-  return (res.data ?? [])
-    .filter((item) => !cleared.has(buildSeenKey(item)))
-    .map((item, index) => {
-      const seenKey = buildSeenKey(item);
-      return {
-        ...item,
-        id: buildId(item, index),
-        read: seen.has(seenKey),
-      };
-    });
+  // Endpoint /v1/admin/activity não existe no backend ainda
+  return [];
 }
 
 export function useAdminNotifications() {

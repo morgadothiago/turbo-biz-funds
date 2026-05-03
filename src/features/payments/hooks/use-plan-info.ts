@@ -11,7 +11,7 @@ const PLAN_DEFAULTS: Record<string, PlanInfo> = {
     name: "Gratuito",
     price: "R$ 0",
     period: "para sempre",
-    description: "1 empresa, recursos básicos",
+    description: "1 usuário, recursos básicos",
     features: ["Categorização básica", "Relatórios simples", "Suporte por email"],
   },
   pro: {
@@ -19,7 +19,7 @@ const PLAN_DEFAULTS: Record<string, PlanInfo> = {
     name: "Pro",
     price: "R$ 97",
     period: "/mês",
-    description: "3 empresas, IA + WhatsApp",
+    description: "3 contas, IA + WhatsApp",
     features: [
       "Tudo do Gratuito",
       "Categorização por IA",
@@ -36,7 +36,7 @@ const PLAN_DEFAULTS: Record<string, PlanInfo> = {
     description: "Ilimitado, API + Suporte VIP",
     features: [
       "Tudo do Pro",
-      "Empresas ilimitadas",
+      "Contas ilimitadas",
       "API de integração",
       "Suporte VIP",
       "Treinamento dedicado",
