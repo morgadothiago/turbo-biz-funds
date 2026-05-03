@@ -7,6 +7,8 @@ import {
   Bell,
   HelpCircle,
   Receipt,
+  Building,
+  BarChart2,
   LucideIcon,
   Menu,
 } from "lucide-react";
@@ -31,6 +33,7 @@ const mainMenuItems: MenuItem[] = [
   { title: "Clientes", url: "/admin/clientes", icon: Users },
   { title: "Assinaturas", url: "/admin/assinaturas", icon: Receipt },
   { title: "Planos", url: "/admin/planos", icon: CreditCard },
+  { title: "Relatórios", url: "/admin/relatorios", icon: BarChart2 },
 ];
 
 const systemMenuItems: MenuItem[] = [

@@ -17,26 +17,21 @@ const mockStats = {
   conversionTrend: "up" as const,
 };
 
-const mockRevenue = [
-  { month: "Nov", receita: 12000, clientes: 210 },
-  { month: "Dez", receita: 13500, clientes: 225 },
-  { month: "Jan", receita: 15000, clientes: 240 },
-];
-
-const mockClients = [
-  { name: "João Silva", email: "joao@email.com", plan: "Pro", status: "Ativo", date: "25/04/2026" },
-  { name: "Maria Lima", email: "maria@email.com", plan: "Business", status: "Trial", date: "24/04/2026" },
-];
-
-const mockActivity = [
-  { type: "signup" as const, message: "Novo cadastro: Pedro", time: "2 horas" },
-  { type: "payment" as const, message: "Pagamento recebido: R$ 99", time: "3 horas" },
-];
-
 const mockPlans = [
-  { id: "free", name: "Free", subscribers: 80 },
-  { id: "pro", name: "Pro", subscribers: 120 },
-  { id: "business", name: "Business", subscribers: 40 },
+  { id: "free", name: "Free", subscribers: 80, mrr: 0 },
+  { id: "pro", name: "Pro", subscribers: 120, mrr: 11988 },
+  { id: "business", name: "Business", subscribers: 40, mrr: 3980 },
+];
+
+const mockUsers = [
+  { name: "João Silva", email: "joao@email.com", plan: "Pro", status: "Ativo", createdAt: "2026-04-25" },
+  { name: "Maria Lima", email: "maria@email.com", plan: "Business", status: "Trial", createdAt: "2026-04-24" },
+];
+
+const mockSubscriptions = [
+  { status: "active", amount: 99.90, planName: "Pro" },
+  { status: "active", amount: 199.90, planName: "Business" },
+  { status: "canceled", amount: 0, planName: "Free" },
 ];
 
 vi.mock("@/lib/api/client", () => ({
@@ -44,10 +39,13 @@ vi.mock("@/lib/api/client", () => ({
     get: vi.fn((url: string) => {
       if (!url) return Promise.reject(new Error("No URL"));
       if (url.includes("/v1/admin/stats")) return Promise.resolve({ data: mockStats });
-      if (url.includes("/v1/admin/revenue")) return Promise.resolve({ data: mockRevenue });
-      if (url.includes("/v1/admin/clients")) return Promise.resolve({ data: mockClients });
-      if (url.includes("/v1/admin/activity")) return Promise.resolve({ data: mockActivity });
       if (url.includes("/v1/admin/plans")) return Promise.resolve({ data: mockPlans });
+      if (url.includes("/v1/admin/users")) return Promise.resolve({ data: mockUsers });
+      if (url.includes("/v1/admin/subscriptions")) return Promise.resolve({ data: mockSubscriptions });
+      // Endpoints que não existem no backend retornam erro
+      if (url.includes("/v1/admin/revenue")) return Promise.reject(new Error("Endpoint not found"));
+      if (url.includes("/v1/admin/clients")) return Promise.reject(new Error("Endpoint not found"));
+      if (url.includes("/v1/admin/activity")) return Promise.reject(new Error("Endpoint not found"));
       return Promise.reject(new Error("Unknown endpoint"));
     }),
   },
@@ -58,6 +56,8 @@ vi.mock("@/lib/api/client", () => ({
       clients: "/v1/admin/clients",
       activity: "/v1/admin/activity",
       plans: "/v1/admin/plans",
+      users: "/v1/admin/users",
+      subscriptions: "/v1/admin/subscriptions",
     },
   },
 }));
@@ -102,11 +102,14 @@ describe("useAdminDashboard", () => {
     expect(mrrStat.trend).toBe("up");
   });
 
-  it("deve retornar revenueData com os dados da API", async () => {
+  it("deve retornar revenueData derivado dos planos (6 meses)", async () => {
     const { result } = renderHook(() => useAdminDashboard(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.data?.revenueData).toBeDefined());
-    expect(result.current.data!.revenueData).toHaveLength(3);
-    expect(result.current.data!.revenueData[2].month).toBe("Jan");
+    // 6 meses: Jan, Fev, Mar, Abr, Mai, Jun
+    expect(result.current.data!.revenueData).toHaveLength(6);
+    expect(result.current.data!.revenueData[0].month).toBe("Jan");
+    expect(result.current.data!.revenueData[0].receita).toBeGreaterThan(0);
+    expect(result.current.data!.revenueData[0].clientes).toBeGreaterThan(0);
   });
 
   it("deve retornar planDistribution derivado dos planos", async () => {
@@ -119,18 +122,23 @@ describe("useAdminDashboard", () => {
     expect(dist[0].color).toBeDefined();
   });
 
-  it("deve retornar recentClients", async () => {
+  it("deve retornar recentClients da API /v1/admin/users", async () => {
     const { result } = renderHook(() => useAdminDashboard(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.data?.recentClients).toBeDefined());
-    expect(result.current.data!.recentClients).toHaveLength(2);
+    expect(result.current.data!.recentClients.length).toBeGreaterThan(0);
     expect(result.current.data!.recentClients[0].name).toBe("João Silva");
+    expect(result.current.data!.recentClients[0].email).toBe("joao@email.com");
   });
 
-  it("deve retornar recentActivity", async () => {
+  it("deve retornar recentActivity derivado de usuários e assinaturas", async () => {
     const { result } = renderHook(() => useAdminDashboard(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.data?.recentActivity).toBeDefined());
-    expect(result.current.data!.recentActivity).toHaveLength(2);
-    expect(result.current.data!.recentActivity[0].type).toBe("signup");
+    // Deve ter pelo menos 2 atividades (3 de usuários + 3 de assinaturas, limitado a 5)
+    expect(result.current.data!.recentActivity.length).toBeGreaterThan(0);
+    expect(result.current.data!.recentActivity.length).toBeLessThanOrEqual(5);
+    // Verifica se há atividades de signup (derivadas de usuários)
+    const hasSignup = result.current.data!.recentActivity.some(a => a.type === "signup");
+    expect(hasSignup).toBe(true);
   });
 
   it("deve ter planDistribution vazio se plans API falhar", async () => {

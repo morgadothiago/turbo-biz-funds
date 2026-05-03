@@ -1,10 +1,10 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { PlanLimitListener } from "@/components/upgrade/PlanLimitListener";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ui/theme-provider";
@@ -18,13 +18,18 @@ const Pagamento = lazy(() => import(/* webpackChunkName: "auth-pagamento" */ "./
 const PagamentoSucesso = lazy(() => import(/* webpackChunkName: "auth-pagamento-sucesso" */ "./pages/PagamentoSucesso"));
 const NotFound = lazy(() => import(/* webpackChunkName: "pages-notfound" */ "./pages/NotFound"));
 const UserDashboard = lazy(() => import(/* webpackChunkName: "dashboard-user" */ "./pages/UserDashboard"));
+const NotificationsPage = lazy(() => import(/* webpackChunkName: "pages-notifications" */ "./pages/Notifications"));
+const SupportPage = lazy(() => import(/* webpackChunkName: "pages-support" */ "./pages/Support"));
+const AdminNotificationsPage = lazy(() => import(/* webpackChunkName: "admin-notifications" */ "./pages/admin/AdminNotifications"));
+const AdminSettingsPage = lazy(() => import(/* webpackChunkName: "admin-settings" */ "./pages/admin/AdminSettings"));
+const AdminReportsPage = lazy(() => import(/* webpackChunkName: "admin-reports" */ "./pages/admin/AdminReports"));
+const AdminSupportPage = lazy(() => import(/* webpackChunkName: "admin-support" */ "./pages/admin/AdminSupport"));
 
 const UserLayout = lazy(() => import(/* webpackChunkName: "layout-user" */ "./layouts/UserLayout"));
 const AdminLayout = lazy(() => import(/* webpackChunkName: "layout-admin" */ "./layouts/AdminLayout"));
 const AdminDashboard = lazy(() => import(/* webpackChunkName: "dashboard-admin" */ "./pages/admin/AdminDashboard"));
 const AdminClients = lazy(() => import(/* webpackChunkName: "pages-admin-clients" */ "./pages/admin/AdminUsers"));
-const AdminCompanies = lazy(() => import(/* webpackChunkName: "pages-admin-companies" */ "./pages/admin/AdminCompanies"));
-const AdminPlans = lazy(() => import(/* webpackChunkName: "pages-admin-plans" */ "./pages/admin/AdminPlans"));
+  const AdminPlans = lazy(() => import(/* webpackChunkName: "pages-admin-plans" */ "./pages/admin/AdminPlans"));
 const AdminSubscriptions = lazy(() => import(/* webpackChunkName: "pages-admin-subscriptions" */ "./pages/admin/AdminSubscriptions"));
 
 const TransactionsPage = lazy(() => import(/* webpackChunkName: "pages-transactions" */ "./pages/Transactions"));
@@ -34,20 +39,6 @@ const CardsPage = lazy(() => import(/* webpackChunkName: "pages-cards" */ "./pag
 const WhatsAppPage = lazy(() => import(/* webpackChunkName: "pages-whatsapp" */ "./pages/WhatsApp"));
 const SettingsPage = lazy(() => import(/* webpackChunkName: "pages-settings" */ "./pages/Settings"));
 const RecorrenciasPage = lazy(() => import(/* webpackChunkName: "pages-recorrencias" */ "./pages/Recorrencias"));
-
-function createQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 5 * 60 * 1000,
-        gcTime: 10 * 60 * 1000,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: true,
-        retry: 1,
-      },
-    },
-  });
-}
 
 const PageLoading = () => (
   <div className="flex items-center justify-center py-12">
@@ -175,6 +166,8 @@ function AppRoutes() {
           <Route path="recorrencias" element={<RecorrenciasPage />} />
           <Route path="whatsapp" element={<WhatsAppPage />} />
           <Route path="configuracoes" element={<SettingsPage />} />
+          <Route path="notificacoes" element={<NotificationsPage />} />
+          <Route path="suporte" element={<SupportPage />} />
         </Route>
 
         <Route
@@ -187,9 +180,12 @@ function AppRoutes() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="clientes" element={<AdminClients />} />
-          <Route path="empresas" element={<AdminCompanies />} />
           <Route path="assinaturas" element={<AdminSubscriptions />} />
           <Route path="planos" element={<AdminPlans />} />
+          <Route path="configuracoes" element={<AdminSettingsPage />} />
+          <Route path="relatorios" element={<AdminReportsPage />} />
+          <Route path="notificacoes" element={<AdminNotificationsPage />} />
+          <Route path="suporte" element={<AdminSupportPage />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
@@ -198,23 +194,18 @@ function AppRoutes() {
   );
 }
 
-const AppShell = () => {
-  const [queryClient] = useState(createQueryClient);
-  return (
+const AppShell = () => (
   <ThemeProvider storageKey="doutorcash-theme">
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <OfflineBanner />
-          <PlanLimitListener />
-          <Toaster />
-          <Sonner />
-          <AppRoutes />
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <OfflineBanner />
+        <PlanLimitListener />
+        <Toaster />
+        <Sonner />
+        <AppRoutes />
+      </TooltipProvider>
+    </AuthProvider>
   </ThemeProvider>
-  );
-};
+);
 
 export default AppShell;
