@@ -1,4 +1,31 @@
 import { useState } from "react";
+
+// Função para formatar data em formato brasileiro
+function formatDateToBR(dateString: string): string {
+  if (!dateString) return "-";
+  
+  try {
+    // Se já estiver no formato brasileiro (dd/mm/aaaa), retorna direto
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Se for ISO string (2026-06-03T16:57:46.134Z)
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+    
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return dateString;
+  }
+}
+
 import {
   Search,
   Filter,
@@ -62,12 +89,23 @@ import { Label } from "@/components/ui/label";
 import { useAdminSubscriptions } from "@/features/admin/hooks/use-admin-subscriptions";
 
 const statusConfig = {
-  ativa: { label: "Ativa", color: "emerald", bg: "emerald-500/10", border: "emerald-200", icon: CheckCircle },
-  cancelada: { label: "Cancelada", color: "slate", bg: "slate-500/10", border: "slate-200", icon: XCircle },
-  trial: { label: "Trial", color: "blue", bg: "blue-500/10", border: "blue-200", icon: RefreshCw },
-  inativa: { label: "Inativa", color: "slate", bg: "slate-500/10", border: "slate-200", icon: Pause },
-  atrasada: { label: "Atrasada", color: "red", bg: "red-500/10", border: "red-200", icon: AlertCircle },
+  Ativo: { label: "Ativo", color: "emerald", bg: "emerald-500/10", border: "emerald-200", icon: CheckCircle },
+  Cancelado: { label: "Cancelado", color: "slate", bg: "slate-500/10", border: "slate-200", icon: XCircle },
+  Trial: { label: "Trial", color: "blue", bg: "blue-500/10", border: "blue-200", icon: RefreshCw },
+  Inativo: { label: "Inativo", color: "slate", bg: "slate-500/10", border: "slate-200", icon: Pause },
+  Inadimplente: { label: "Inadimplente", color: "red", bg: "red-500/10", border: "red-200", icon: AlertCircle },
 };
+
+// Normalizar status para fallback
+function getStatusConfig(status: string) {
+  return statusConfig[status as keyof typeof statusConfig] ?? {
+    label: status,
+    color: "slate",
+    bg: "slate-500/10",
+    border: "slate-200",
+    icon: AlertCircle,
+  };
+}
 
 export default function AdminSubscriptions() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -77,8 +115,8 @@ export default function AdminSubscriptions() {
   const { subscriptions, stats, isLoading, isError, error } = useAdminSubscriptions();
 
   const filteredSubscriptions = subscriptions.filter(sub => {
-    const matchesSearch = sub.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          sub.user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (sub.user?.name ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (sub.user?.email ?? "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPlan = selectedPlan === "all" || sub.plan === selectedPlan;
     const matchesStatus = selectedStatus === "all" || sub.status === selectedStatus;
     return matchesSearch && matchesPlan && matchesStatus;
@@ -177,30 +215,44 @@ export default function AdminSubscriptions() {
                   className="pl-9"
                 />
               </div>
-              <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Plano" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os planos</SelectItem>
-                  <SelectItem value="Free">Free</SelectItem>
-                  <SelectItem value="Pro">Pro</SelectItem>
-                  <SelectItem value="Business">Business</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="ativa">Ativa</SelectItem>
-                  <SelectItem value="trial">Trial</SelectItem>
-                  <SelectItem value="cancelada">Cancelada</SelectItem>
-                  <SelectItem value="atrasada">Atrasada</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+               <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                 <SelectTrigger className="w-[140px]">
+                   <SelectValue placeholder="Plano" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="all">Todos os planos</SelectItem>
+                   {/* Plantas dinâmicas baseadas nos dados da API */}
+                   {Array.from(new Set(subscriptions.map(s => s.plan))).map(plan => (
+                     <SelectItem key={plan} value={plan}>{plan}</SelectItem>
+                   ))}
+                 </SelectContent>
+               </Select>
+               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                 <SelectTrigger className="w-[140px]">
+                   <SelectValue placeholder="Status" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="all">Todos</SelectItem>
+                   {/* Status dinâmicos baseados no statusConfig */}
+                   {Object.keys(statusConfig).map(status => (
+                     <SelectItem key={status} value={status}>{statusConfig[status as keyof typeof statusConfig].label}</SelectItem>
+                   ))}
+                 </SelectContent>
+               </Select>
+               {(searchTerm || selectedPlan !== "all" || selectedStatus !== "all") && (
+                 <Button 
+                   variant="ghost" 
+                   size="sm"
+                   onClick={() => {
+                     setSearchTerm("");
+                     setSelectedPlan("all");
+                     setSelectedStatus("all");
+                   }}
+                 >
+                   Limpar filtros
+                 </Button>
+               )}
+             </div>
           </CardContent>
         </Card>
 
@@ -218,37 +270,28 @@ export default function AdminSubscriptions() {
             </TableHeader>
             <TableBody>
               {filteredSubscriptions.map((sub) => {
-                const status = statusConfig[sub.status as keyof typeof statusConfig];
+                const status = getStatusConfig(sub.status);
                 const StatusIcon = status.icon;
                 return (
                   <TableRow key={sub.id} className="border-muted/50 hover:bg-muted/30">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
-                            {sub.user.avatar}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium text-sm">{sub.user.name}</p>
-                          <p className="text-xs text-muted-foreground">{sub.user.email}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={
-                          sub.plan === "Business"
-                            ? "bg-violet-500/10 text-violet-600 border-violet-200"
-                            : sub.plan === "Pro"
-                            ? "bg-blue-500/10 text-blue-600 border-blue-200"
-                            : "bg-muted text-muted-foreground"
-                        }
-                      >
-                        {sub.plan}
-                      </Badge>
-                    </TableCell>
+                     <TableCell>
+                       <div className="flex items-center gap-3">
+                         <Avatar className="h-9 w-9">
+                           <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
+                             {sub.user?.avatar ?? "?"}
+                           </AvatarFallback>
+                         </Avatar>
+                         <div>
+                           <p className="font-medium text-sm">{sub.user?.name ?? "N/A"}</p>
+                           <p className="text-xs text-muted-foreground">{sub.user?.email ?? "N/A"}</p>
+                         </div>
+                       </div>
+                     </TableCell>
+                     <TableCell>
+                       <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                         {sub.plan}
+                       </Badge>
+                     </TableCell>
                     <TableCell>
                       <span className="font-medium">
                         {sub.amount > 0 ? `R$ ${sub.amount.toFixed(2)}` : "Gratuito"}
@@ -266,7 +309,7 @@ export default function AdminSubscriptions() {
                         {status.label}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{sub.nextBilling}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{formatDateToBR(sub.nextBilling)}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -290,13 +333,13 @@ export default function AdminSubscriptions() {
                             Renovar manualmente
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          {sub.status === "ativa" && (
+                          {sub.status === "Ativo" && (
                             <DropdownMenuItem className="text-amber-500">
                               <Pause className="h-4 w-4 mr-2" />
                               Pausar
                             </DropdownMenuItem>
                           )}
-                          {sub.status === "pausada" && (
+                          {sub.status === "Inativo" && (
                             <DropdownMenuItem>
                               <Play className="h-4 w-4 mr-2" />
                               Reativar

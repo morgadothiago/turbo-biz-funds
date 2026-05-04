@@ -89,7 +89,11 @@ export function useCreatePlan() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreatePlanPayload) =>
-      api.post(apiEndpoints.admin.plans, payload),
+      api.post(apiEndpoints.admin.plans, {
+        ...payload,
+        // Transformar features de {name, included}[] para string[] conforme Swagger
+        features: payload.features.map(feature => feature.name),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "plans"] });
     },

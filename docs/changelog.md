@@ -7,6 +7,12 @@ seguindo [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Fixed
+- Corrigido erro 422 no `POST /v1/admin/plans` (payload de `features` agora é `string[]` conforme Swagger)
+- Corrigido sistema de notificações admin:
+  - Hook `useAdminNotifications` agora retorna `isLoading` e `markRead` (marcar individual)
+  - Notificações persistem estado `read` via localStorage (`admin:notifications:seen`)
+  - Filtro de notificações limpas (`admin:notifications:cleared`) implementado
+  - Logs de erro adicionados para chamadas de API individuais
 - Corrigido erro `ReferenceError: FileBarChart is not defined` no AdminSidebar.tsx
   - Substituído ícone inexistente `FileBarChart` por `BarChart2` do lucide-react
   - Item "Relatórios" no menu admin agora renderiza corretamente
