@@ -350,9 +350,8 @@ function ChangePlanDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const updateUser = useUpdateAdminUser();
   const [plan, setPlan] = useState(user?.plan ?? "free");
-
+  const updateUser = useUpdateAdminUser();
   if (!user) return null;
 
   const handleSave = () => {
@@ -366,7 +365,7 @@ function ChangePlanDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose} onCloseAutoFocus={(e) => e.preventDefault()}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Alterar Plano</DialogTitle>
@@ -409,7 +408,6 @@ function ChangeRoleDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const [adminPassword, setAdminPassword] = useState("");
   const updateUser = useUpdateAdminUser();
   if (!user) return null;
   const isAdmin = user.role === "admin";
@@ -417,29 +415,44 @@ function ChangeRoleDialog({
   const isPromoting = !isAdmin;
 
   const handleConfirm = () => {
-    if (isPromoting && !adminPassword) {
-      toast.error("Digite a senha administrativa");
-      return;
-    }
-    updateUser.mutate(
-      { id: user.id, role: newRole, adminPassword: isPromoting ? adminPassword : undefined },
-      {
+    // Payload sem adminPassword - o backend não precisa
+    const payload = { 
+      id: user.id, 
+      role: newRole
+    };
+    
+    updateUser.mutate(payload, {
         onSuccess: () => {
           toast.success(isAdmin ? "Acesso admin removido" : "Usuário promovido a admin");
-          setAdminPassword("");
           onClose();
         },
         onError: (error: unknown) => {
-          const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "";
-          toast.error(msg || "Erro ao alterar papel");
-          setAdminPassword("");
+          // Extrair mensagem de erro
+          const axiosError = error as { 
+            response?: { 
+              data?: unknown; 
+              status?: number;
+            }; 
+          };
+          const status = axiosError.response?.status;
+          const data = axiosError.response?.data;
+          const msg = typeof data === 'object' && data !== null && 'message' in data 
+            ? String((data as { message: string }).message) 
+            : "";
+          
+          // Se for 422 ou 404, provavelmente o endpoint não está implementado no backend
+          if (status === 422 || status === 404) {
+            toast.error("Funcionalidade em desenvolvimento. O endpoint de atualização de usuários ainda não está disponível no backend.");
+          } else {
+            toast.error(msg || "Erro ao alterar papel");
+          }
         },
       }
     );
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={(open) => { if (!open) setAdminPassword(""); onClose(); }}>
+    <AlertDialog open={open} onOpenChange={onClose} onCloseAutoFocus={(e) => e.preventDefault()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -451,24 +464,11 @@ function ChangeRoleDialog({
               : `${user.name} terá acesso total ao painel administrativo. Certifique-se de que isso é intencional.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {isPromoting && (
-          <div className="space-y-2 py-2">
-            <Label htmlFor="admin-password">Senha Administrativa</Label>
-            <Input
-              id="admin-password"
-              type="password"
-              placeholder="Digite sua senha administrativa"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleConfirm(); }}
-            />
-          </div>
-        )}
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setAdminPassword("")}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={updateUser.isPending || (isPromoting && !adminPassword)}
+            disabled={updateUser.isPending}
             className={!isAdmin ? "bg-orange-600 hover:bg-orange-700" : ""}
           >
             {updateUser.isPending ? "Aplicando..." : isAdmin ? "Remover admin" : "Confirmar promoção"}
@@ -492,8 +492,9 @@ function ChangeStatusDialog({
 }) {
   const updateUser = useUpdateAdminUser();
   if (!user) return null;
-  const isBlocked = user.status === "Bloqueado" || user.status === "suspended";
-  const newStatus = isBlocked ? "Ativo" : "Bloqueado";
+  const isBlocked = user.status === "Bloqueado" || user.status === "suspended" || user.status === "blocked";
+  // O backend pode aceitar tanto "blocked" quanto "Bloqueado", vamos usar "active" e "blocked"
+  const newStatus = isBlocked ? "active" : "blocked";
 
   const handleConfirm = () => {
     updateUser.mutate(
@@ -509,7 +510,7 @@ function ChangeStatusDialog({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onClose}>
+    <AlertDialog open={open} onOpenChange={onClose} onCloseAutoFocus={(e) => e.preventDefault()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -558,7 +559,7 @@ function DeleteUserDialog({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onClose}>
+    <AlertDialog open={open} onOpenChange={onClose} onCloseAutoFocus={(e) => e.preventDefault()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Excluir usuário permanentemente?</AlertDialogTitle>
@@ -635,11 +636,19 @@ export default function AdminUsers() {
     user: AdminUser,
     action: "plan" | "status" | "role" | "delete"
   ) => {
+    // Fechar todos os diálogos primeiro para evitar conflito de estados
+    setPlanDialogOpen(false);
+    setStatusDialogOpen(false);
+    setRoleDialogOpen(false);
+    setDeleteDialogOpen(false);
     setActionUser(user);
-    if (action === "plan") setPlanDialogOpen(true);
-    if (action === "status") setStatusDialogOpen(true);
-    if (action === "role") setRoleDialogOpen(true);
-    if (action === "delete") setDeleteDialogOpen(true);
+    // Pequeno delay para garantir que os diálogos fecham antes de abrir novo
+    setTimeout(() => {
+      if (action === "plan") setPlanDialogOpen(true);
+      if (action === "status") setStatusDialogOpen(true);
+      if (action === "role") setRoleDialogOpen(true);
+      if (action === "delete") setDeleteDialogOpen(true);
+    }, 10);
   };
 
   if (isError) {

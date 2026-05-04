@@ -13,15 +13,6 @@ export interface AdminNotification extends AdminActivityItem {
   read: boolean;
 }
 
-function buildId(item: AdminActivityItem, index: number): string {
-  return `${item.type}::${item.message}::${index}`;
-}
-
-// Para detecção de "novo": ignora índice, compara só tipo+mensagem+tempo
-function buildSeenKey(item: AdminActivityItem): string {
-  return `${item.type}::${item.message}::${item.time}`;
-}
-
 function getSeenIds(): Set<string> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -57,7 +48,7 @@ function saveClearedKeys(keys: Set<string>) {
 }
 
 const ACTIVITY_ICONS: Record<string, string> = {
-  signup:  "👤",
+  signup: "👤",
   payment: "💳",
   upgrade: "⬆️",
   support: "🎧",
@@ -71,9 +62,77 @@ function toastForItem(item: AdminActivityItem) {
   });
 }
 
+// Helper to extract data from API response
+function extractData<T>(response: any): T | null {
+  if (!response) return null;
+  return (response.data ?? response) as T;
+}
+
 async function fetchActivity(): Promise<AdminNotification[]> {
-  // Endpoint /v1/admin/activity não existe no backend ainda
-  return [];
+  try {
+    const [usersRes, subsRes] = await Promise.allSettled([
+      api.get(`${apiEndpoints.admin.users}?limit=10`),
+      api.get(apiEndpoints.admin.subscriptions),
+    ]);
+
+    // Log individual API errors for debugging
+    if (usersRes.status === 'rejected') {
+      console.error('[useAdminNotifications] Users API failed:', usersRes.reason);
+    }
+    if (subsRes.status === 'rejected') {
+      console.error('[useAdminNotifications] Subscriptions API failed:', subsRes.reason);
+    }
+
+    const notifications: AdminNotification[] = [];
+    let idx = 0;
+
+    // Load seen and cleared IDs from localStorage
+    const seenIds = getSeenIds();
+    const clearedIds = getClearedKeys();
+
+    // 1. New signups from users endpoint
+    const usersData = extractData<any[]>(usersRes.status === 'fulfilled' ? usersRes.value : null);
+    const users: any[] = usersData ?? [];
+    
+    users.slice(0, 5).forEach((u: any) => {
+      const id = `signup::${u.id ?? u.email}::${idx++}`;
+      // Skip cleared notifications
+      if (clearedIds.has(id)) return;
+      notifications.push({
+        id,
+        type: "signup",
+        message: `Novo cadastro: ${u.name || u.email || "Usuário"}`,
+        time: "Recentemente",
+        read: seenIds.has(id), // Mark as read if seen
+      });
+    });
+
+    // 2. Payments from subscriptions (active status, paid plans)
+    const subsData = extractData<any[]>(subsRes.status === 'fulfilled' ? subsRes.value : null);
+    const subscriptions: any[] = subsData ?? [];
+    
+    subscriptions
+      .filter((sub: any) => sub.status === "active" && sub.planName && sub.planName.toLowerCase() !== "free")
+      .slice(0, 5)
+      .forEach((sub: any) => {
+        const id = `payment::${sub.id ?? idx}::${idx++}`;
+        // Skip cleared notifications
+        if (clearedIds.has(id)) return;
+        notifications.push({
+          id,
+          type: "payment",
+          message: `Pagamento recebido: R$ ${sub.amount || 0} - ${sub.planName || "Plano"}`,
+          time: "Recentemente",
+          read: seenIds.has(id), // Mark as read if seen
+        });
+      });
+
+    console.log("[useAdminNotifications] fetched:", notifications.length, "notifications (seen:", seenIds.size, "cleared:", clearedIds.size, ")");
+    return notifications;
+  } catch (error) {
+    console.error("[useAdminNotifications] Error:", error);
+    return [];
+  }
 }
 
 export function useAdminNotifications() {
@@ -81,24 +140,24 @@ export function useAdminNotifications() {
   const prevIdsRef = useRef<Set<string>>(new Set());
   const initialLoadRef = useRef(true);
 
-  const { data: notifications = [] } = useQuery({
+  const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["admin", "notifications"],
     queryFn: fetchActivity,
     refetchInterval: POLL_INTERVAL,
     staleTime: 0,
   });
 
-  // Detect new items after initial load using seenKeys (type::message::time)
+  // Detect new items after initial load
   useEffect(() => {
     if (notifications.length === 0) return;
 
     if (initialLoadRef.current) {
       initialLoadRef.current = false;
-      prevIdsRef.current = new Set(notifications.map((n) => buildSeenKey(n)));
+      prevIdsRef.current = new Set(notifications.map((n) => n.id));
       return;
     }
 
-    const newItems = notifications.filter((n) => !prevIdsRef.current.has(buildSeenKey(n)));
+    const newItems = notifications.filter((n) => !prevIdsRef.current.has(n.id));
     if (newItems.length === 0) return;
 
     newItems.slice(0, 3).forEach(toastForItem);
@@ -106,13 +165,23 @@ export function useAdminNotifications() {
       toast(`+${newItems.length - 3} outras notificações`, { duration: 4000 });
     }
 
-    prevIdsRef.current = new Set(notifications.map((n) => buildSeenKey(n)));
+    prevIdsRef.current = new Set(notifications.map((n) => n.id));
   }, [notifications]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const markRead = useCallback((id: string) => {
+    const seenIds = getSeenIds();
+    seenIds.add(id);
+    saveSeenIds(seenIds);
+    queryClient.setQueryData<AdminNotification[]>(
+      ["admin", "notifications"],
+      (prev) => (prev ?? []).map((n) => n.id === id ? { ...n, read: true } : n)
+    );
+  }, [queryClient]);
+
   const markAllRead = useCallback(() => {
-    const allSeenKeys = new Set(notifications.map((n) => buildSeenKey(n)));
+    const allSeenKeys = new Set(notifications.map((n) => n.id));
     saveSeenIds(allSeenKeys);
     queryClient.setQueryData<AdminNotification[]>(
       ["admin", "notifications"],
@@ -121,15 +190,15 @@ export function useAdminNotifications() {
   }, [notifications, queryClient]);
 
   const clearAll = useCallback(() => {
-    const allKeys = new Set(notifications.map((n) => buildSeenKey(n)));
-    // merge com cleared existente para não perder limpezas anteriores
+    const allKeys = new Set(notifications.map((n) => n.id));
+    // merge with cleared existing
     const existing = getClearedKeys();
     allKeys.forEach((k) => existing.add(k));
     saveClearedKeys(existing);
-    // também marca como lidas no localStorage
-    saveSeenIds(new Set(notifications.map((n) => buildSeenKey(n))));
+    // also mark as read in localStorage
+    saveSeenIds(new Set(notifications.map((n) => n.id)));
     queryClient.setQueryData<AdminNotification[]>(["admin", "notifications"], []);
   }, [notifications, queryClient]);
 
-  return { notifications, unreadCount, markAllRead, clearAll };
+  return { notifications, isLoading, unreadCount, markRead, markAllRead, clearAll };
 }

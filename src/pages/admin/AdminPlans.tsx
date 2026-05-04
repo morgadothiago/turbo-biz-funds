@@ -56,6 +56,13 @@ import {
   type CreatePlanPayload,
 } from "@/features/admin/hooks/use-admin-plans";
 import { toast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const statusColors: Record<string, string> = {
   Ativo: "bg-success/10 text-success",
@@ -68,6 +75,7 @@ export default function AdminPlans() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   const { plans, subscriptions, isLoading, isError, error } = useAdminPlans();
   const createPlan = useCreatePlan();
@@ -82,12 +90,14 @@ export default function AdminPlans() {
     features: [],
     popular: false,
   });
+  const [newFeatureInput, setNewFeatureInput] = useState("");
 
   const [editPlanData, setEditPlanData] = useState<Partial<CreatePlanPayload>>({});
+  const [editFeatureInput, setEditFeatureInput] = useState("");
 
   const selectedPlan = plans.find((p) => p.id === editingPlanId) ?? null;
-  const totalMRR = plans.reduce((sum, plan) => sum + plan.mrr, 0);
-  const totalSubscribers = plans.reduce((sum, plan) => sum + plan.subscribers, 0);
+  const totalMRR = plans.reduce((sum, plan) => sum + (plan.mrr ?? 0), 0);
+  const totalSubscribers = plans.reduce((sum, plan) => sum + (plan.subscribers ?? 0), 0);
 
   const openEditDialog = (planId: string) => {
     const plan = plans.find((p) => p.id === planId);
@@ -100,9 +110,55 @@ export default function AdminPlans() {
         features: plan.features,
         popular: plan.popular,
       });
+      setEditFeatureInput("");
     }
     setEditingPlanId(planId);
     setIsEditDialogOpen(true);
+  };
+
+  const handleEditAddFeature = () => {
+    if (!editFeatureInput.trim()) return;
+    const currentFeatures = editPlanData.features ?? [];
+    const newFeatures = typeof currentFeatures[0] === 'string' 
+      ? [...currentFeatures, editFeatureInput.trim()]
+      : [...currentFeatures.map((f: any) => f.name), editFeatureInput.trim()];
+    setEditPlanData({ ...editPlanData, features: newFeatures as any });
+    setEditFeatureInput("");
+  };
+
+  const handleEditRemoveFeature = (index: number) => {
+    const currentFeatures = editPlanData.features ?? [];
+    const newFeatures = currentFeatures.filter((_: any, i: number) => i !== index);
+    setEditPlanData({ ...editPlanData, features: newFeatures as any });
+  };
+
+  const getApiErrorMessage = (error: unknown, fallback: string) => {
+    if (error && typeof error === "object") {
+      // Erro do axios com response
+      if ("response" in error) {
+        const response = (error as { response?: { data?: unknown } }).response;
+        if (response?.data) {
+          const data = response.data;
+          // Se for um objeto com message
+          if (typeof data === "object" && "message" in data) {
+            return String((data as { message: string }).message);
+          }
+          // Se for string
+          if (typeof data === "string") {
+            return data;
+          }
+          // Se for array de erros (common em 422)
+          if (Array.isArray(data)) {
+            return data.map((e: any) => e.message || e).join(", ");
+          }
+        }
+      }
+      // Erro direto com message
+      if ("message" in error) {
+        return String((error as { message: string }).message);
+      }
+    }
+    return fallback;
   };
 
   const handleCreatePlan = () => {
@@ -110,34 +166,173 @@ export default function AdminPlans() {
       toast({ title: "Preencha os campos obrigatórios", variant: "destructive" });
       return;
     }
-    createPlan.mutate(newPlan as CreatePlanPayload, {
+// Converter features para formato que o Swagger espera: { name, included }[]
+    const featuresList = (newPlan.features ?? []).map((f: any) => {
+      if (typeof f === 'object' && f !== null && 'name' in f) {
+        return f;
+      }
+      return { name: String(f), included: true };
+    });
+
+    // Se não tiver features, adicionar uma padrão
+    if (featuresList.length === 0) {
+      featuresList.push({ name: "Funcionalidade básica", included: true });
+    }
+
+    // Payload direto conforme documentação do backend (sem wrapper "data")
+    const payload = {
+      name: newPlan.name,
+      description: newPlan.description,
+      price: newPlan.price,
+      billingPeriod: newPlan.billingPeriod === "MONTHLY" ? "mês" : newPlan.billingPeriod === "YEARLY" ? "ano" : newPlan.billingPeriod,
+      features: featuresList,
+      popular: newPlan.popular ?? false,
+    };
+    
+    createPlan.mutate(payload as CreatePlanPayload, {
       onSuccess: () => {
         toast({ title: "Plano criado com sucesso" });
         setIsCreateDialogOpen(false);
         setNewPlan({ name: "", description: "", price: 0, billingPeriod: "mês", features: [], popular: false });
+        setNewFeatureInput("");
       },
-      onError: () => toast({ title: "Erro ao criar plano", variant: "destructive" }),
+      onError: (err: unknown) => {
+        // Tentar extrair detalhes do erro
+        let errorDetails = "Verifique os dados e tente novamente";
+        if (err && typeof err === "object") {
+          const axiosErr = err as { 
+            response?: { 
+              data?: unknown; 
+              status?: number;
+              statusText?: string;
+              headers?: unknown;
+            }; 
+          };
+          if (axiosErr.response) {
+            // Tentar obter detalhes específicos
+            const data = axiosErr.response.data as any;
+            if (data && typeof data === 'object') {
+              if (data.errors) {
+                errorDetails = `Erros: ${JSON.stringify(data.errors)}`;
+              } else if (data.message) {
+                errorDetails = data.message;
+              } else if (Array.isArray(data)) {
+                errorDetails = data.join(', ');
+              }
+            } else {
+              errorDetails = `Status: ${axiosErr.response.status} - ${axiosErr.response.statusText}`;
+            }
+          }
+        }
+        toast({
+          title: "Erro ao criar plano",
+          description: errorDetails,
+          variant: "destructive",
+        });
+      },
     });
+  };
+
+  const handleAddFeature = () => {
+    if (!newFeatureInput.trim()) return;
+    const currentFeatures = newPlan.features ?? [];
+    const newFeatures = typeof currentFeatures[0] === 'string' 
+      ? [...currentFeatures, newFeatureInput.trim()]
+      : [...currentFeatures.map((f: any) => f.name), newFeatureInput.trim()];
+    setNewPlan({ ...newPlan, features: newFeatures as any });
+    setNewFeatureInput("");
+  };
+
+  const handleRemoveFeature = (index: number) => {
+    const currentFeatures = newPlan.features ?? [];
+    const newFeatures = currentFeatures.filter((_: any, i: number) => i !== index);
+    setNewPlan({ ...newPlan, features: newFeatures as any });
   };
 
   const handleUpdatePlan = () => {
     if (!editingPlanId) return;
+    
+    // Converter features para formato que o Swagger espera: { name, included }[]
+    const featuresList = (editPlanData.features ?? []).map((f: any) => {
+      if (typeof f === 'object' && f !== null && 'name' in f) {
+        return f;
+      }
+      return { name: String(f), included: true };
+    });
+
+    // Se não tiver features, manter vazio ou padrão
+    const features = featuresList.length > 0 ? featuresList : [];
+
+    const payload = {
+      ...editPlanData,
+      features,
+      // billingPeriod em formato texto
+      billingPeriod: editPlanData.billingPeriod === "MONTHLY" ? "mês" : editPlanData.billingPeriod === "YEARLY" ? "ano" : editPlanData.billingPeriod,
+    };
+
     updatePlan.mutate(
-      { id: editingPlanId, ...editPlanData } as CreatePlanPayload & { id: string },
+      { id: editingPlanId, ...payload },
       {
         onSuccess: () => {
           toast({ title: "Plano atualizado com sucesso" });
           setIsEditDialogOpen(false);
         },
-        onError: () => toast({ title: "Erro ao atualizar plano", variant: "destructive" }),
+        onError: (err: unknown) => {
+          let errorDetails = "Tente novamente";
+          if (err && typeof err === "object") {
+            const axiosErr = err as { 
+              response?: { 
+                data?: unknown; 
+                status?: number;
+                statusText?: string;
+              }; 
+            };
+            if (axiosErr.response) {
+              errorDetails = `Status: ${axiosErr.response.status} - ${JSON.stringify(axiosErr.response.data)}`;
+            }
+          }
+          
+          toast({
+            title: "Erro ao atualizar plano",
+            description: errorDetails,
+            variant: "destructive",
+          });
+        },
       }
     );
   };
 
   const handleDeletePlan = (planId: string) => {
+    if (!planId) {
+      toast({ title: "ID do plano inválido", variant: "destructive" });
+      return;
+    }
     deletePlan.mutate(planId, {
-      onSuccess: () => toast({ title: "Plano desativado com sucesso" }),
-      onError: () => toast({ title: "Erro ao desativar plano", variant: "destructive" }),
+      onSuccess: () => {
+        toast({ title: "Plano desativado com sucesso" });
+      },
+      onError: (err: unknown) => {
+        // Tentar extrair detalhes do erro
+        let errorDetails = "O plano não pôde ser removido";
+        if (err && typeof err === "object") {
+          const axiosErr = err as { 
+            response?: { 
+              data?: unknown; 
+              status?: number;
+              statusText?: string;
+            }; 
+          };
+          if (axiosErr.response) {
+            errorDetails = `Status: ${axiosErr.response.status} - ${JSON.stringify(axiosErr.response.data)}`;
+          }
+        }
+        
+        toast({
+          title: "Erro ao desativar plano",
+          description: errorDetails,
+          variant: "destructive",
+        });
+      },
     });
   };
 
@@ -220,8 +415,8 @@ export default function AdminPlans() {
             {/* Plan Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {plans.map((plan) => {
-                const PlanIcon = getAdminPlanIcon(plan.id);
-                const planColor = getAdminPlanColor(plan.id);
+                const PlanIcon = getAdminPlanIcon(plan.name.toLowerCase());
+                const planColor = getAdminPlanColor(plan.name.toLowerCase());
                 return (
                 <Card key={plan.id} className={`relative ${plan.popular ? 'border-primary shadow-lg' : ''}`}>
                   {plan.popular && (
@@ -234,20 +429,26 @@ export default function AdminPlans() {
                       <div className={`p-3 rounded-xl ${planColor}`}>
                         <PlanIcon className="h-6 w-6" />
                       </div>
-                      <DropdownMenu>
+                      <DropdownMenu open={openDropdownId === plan.id} onOpenChange={(open) => {
+                          if (open) {
+                            setOpenDropdownId(plan.id);
+                          } else {
+                            setOpenDropdownId(null);
+                          }
+                        }}>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" onClick={() => setOpenDropdownId(openDropdownId === plan.id ? null : plan.id)}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditDialog(plan.id)}>
+                        <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+                          <DropdownMenuItem onClick={() => { openEditDialog(plan.id); setOpenDropdownId(null); }}>
                             <Edit className="h-4 w-4 mr-2" />
                             Editar plano
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive"
-                            onClick={() => handleDeletePlan(plan.id)}
+                            onClick={() => { handleDeletePlan(plan.id); setOpenDropdownId(null); }}
                             disabled={deletePlan.isPending}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
@@ -265,7 +466,9 @@ export default function AdminPlans() {
                         {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}`}
                       </span>
                       {plan.price > 0 && (
-                        <span className="text-muted-foreground">/{plan.billingPeriod}</span>
+                        <span className="text-muted-foreground">
+                          /{plan.billingPeriod === 'YEARLY' ? 'ano' : 'mês'}
+                        </span>
                       )}
                     </div>
 
@@ -281,18 +484,15 @@ export default function AdminPlans() {
                     </div>
 
                     <div className="space-y-3">
-                      {plan.features.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-3">
-                          {feature.included ? (
+                      {plan.features.map((feature, index) => {
+                        const featureName = typeof feature === 'string' ? feature : feature.name;
+                        return (
+                          <div key={index} className="flex items-center gap-3">
                             <Check className="h-4 w-4 text-success shrink-0" />
-                          ) : (
-                            <X className="h-4 w-4 text-muted-foreground shrink-0" />
-                          )}
-                          <span className={`text-sm ${!feature.included ? 'text-muted-foreground' : ''}`}>
-                            {feature.name}
-                          </span>
-                        </div>
-                      ))}
+                            <span className="text-sm">{featureName}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </CardContent>
                 </Card>
@@ -347,13 +547,52 @@ export default function AdminPlans() {
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="plan-period">Período</Label>
-                        <Input
-                          id="plan-period"
-                          placeholder="mês"
-                          value={newPlan.billingPeriod}
-                          onChange={(e) => setNewPlan({ ...newPlan, billingPeriod: e.target.value })}
-                        />
+                        <Select 
+                          value={newPlan.billingPeriod} 
+                          onValueChange={(value) => setNewPlan({ ...newPlan, billingPeriod: value })}
+                        >
+                          <SelectTrigger id="plan-period">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mês">Mensal</SelectItem>
+                            <SelectItem value="semestre">Semestral</SelectItem>
+                            <SelectItem value="ano">Anual</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Funcionalidades do Plano</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Ex: Relatórios avançados"
+                          value={newFeatureInput}
+                          onChange={(e) => setNewFeatureInput(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddFeature())}
+                        />
+                        <Button type="button" variant="outline" onClick={handleAddFeature}>
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {newPlan.features && newPlan.features.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {newPlan.features.map((feature: any, index: number) => (
+                            <Badge key={index} variant="secondary" className="pl-2 pr-1 py-1">
+                              {typeof feature === 'string' ? feature : feature.name}
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+                                onClick={() => handleRemoveFeature(index)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="plan-popular">Plano popular</Label>
@@ -471,12 +710,52 @@ export default function AdminPlans() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="edit-period">Período</Label>
-                    <Input
-                      id="edit-period"
-                      value={editPlanData.billingPeriod ?? selectedPlan.billingPeriod}
-                      onChange={(e) => setEditPlanData({ ...editPlanData, billingPeriod: e.target.value })}
-                    />
+                    <Select 
+                      value={editPlanData.billingPeriod ?? selectedPlan.billingPeriod} 
+                      onValueChange={(value) => setEditPlanData({ ...editPlanData, billingPeriod: value })}
+                    >
+                      <SelectTrigger id="edit-period">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="mês">Mensal</SelectItem>
+                        <SelectItem value="semestre">Semestral</SelectItem>
+                        <SelectItem value="ano">Anual</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Funcionalidades do Plano</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Ex: Relatórios avançados"
+                      value={editFeatureInput}
+                      onChange={(e) => setEditFeatureInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleEditAddFeature())}
+                    />
+                    <Button type="button" variant="outline" onClick={handleEditAddFeature}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {editPlanData.features && editPlanData.features.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {editPlanData.features.map((feature: any, index: number) => (
+                        <Badge key={index} variant="secondary" className="pl-2 pr-1 py-1">
+                          {typeof feature === 'string' ? feature : feature.name}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+                            onClick={() => handleEditRemoveFeature(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="edit-popular">Plano popular</Label>
