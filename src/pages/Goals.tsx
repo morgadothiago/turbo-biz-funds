@@ -85,6 +85,7 @@ const GoalsPage = memo(() => {
           setIsDialogOpen(false);
           setForm({ name: "", target: "", current: "0", deadline: "", category: "", color: GOAL_COLORS[0], icon: GOAL_ICONS[0] });
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (error: any) => {
           console.error("[Goals] Erro ao criar meta:", error);
           // Se for 422, mostra mensagem de validação

@@ -77,7 +77,7 @@ describe("useAdminSubscriptions", () => {
     expect(first.id).toBe("s1");
     expect(first.user.name).toBe("Clara Mendes");
     expect(first.plan).toBe("Pro");
-    expect(first.status).toBe("ativa");
+    expect(first.status).toBe("Ativo");
   });
 
   it("deve retornar stats corretas", async () => {

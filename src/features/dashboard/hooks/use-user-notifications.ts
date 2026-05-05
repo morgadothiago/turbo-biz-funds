@@ -42,6 +42,7 @@ async function fetchSubscription(): Promise<SubscriptionResponse | null> {
     // Tenta endpoint alternativo ou retorna null se não existir
     const res = await api.get<SubscriptionResponse>("/v1/subscriptions/me");
     return res as unknown as SubscriptionResponse;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // Se for 404 (endpoint não existe) ou 500, retorna null silenciosamente
     if (error?.status === 404 || error?.status === 500) {
