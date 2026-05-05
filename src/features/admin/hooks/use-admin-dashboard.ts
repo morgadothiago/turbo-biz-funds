@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import { useQuery } from "@tanstack/react-query";
 import { api, apiEndpoints } from "@/lib/api/client";
 import {
@@ -36,6 +35,7 @@ export interface AdminRecentClient {
   email: string;
   plan: string;
   status: string;
+  role: string;
   date: string;
 }
 
@@ -159,7 +159,8 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
       name: u.name || u.email || "Usuário",
       email: u.email || "",
       plan: u.plan || "free",
-      status: u.status || "active",
+      status: u.status === "blocked" ? "Bloqueado" : u.status === "active" ? "Ativo" : u.status || "Pendente",
+      role: u.role || "user",
       date: u.createdAt || u.lastLoginAt || "",
     }));
 

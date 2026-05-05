@@ -15,6 +15,8 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   "/dashboard/cartoes": { title: "Cartões", subtitle: "Seus cartões de crédito" },
   "/dashboard/whatsapp": { title: "WhatsApp", subtitle: "Integração via mensagem" },
   "/dashboard/configuracoes": { title: "Configurações", subtitle: "Sua conta" },
+  "/dashboard/notificacoes": { title: "Notificações", subtitle: "Central de avisos" },
+  "/dashboard/suporte": { title: "Suporte", subtitle: "Ajuda e contato" },
 };
 
 function Header() {

@@ -146,6 +146,7 @@ export default defineConfig(({ mode }) => ({
       'recharts',
       'framer-motion',
       'lucide-react',
+      '@radix-ui/react-dropdown-menu',
     ],
     exclude: ['@radix-ui/react-dialog'],
   },

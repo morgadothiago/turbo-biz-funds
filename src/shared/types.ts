@@ -69,7 +69,7 @@ export interface CreditCard {
 export interface PlanInfo {
   id: string;
   name: string;
-  price: string;
+  price: string | number;
   period: string;
   description: string;
   features: string[];

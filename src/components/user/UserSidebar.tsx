@@ -10,6 +10,8 @@ import {
   RefreshCw,
   LucideIcon,
   Menu,
+  Bell,
+  HelpCircle,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -38,6 +40,8 @@ const mainMenuItems: MenuItem[] = [
 
 const integrationItems: MenuItem[] = [
   { title: "WhatsApp", url: "/dashboard/whatsapp", icon: MessageCircle, whatsapp: true },
+  { title: "Notificações", url: "/dashboard/notificacoes", icon: Bell },
+  { title: "Suporte", url: "/dashboard/suporte", icon: HelpCircle },
   { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, apiEndpoints } from "@/lib/api/client";
 import { Sparkles, Zap, Crown } from "lucide-react";
@@ -54,9 +55,36 @@ export function getAdminPlanColor(planId: string) {
   return PLAN_COLOR_MAP[planId.toLowerCase()] ?? "bg-muted";
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function resolveId(p: any): string {
+  // Prefer real UUID fields over slug-like ids
+  const candidates = [p.id, p.uuid, p._id, p.planId];
+  return candidates.find((c) => typeof c === "string" && UUID_RE.test(c)) ?? p.id ?? "";
+}
+
 async function fetchAdminPlans(): Promise<ApiAdminPlansResponse> {
-  const res = await api.get<ApiAdminPlansResponse>(apiEndpoints.admin.plans);
-  return res;
+  const res = await api.get<ApiAdminPlansResponse | AdminPlan[]>(apiEndpoints.admin.plans);
+  // API may return a flat array or { data: [], subscriptions: [] }
+  const raw: any[] = Array.isArray(res) ? res : ((res as any)?.data ?? []);
+  console.log("[fetchAdminPlans] raw response sample:", raw[0]);
+  const plans: AdminPlan[] = raw.map((p: any) => ({
+    ...p,
+    id: resolveId(p),
+    subscribers: p.subscribers ?? 0,
+    mrr: p.mrr ?? 0,
+    description: p.description ?? "",
+    billingPeriod: p.billingPeriod ?? "mês",
+    features: Array.isArray(p.features)
+      ? p.features.map((f: any) =>
+          typeof f === "string" ? { name: f, included: true } : f
+        )
+      : [],
+  }));
+  const subscriptions: AdminPlanSubscription[] = Array.isArray(res)
+    ? []
+    : ((res as any)?.subscriptions ?? []);
+  return { data: plans, subscriptions };
 }
 
 export function useAdminPlans() {
@@ -88,12 +116,10 @@ export interface CreatePlanPayload {
 export function useCreatePlan() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreatePlanPayload) =>
-      api.post(apiEndpoints.admin.plans, {
-        ...payload,
-        // Transformar features de {name, included}[] para string[] conforme Swagger
-        features: payload.features.map(feature => feature.name),
-      }),
+    mutationFn: (payload: CreatePlanPayload) => {
+      console.log("[useCreatePlan] payload:", JSON.stringify(payload, null, 2));
+      return api.post(apiEndpoints.admin.plans, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "plans"] });
     },
@@ -104,7 +130,7 @@ export function useUpdatePlan() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...payload }: CreatePlanPayload & { id: string }) =>
-      api.patch(`${apiEndpoints.admin.plans}/${id}`, payload),
+      api.patch(apiEndpoints.admin.plan(id), payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "plans"] });
     },
@@ -114,8 +140,10 @@ export function useUpdatePlan() {
 export function useDeletePlan() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      api.delete(`${apiEndpoints.admin.plans}/${id}`),
+    mutationFn: (id: string) => {
+      if (!id) return Promise.reject(new Error("ID do plano inválido"));
+      return api.delete(apiEndpoints.admin.plan(id));
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "plans"] });
     },

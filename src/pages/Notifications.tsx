@@ -1,22 +1,35 @@
-import { 
-  Bell, CheckCheck, Trash2, Info, AlertTriangle, AlertCircle, CheckCircle 
-} from "lucide-react";
+import { useCallback } from "react";
+import { Bell, CheckCheck, Trash2, Info, AlertTriangle, AlertCircle, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { useAdminNotifications, type AdminNotification } from "@/features/admin/hooks/use-admin-notifications";
+import { useUserNotifications } from "@/features/dashboard/hooks/use-user-notifications";
+import { useAuth } from "@/contexts/AuthContext";
 
 const severityConfig = {
-  signup: { icon: Info, color: "text-blue-500", bg: "bg-blue-500/10", label: "Novo Cadastro" },
-  payment: { icon: AlertCircle, color: "text-emerald-500", bg: "bg-emerald-500/10", label: "Pagamento" },
-  upgrade: { icon: AlertTriangle, color: "text-amber-500", bg: "bg-amber-500/10", label: "Upgrade" },
-  support: { icon: Bell, color: "text-violet-500", bg: "bg-violet-500/10", label: "Suporte" },
+  info: { icon: Info, color: "text-blue-500", bg: "bg-blue-500/10", label: "Informação" },
+  warning: { icon: AlertTriangle, color: "text-amber-500", bg: "bg-amber-500/10", label: "Aviso" },
+  error: { icon: AlertCircle, color: "text-destructive", bg: "bg-destructive/10", label: "Erro" },
+  success: { icon: CheckCircle, color: "text-emerald-500", bg: "bg-emerald-500/10", label: "Sucesso" },
 };
 
-export default function AdminNotifications() {
-  const { notifications, isLoading, markRead, markAllRead } = useAdminNotifications();
+export default function Notifications() {
+  const { user } = useAuth();
+  const { notifications, readIds, unreadCount, isLoading, markRead, markAllRead } = useUserNotifications();
+
+  const handleMarkRead = useCallback((id: string) => {
+    markRead(id);
+  }, [markRead]);
+
+  if (!user) {
+    return (
+      <div className="flex-1 p-6 flex items-center justify-center">
+        <p className="text-muted-foreground">Faça login para ver notificações</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -34,17 +47,14 @@ export default function AdminNotifications() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Bell className="h-6 w-6 text-primary" />
-            Notificações Admin
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">Notificações</h1>
           <p className="text-muted-foreground text-sm">
-            {notifications.filter(n => !n.read).length > 0
-              ? `Você tem ${notifications.filter(n => !n.read).length} não lida${notifications.filter(n => !n.read).length !== 1 ? "s" : ""}`
+            {unreadCount > 0
+              ? `Você tem ${unreadCount} notificação${unreadCount !== 1 ? "ões" : ""} não lida${unreadCount !== 1 ? "s" : ""}`
               : "Todas as notificações foram lidas"}
           </p>
         </div>
-        {notifications.filter(n => !n.read).length > 0 && (
+        {unreadCount > 0 && (
           <Button variant="outline" size="sm" onClick={markAllRead}>
             <CheckCheck className="h-4 w-4 mr-2" />
             Marcar todas como lidas
@@ -58,15 +68,15 @@ export default function AdminNotifications() {
           <CardContent className="p-8 text-center">
             <Bell className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
             <p className="text-lg font-medium">Nenhuma notificação</p>
-            <p className="text-sm text-muted-foreground">Aqui aparecerão notificações de novos cadastros, pagamentos e upgrades.</p>
+            <p className="text-sm text-muted-foreground">Quando houver novidades, elas aparecerão aqui.</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {notifications.map((notification: AdminNotification) => {
-            const config = severityConfig[notification.type] ?? severityConfig.support;
+          {notifications.map((notification) => {
+            const config = severityConfig[notification.severity] ?? severityConfig.info;
             const Icon = config.icon;
-            const isRead = notification.read;
+            const isRead = readIds.includes(notification.id);
 
             return (
               <Card
@@ -81,27 +91,22 @@ export default function AdminNotifications() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <CardTitle className="text-base">{config.label}</CardTitle>
+                          <CardTitle className="text-base">{notification.title}</CardTitle>
                           {!isRead && (
                             <Badge variant="default" className="h-2 w-2 rounded-full p-0 bg-primary" />
                           )}
                         </div>
                         <CardDescription className="mt-1">
-                          {notification.message}
+                          {notification.body}
                         </CardDescription>
                         <p className="text-xs text-muted-foreground mt-2">
-                          {(() => {
-                            const d = new Date(notification.time);
-                            return isNaN(d.getTime())
-                              ? notification.time
-                              : d.toLocaleDateString("pt-BR", {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                });
-                          })()}
+                          {new Date(notification.createdAt).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </p>
                       </div>
                     </div>
@@ -110,13 +115,23 @@ export default function AdminNotifications() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => markRead(notification.id)}
+                          onClick={() => handleMarkRead(notification.id)}
                         >
                           <CheckCheck className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
                   </div>
+                  {notification.action && (
+                    <>
+                      <Separator className="my-3" />
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={notification.action.href} target="_blank" rel="noopener noreferrer">
+                          {notification.action.label}
+                        </a>
+                      </Button>
+                    </>
+                  )}
                 </CardHeader>
               </Card>
             );

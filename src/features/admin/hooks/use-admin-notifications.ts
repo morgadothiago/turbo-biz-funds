@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -112,7 +113,7 @@ async function fetchActivity(): Promise<AdminNotification[]> {
     const subscriptions: any[] = subsData ?? [];
     
     subscriptions
-      .filter((sub: any) => sub.status === "active" && sub.planName && sub.planName.toLowerCase() !== "free")
+      .filter((sub: any) => sub.status?.toLowerCase() === "active" && sub.planName && sub.planName.toLowerCase() !== "free")
       .slice(0, 5)
       .forEach((sub: any) => {
         const id = `payment::${sub.id ?? idx}::${idx++}`;
