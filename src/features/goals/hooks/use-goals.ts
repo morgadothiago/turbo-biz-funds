@@ -40,12 +40,15 @@ export function useCreateGoal() {
     mutationFn: async (payload: CreateGoalPayload) => {
       // Formata o payload para o formato esperado pelo backend
       const backendPayload = {
-        name: payload.name,
-        target: payload.target,
-        current: payload.current ?? 0,
-        deadline: payload.deadline, // Enviar no formato ISO ou string
-        ...(payload.category && { category: payload.category }),
+        // Campos no formato snake_case que é padrão do backend
+        title: payload.name,
+        target_value: payload.target,
+        current_value: payload.current ?? 0,
+        target_date: payload.deadline,
+        goal_category: payload.category || "Geral",
       };
+      
+      console.log("[useCreateGoal] Enviando payload:", JSON.stringify(backendPayload));
       
       const res = await api.post<ApiItemResponse<Goal>>(apiEndpoints.goals.create, backendPayload);
       return res;

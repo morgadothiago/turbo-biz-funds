@@ -413,6 +413,7 @@ export const translations: Record<Locale, Translations> = {
       trustSecurePayment: "Pagamento seguro",
       trustCancelAnyTime: "Cancele quando quiser",
       trustHumanSupport: "Suporte humanizado",
+      popularBadge: "Mais Popular",
       pricingWhyNoFree: "Por que não temos plano gratuito?",
       // FAQ
       faqBadge: "Dúvidas",
@@ -636,6 +637,7 @@ export const translations: Record<Locale, Translations> = {
       trustSecurePayment: "Secure payment",
       trustCancelAnyTime: "Cancel anytime",
       trustHumanSupport: "Human support",
+      popularBadge: "Most Popular",
       pricingWhyNoFree: "Why no free plan?",
       // FAQ
       faqBadge: "Questions",
@@ -859,6 +861,7 @@ export const translations: Record<Locale, Translations> = {
       trustSecurePayment: "Pago seguro",
       trustCancelAnyTime: "Cancela cuando quieras",
       trustHumanSupport: "Soporte humanizado",
+      popularBadge: "Más Popular",
       pricingWhyNoFree: "¿Por qué no tenemos plan gratuito?",
       // FAQ
       faqBadge: "Preguntas",
