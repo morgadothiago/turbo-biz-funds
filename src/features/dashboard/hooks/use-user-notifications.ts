@@ -39,10 +39,16 @@ function saveReadIds(ids: string[]) {
 
 async function fetchSubscription(): Promise<SubscriptionResponse | null> {
   try {
+    // Tenta endpoint alternativo ou retorna null se não existir
     const res = await api.get<SubscriptionResponse>("/v1/subscriptions/me");
     return res as unknown as SubscriptionResponse;
-  } catch {
-    return null;
+  } catch (error: any) {
+    // Se for 404 (endpoint não existe) ou 500, retorna null silenciosamente
+    if (error?.status === 404 || error?.status === 500) {
+      console.log("[fetchSubscription] Endpoint não disponível, usando dados padrão");
+      return null;
+    }
+    throw error; // Repropaga outros erros
   }
 }
 

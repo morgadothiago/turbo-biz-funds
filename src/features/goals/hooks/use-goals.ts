@@ -3,8 +3,18 @@ import { api, apiEndpoints } from "@/lib/api/client";
 import type { Goal, CreateGoalPayload, ApiListResponse, ApiItemResponse } from "@/shared/types";
 
 async function fetchGoals(): Promise<Goal[]> {
-  const res = await api.get<ApiListResponse<Goal>>(apiEndpoints.goals.list);
-  return res.data;
+  try {
+    const res = await api.get<ApiListResponse<Goal> | { data: Goal[] }>(apiEndpoints.goals.list);
+    // Aceita tanto { data: [...] } quanto [...]
+    return Array.isArray(res) ? res : (res as ApiListResponse<Goal>).data ?? [];
+  } catch (error: any) {
+    console.error("[fetchGoals] Erro:", error);
+    // Se o endpoint não existir, retorna array vazio
+    if (error?.status === 404 || error?.status === 500) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export function useGoals() {
@@ -12,6 +22,7 @@ export function useGoals() {
     queryKey: ["goals"],
     queryFn: fetchGoals,
     staleTime: 5 * 60 * 1000,
+    retry: 1,
   });
 
   return {
@@ -26,8 +37,19 @@ export function useGoals() {
 export function useCreateGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateGoalPayload) =>
-      api.post<ApiItemResponse<Goal>>(apiEndpoints.goals.create, payload),
+    mutationFn: async (payload: CreateGoalPayload) => {
+      // Formata o payload para o formato esperado pelo backend
+      const backendPayload = {
+        name: payload.name,
+        target: payload.target,
+        current: payload.current ?? 0,
+        deadline: payload.deadline, // Enviar no formato ISO ou string
+        ...(payload.category && { category: payload.category }),
+      };
+      
+      const res = await api.post<ApiItemResponse<Goal>>(apiEndpoints.goals.create, backendPayload);
+      return res;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals"] });
     },

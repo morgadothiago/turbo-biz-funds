@@ -62,14 +62,21 @@ const GoalsPage = memo(() => {
       toast.error("Preencha nome, valor alvo e prazo");
       return;
     }
+    
+    const targetValue = parseFloat(form.target);
+    if (isNaN(targetValue) || targetValue <= 0) {
+      toast.error("Valor alvo inválido");
+      return;
+    }
+    
+    const currentValue = parseFloat(form.current) || 0;
+    
     createGoal.mutate(
       {
         name: form.name.trim(),
-        target: parseFloat(form.target),
-        current: parseFloat(form.current) || 0,
-        deadline: new Date(form.deadline).toISOString(),
-        color: form.color,
-        icon: form.icon,
+        target: targetValue,
+        current: currentValue,
+        deadline: form.deadline, // Enviar no formato YYYY-MM-DD que o input date retorna
         category: form.category.trim() || "Geral",
       },
       {
@@ -78,7 +85,19 @@ const GoalsPage = memo(() => {
           setIsDialogOpen(false);
           setForm({ name: "", target: "", current: "0", deadline: "", category: "", color: GOAL_COLORS[0], icon: GOAL_ICONS[0] });
         },
-        onError: () => toast.error("Erro ao criar meta"),
+        onError: (error: any) => {
+          console.error("[Goals] Erro ao criar meta:", error);
+          // Se for 422, mostra mensagem de validação
+          if (error?.status === 422) {
+            toast.error(error?.message || "Dados inválidos. Verifique os campos.");
+          } else if (error?.status === 500) {
+            toast.error("Erro no servidor. Tente novamente mais tarde.");
+          } else if (error?.status === 404) {
+            toast.error("Funcionalidade em desenvolvimento.");
+          } else {
+            toast.error("Erro ao criar meta");
+          }
+        },
       }
     );
   };
