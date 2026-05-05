@@ -1,9 +1,10 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Check, Star, Zap, Shield } from "lucide-react";
+import { Check, Star, Zap, Shield, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
 import { analytics } from "@/lib/analytics";
+import { usePublicPlans } from "@/features/plans/hooks/use-public-plans";
 
 interface PlanProps {
   name: string;
@@ -93,8 +94,10 @@ PlanCard.displayName = "PlanCard";
 
 const Pricing = memo(() => {
   const { t } = useI18n();
+  const { data: plans, isLoading } = usePublicPlans();
 
-  const PLANS: PlanProps[] = [
+  // Fallback para dados hardcoded se API não retornar nada
+  const defaultPlans: PlanProps[] = [
     {
       name: t("landing", "planMonthly"),
       description: t("landing", "planMonthlyDescription"),
@@ -129,6 +132,33 @@ const Pricing = memo(() => {
     },
   ];
 
+  // Converte dados da API para formato esperado pelo componente
+  const PLANS = plans && plans.length > 0
+    ? plans.map((plan) => {
+        const priceStr = plan.price.toFixed(2).replace(".", ",");
+        const [price, priceDecimal] = priceStr.split(",");
+        
+        const periodMap: Record<string, string> = {
+          "MONTHLY": "/mês",
+          "YEARLY": "/ano",
+          "mês": "/mês",
+          "ano": "/ano",
+        };
+        
+        return {
+          name: plan.name,
+          description: plan.description,
+          price,
+          priceDecimal,
+          period: periodMap[plan.billingPeriod?.toUpperCase()] || `/${plan.billingPeriod}`,
+          features: plan.features,
+          cta: t("landing", "planCTA2"),
+          highlighted: plan.popular ?? false,
+          badge: plan.popular ? "Mais Popular" : undefined,
+        } as PlanProps;
+      })
+    : defaultPlans;
+
   const TRUST_BADGES = [
     { icon: Shield, text: t("landing", "trustSecurePayment") },
     { icon: Check, text: t("landing", "trustCancelAnyTime") },
@@ -151,9 +181,15 @@ const Pricing = memo(() => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {PLANS.map((plan) => (
-            <PlanCard key={plan.name} plan={plan} />
-          ))}
+          {isLoading ? (
+            <div className="col-span-3 flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+            </div>
+          ) : (
+            PLANS.map((plan) => (
+              <PlanCard key={plan.name} plan={plan} />
+            ))
+          )}
         </div>
 
         <div className="mt-16 max-w-2xl mx-auto">
