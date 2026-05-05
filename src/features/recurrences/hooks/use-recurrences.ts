@@ -3,8 +3,16 @@ import { api, apiEndpoints } from "@/lib/api/client";
 import type { Recurrence, RecurrencePayload, ApiListResponse, ApiItemResponse } from "@/shared/types";
 
 async function fetchActiveRecurrences(): Promise<Recurrence[]> {
-  const res = await api.get<ApiListResponse<Recurrence>>(apiEndpoints.recurrences.active);
-  return res.data;
+  try {
+    const res = await api.get<ApiListResponse<Recurrence> | { data: Recurrence[] }>(apiEndpoints.recurrences.active);
+    return Array.isArray(res) ? res : (res as ApiListResponse<Recurrence>).data ?? [];
+  } catch (error: any) {
+    console.error("[fetchActiveRecurrences] Erro:", error);
+    if (error?.status === 404 || error?.status === 500) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export function useActiveRecurrences() {
@@ -26,8 +34,23 @@ export function useActiveRecurrences() {
 export function useCreateRecurrence() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: RecurrencePayload) =>
-      api.post<ApiItemResponse<Recurrence>>(apiEndpoints.recurrences.create, payload),
+    mutationFn: async (payload: RecurrencePayload) => {
+      // Formata o payload para o formato snake_case do backend
+      const backendPayload = {
+        category_id: payload.categoryId,
+        type: payload.type,
+        amount: payload.amount,
+        description: payload.description || "",
+        frequency: payload.frequency,
+        start_date: payload.startDate,
+        end_date: payload.endDate || null,
+      };
+      
+      console.log("[useCreateRecurrence] Enviando payload:", JSON.stringify(backendPayload));
+      
+      const res = await api.post<ApiItemResponse<Recurrence>>(apiEndpoints.recurrences.create, backendPayload);
+      return res;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurrences"] });
     },
