@@ -416,6 +416,9 @@ function AdminDashboardError({ message }: { message: string }) {
 }
 
 function AdminDashboard() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const clientsPerPage = 4;
+
   const { data, isLoading, isError, error } = useAdminDashboard();
 
   if (isLoading) return <AdminDashboardSkeleton />;
@@ -425,6 +428,9 @@ function AdminDashboard() {
   }
 
   const { stats, revenueData, planDistribution, recentClients, recentActivity } = data;
+  const totalPages = Math.ceil(recentClients.length / clientsPerPage);
+  const start = (currentPage - 1) * clientsPerPage;
+  const paginatedClients = recentClients.slice(start, start + clientsPerPage);
 
   return (
     <div className="p-5 lg:p-7 space-y-5">
@@ -481,7 +487,7 @@ function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentClients.map((client) => (
+                  {paginatedClients.map((client) => (
                     <TableRow key={client.email}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -504,16 +510,57 @@ function AdminDashboard() {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={cn("text-xs", client.status === "Ativo" ? "bg-green-50 text-green-700 border-green-200" : "")}
+                          className={cn(
+                            "text-xs",
+                            client.status === "Bloqueado" && "bg-red-50 text-red-700 border-red-200 font-semibold",
+                            client.status === "Ativo" && "bg-green-50 text-green-700 border-green-200"
+                          )}
                         >
-                          {client.status}
+                          {client.status === "Bloqueado" && "⚠️ "}{client.status}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {client.role === "admin" && (
+                          <Badge variant="default" className="text-xs bg-amber-500 hover:bg-amber-600">
+                            👑 Admin
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-right text-xs text-gray-400">{client.date}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    Mostrando {((currentPage - 1) * clientsPerPage) + 1} - {Math.min(currentPage * clientsPerPage, recentClients.length)} de {recentClients.length} clientes
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-xs text-muted-foreground">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

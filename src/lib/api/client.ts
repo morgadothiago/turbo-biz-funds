@@ -166,11 +166,18 @@ export const apiEndpoints = {
   admin: {
     stats: "/v1/admin/stats",
     revenue: "/v1/admin/revenue",
+    revenueChart: "/v1/admin/revenue/chart",
+    cashflow: "/v1/admin/cashflow",
     users: "/v1/admin/users",
     user: (id: string) => `/v1/admin/users/${id}`,
+    userGrowth: "/v1/admin/users/growth",
     clients: "/v1/admin/clients",
     subscriptions: "/v1/admin/subscriptions",
     plans: "/v1/admin/plans",
+    plan: (id: string) => `/v1/admin/plans/${id}`,
+    planDistribution: "/v1/admin/plans/distribution",
     activity: "/v1/admin/activity",
+    churn: "/v1/admin/churn",
+    reportsExport: "/v1/admin/reports/export",
   },
 } as const;
