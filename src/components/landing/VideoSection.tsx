@@ -5,7 +5,7 @@ import { analytics } from "@/lib/analytics";
 import CTAButton from "@/components/landing/CTAButton";
 
 const logoWeb = "/logoweb.png";
-const YT_ID = "kV1GIO8pb9Q";
+const YT_ID = "ydOUCjXut48";
 const YT_THUMB = `https://img.youtube.com/vi/${YT_ID}/maxresdefault.jpg`;
 const YT_EMBED = `https://www.youtube.com/embed/${YT_ID}?autoplay=1&rel=0&modestbranding=1`;
 
