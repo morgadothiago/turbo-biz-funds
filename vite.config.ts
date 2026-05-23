@@ -128,6 +128,48 @@ export default defineConfig(({ mode }) => ({
           constBindings: true,
           objectShorthand: true,
         },
+        manualChunks(id) {
+          // React core — cache longo, raramente muda
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'vendor-react';
+          }
+          // Router
+          if (id.includes('node_modules/react-router')) {
+            return 'vendor-router';
+          }
+          // TanStack Query
+          if (id.includes('node_modules/@tanstack/')) {
+            return 'vendor-query';
+          }
+          // Radix UI — grande, mas cacheia separado do resto
+          if (id.includes('node_modules/@radix-ui/')) {
+            return 'vendor-radix';
+          }
+          // Framer Motion — pesado, só landing page usa animações
+          if (id.includes('node_modules/framer-motion')) {
+            return 'vendor-motion';
+          }
+          // Recharts — já lazy, mas isola no próprio chunk
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-')) {
+            return 'vendor-charts';
+          }
+          // Formulários
+          if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform/') || id.includes('node_modules/zod')) {
+            return 'vendor-forms';
+          }
+          // Utilitários UI pequenos — sonner, vaul, cmdk, next-themes, etc.
+          if (
+            id.includes('node_modules/sonner') ||
+            id.includes('node_modules/vaul') ||
+            id.includes('node_modules/cmdk') ||
+            id.includes('node_modules/next-themes') ||
+            id.includes('node_modules/class-variance-authority') ||
+            id.includes('node_modules/clsx') ||
+            id.includes('node_modules/tailwind-merge')
+          ) {
+            return 'vendor-ui-utils';
+          }
+        },
       },
       treeshake: {
         moduleSideEffects: 'no-external',
