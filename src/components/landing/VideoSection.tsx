@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from "react";
+import { memo, useRef, useState, useEffect } from "react";
 import { Play, Pause } from "lucide-react";
 import { motion } from "framer-motion";
 import { analytics } from "@/lib/analytics";
@@ -8,8 +8,27 @@ const logoWeb = "/logoweb.png";
 
 const VideoSection = memo(() => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const video = videoRef.current;
+    if (!section || !video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.preload = "metadata";
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   const togglePlay = () => {
     const v = videoRef.current;
@@ -52,6 +71,7 @@ const VideoSection = memo(() => {
 
         {/* Player de vídeo customizado */}
         <div
+          ref={sectionRef}
           className="relative w-full rounded-b-2xl overflow-hidden border border-[#0047FF]/50 bg-black cursor-pointer"
           style={{ aspectRatio: "16/9" }}
           onClick={togglePlay}
@@ -59,11 +79,14 @@ const VideoSection = memo(() => {
           <video
             ref={videoRef}
             className="w-full h-full object-cover"
-            preload="metadata"
-            src="/VSL Doutor Cash.mp4"
+            preload="none"
+            poster="/vsl-poster.jpg"
             onTimeUpdate={handleTimeUpdate}
             onEnded={() => setIsPlaying(false)}
-          />
+          >
+            <source src="/vsl-doutorcash.webm" type="video/webm" />
+            <source src="/vsl-doutorcash.mp4" type="video/mp4" />
+          </video>
 
           {/* Play/Pause overlay */}
           <div
