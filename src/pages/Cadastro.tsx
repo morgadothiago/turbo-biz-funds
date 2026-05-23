@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,8 +58,24 @@ const Cadastro = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, logout, isAuthenticated } = useAuth();
   const { plans, isLoading: isPlansLoading } = usePlansList();
+
+  // Usuário já logado visitando /cadastro → redireciona (só no mount)
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const selectedPlan = plans.find((p) => p.id === formData.plan);
+  const isPaid = (() => {
+    if (!selectedPlan) return false;
+    const raw = selectedPlan.price;
+    if (typeof raw === "number") return raw > 0;
+    const n = parseFloat(String(raw).replace(/[^\d.,]/g, "").replace(",", "."));
+    return !isNaN(n) && n > 0;
+  })();
 
   const validateStep1 = (): boolean => {
     const result = registerSchema.safeParse({
@@ -95,6 +111,10 @@ const Cadastro = () => {
     setIsLoading(true);
 
     try {
+      if (isPaid) {
+        sessionStorage.setItem("postRegisterRedirect", `/pagamento?plan=${formData.plan}`);
+      }
+
       await register({
         name: formData.name,
         email: formData.email,
@@ -105,14 +125,18 @@ const Cadastro = () => {
 
       analytics.signup("email");
 
-      toast.success("Conta criada com sucesso!");
-
-      if (formData.plan !== "free") {
-        // Plano pago: vai para pagamento. PrivateRoute aguarda o token no storage.
-        navigate("/pagamento", { state: { plan: formData.plan }, replace: true });
+      if (isPaid) {
+        toast.success("Conta criada! Redirecionando para pagamento...");
+        navigate(`/pagamento?plan=${formData.plan}`, { replace: true });
+      } else {
+        // Plano grátis: limpa sessão e vai para login
+        await logout();
+        sessionStorage.removeItem("postRegisterRedirect");
+        toast.success("Conta criada com sucesso! Faça login para continuar.");
+        navigate("/login", { replace: true });
       }
-      // Plano free: PublicRoute detecta isAuthenticated=true e redireciona automaticamente.
     } catch (err: unknown) {
+      sessionStorage.removeItem("postRegisterRedirect");
       const apiError = err as { message?: string; status?: number };
       if (apiError?.status === 409) {
         setErrors({ email: "Este email já está cadastrado" });
@@ -420,7 +444,7 @@ const Cadastro = () => {
                     </>
                   ) : (
                     <>
-                      Criar conta
+                      {isPaid ? "Criar conta e ir para pagamento" : "Criar conta grátis"}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}

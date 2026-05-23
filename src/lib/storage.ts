@@ -86,8 +86,8 @@ export const storage: StorageUtils = {
 
   clear: (): void => {
     try {
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER);
+      localStorage.clear();
+      sessionStorage.clear();
     } catch {
       if (import.meta.env.DEV) console.error("Erro ao limpar storage");
     }

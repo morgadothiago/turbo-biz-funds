@@ -324,7 +324,7 @@ export const translations: Record<Locale, Translations> = {
       heroBadge: "Chega de Planilhas",
       heroTitleLine1: "Cansou de planilhas?",
       heroTitleLine2: "Você ainda tenta lembrar tudo de cabeça ou não sabe para onde está indo o seu dinheiro?",
-      heroSubtitle: "Tenha um assessor financeiro pessoal trabalhando 24 horas por dia para você. Mande áudio, foto ou texto. Seu assistente financeiro resolve tudo pra você — sem planilha, sem estresse.",
+      heroSubtitle: "Tenha um assistente financeiro pessoal trabalhando 24 horas por dia para você. Mande áudio, foto ou texto. Seu assistente financeiro resolve tudo pra você — sem planilha, sem estresse.",
       heroCTA: "Comece agora",
       heroWatchDemo: "Ver como funciona",
       heroStatUsers: "3.000+ usuários",

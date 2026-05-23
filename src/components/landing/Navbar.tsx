@@ -1,40 +1,32 @@
 import { useState, useCallback, memo } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { useI18n } from "@/lib/i18n-provider";
 import { analytics } from "@/lib/analytics";
+
 const logoWeb = "/logoweb.png";
 
+const NAV_LINKS = [
+  { name: "Como Funciona", href: "#como-funciona" },
+  { name: "Depoimentos",   href: "#depoimentos"   },
+  { name: "Preços",        href: "#planos"         },
+  { name: "Dúvidas",       href: "#faq"            },
+] as const;
+
 const Navbar = memo(() => {
-  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
 
-  const closeMenu = useCallback(() => {
-    setIsOpen(false);
-  }, []);
+  const closeMenu   = useCallback(() => setIsOpen(false), []);
+  const trackClick  = useCallback((name: string) => analytics.click(name, "navbar"), []);
 
-  const handleCTAClick = useCallback((buttonName: string) => {
-    analytics.click(buttonName, "navbar");
-  }, []);
-
-  const NAV_LINKS = [
-    { name: t("landing", "navHowItWorks"), href: "#como-funciona" },
-    { name: t("landing", "navTestimonials"), href: "#depoimentos" },
-    { name: t("landing", "navPricing"), href: "#planos" },
-    { name: t("landing", "navFAQ"), href: "#faq" },
-  ] as const;
-
-  const NavLinks = () => (
+  const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
       {NAV_LINKS.map((link) => (
         <a
           key={link.name}
           href={link.href}
-          className="text-sm font-medium text-white/70 hover:text-white transition-colors py-2"
-          onClick={closeMenu}
+          onClick={onClick}
+          className="text-sm font-bold text-white/80 hover:text-white transition-colors duration-150 py-1"
         >
           {link.name}
         </a>
@@ -42,71 +34,123 @@ const Navbar = memo(() => {
     </>
   );
 
-  const navLinkClass = "text-sm font-medium text-white/70 hover:text-white transition-colors py-2";
-
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#06091c]/80 backdrop-blur-xl border-b border-white/10">
-      <div className="container mx-auto px-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/[0.07]">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2 group">
+
+          {/* Logo — icon + "Doutor Cash" text from logoweb.png */}
+          <Link
+            to="/"
+            className="flex items-center gap-1 flex-shrink-0 group"
+            aria-label="Doutor Cash — Início"
+          >
             <img
               src={logoWeb}
-              alt="doutorcash"
-              className="h-9 w-auto transition-transform group-hover:scale-105"
+              alt="DC"
+              className="h-16 w-auto transition-transform duration-200 group-hover:scale-105"
             />
+            <span className="text-white font-bold text-[15px] leading-snug hidden sm:flex flex-col justify-center">
+              <span>Doutor</span>
+              <span>Cash</span>
+            </span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          {/* Desktop nav — centered absolutely */}
+          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             <NavLinks />
           </div>
 
+          {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10" asChild>
-              <Link to="/login" onClick={() => handleCTAClick("login")}>{t("landing", "navLogin")}</Link>
-            </Button>
-            <Button className="bg-[#1a3799] hover:bg-[#1a3799]/90 text-white font-semibold rounded-xl" asChild>
-              <Link to="/cadastro" onClick={() => handleCTAClick("sign_up")}>{t("landing", "navSignUp")}</Link>
-            </Button>
+            {/* LOGIN — transparent + cyan border */}
+            <Link
+              to="/login"
+              onClick={() => trackClick("login")}
+              className="
+                inline-flex items-center px-5 py-2 rounded-lg
+                border border-cyan-400/70 text-white text-sm font-bold uppercase tracking-wide
+                hover:border-cyan-300 hover:bg-cyan-400/10
+                transition-all duration-150
+              "
+            >
+              LOGIN
+            </Link>
+
+            {/* CADASTRE-SE — solid #0047FF */}
+            <Link
+              to="/cadastro"
+              onClick={() => trackClick("sign_up")}
+              className="
+                inline-flex items-center px-5 py-2 rounded-lg
+                bg-[#0047FF] hover:bg-[#1a5fff]
+                text-white text-sm font-bold uppercase tracking-wide
+                shadow-[0_0_18px_rgba(0,71,255,0.35)]
+                hover:shadow-[0_0_28px_rgba(0,71,255,0.55)]
+                transition-all duration-150
+              "
+            >
+              CADASTRE-SE
+            </Link>
           </div>
 
+          {/* Mobile hamburger */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <button
-                className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-                aria-label="Toggle menu"
+                className="md:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+                aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
               >
                 {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col gap-6 pt-6">
-                <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
-                  <img
-                    src={logoWeb}
-                    alt="doutorcash"
-                    className="h-9 w-auto"
-                  />
+
+            <SheetContent
+              side="right"
+              className="w-[300px] sm:w-[360px] bg-[#020617] border-white/10 flex flex-col"
+            >
+              <div className="flex flex-col gap-6 pt-6 flex-1">
+                <Link to="/" onClick={closeMenu} className="flex items-center gap-1">
+                  <img src={logoWeb} alt="DC" className="h-16 w-auto" />
+                  <span className="text-white font-bold text-[15px] leading-snug flex flex-col justify-center">
+                    <span>Doutor</span>
+                    <span>Cash</span>
+                  </span>
                 </Link>
 
-                <div className="flex flex-col gap-2">
-                  <NavLinks />
-                </div>
+                <nav className="flex flex-col gap-4">
+                  <NavLinks onClick={closeMenu} />
+                </nav>
 
-                <div className="flex items-center gap-2 pt-4 border-t border-border">
-                  <ThemeToggle />
-                </div>
-
-                <div className="flex flex-col gap-3 pt-4 border-t border-border">
-                  <Button variant="outline" asChild className="w-full">
-                    <Link to="/login" onClick={() => { closeMenu(); handleCTAClick("login_mobile"); }}>{t("landing", "navLogin")}</Link>
-                  </Button>
-                  <Button variant="hero" asChild className="w-full">
-                    <Link to="/cadastro" onClick={() => { closeMenu(); handleCTAClick("sign_up_mobile"); }}>{t("landing", "navSignUp")}</Link>
-                  </Button>
+                <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-white/10">
+                  <Link
+                    to="/login"
+                    onClick={() => { closeMenu(); trackClick("login_mobile"); }}
+                    className="
+                      flex items-center justify-center w-full px-5 py-2.5 rounded-lg
+                      border border-cyan-400/70 text-white text-sm font-bold uppercase
+                      hover:bg-cyan-400/10 transition-all
+                    "
+                  >
+                    LOGIN
+                  </Link>
+                  <Link
+                    to="/cadastro"
+                    onClick={() => { closeMenu(); trackClick("sign_up_mobile"); }}
+                    className="
+                      flex items-center justify-center w-full px-5 py-2.5 rounded-lg
+                      bg-[#0047FF] hover:bg-[#1a5fff]
+                      text-white text-sm font-bold uppercase
+                      transition-all
+                    "
+                  >
+                    CADASTRE-SE
+                  </Link>
                 </div>
               </div>
             </SheetContent>
           </Sheet>
+
         </div>
       </div>
     </nav>

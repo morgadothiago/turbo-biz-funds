@@ -47,7 +47,7 @@ const PLAN_DEFAULTS: Record<string, PlanInfo> = {
 async function fetchPlanInfo(planId: string): Promise<PlanInfo> {
   try {
     const res = await api.get<ApiItemResponse<PlanInfo>>(apiEndpoints.plans.get(planId));
-    return res.data;
+    return normalizePlan(res.data);
   } catch {
     return PLAN_DEFAULTS[planId] ?? { id: planId, name: planId, price: "—", period: "/mês", description: "", features: [] };
   }
@@ -69,13 +69,25 @@ export function usePlanInfo(planId: string) {
   };
 }
 
+function normalizePlan(plan: PlanInfo): PlanInfo {
+  return {
+    ...plan,
+    features: Array.isArray(plan.features)
+      ? plan.features.map((f: string | { name: string }) =>
+          typeof f === "string" ? f : f.name
+        )
+      : [],
+  };
+}
+
 export function usePlansList() {
   const query = useQuery({
     queryKey: ["plans"],
     queryFn: async () => {
       try {
-        const res = await publicApi.get<{ data: PlanInfo[] }>(apiEndpoints.plans.list);
-        return res;
+        const res = await publicApi.get<{ data: PlanInfo[] } | PlanInfo[]>(apiEndpoints.plans.list);
+        const plans: PlanInfo[] = Array.isArray(res) ? res : (res as { data: PlanInfo[] }).data ?? [];
+        return { data: plans.map(normalizePlan) };
       } catch (error) {
         const axiosError = error as AxiosError;
         if (axiosError?.response?.status === 401) {

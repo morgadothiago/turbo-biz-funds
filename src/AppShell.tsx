@@ -100,6 +100,11 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
     if (user?.role === "admin") {
       return <Navigate to="/admin" replace />;
     }
+    const pending = sessionStorage.getItem("postRegisterRedirect");
+    if (pending) {
+      sessionStorage.removeItem("postRegisterRedirect");
+      return <Navigate to={pending} replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -128,11 +133,7 @@ function AppRoutes() {
             <Login />
           </PublicRoute>
         } />
-        <Route path="/cadastro" element={
-          <PublicRoute>
-            <Cadastro />
-          </PublicRoute>
-        } />
+        <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/recuperar-senha" element={
           <PublicRoute>
             <ForgotPassword />

@@ -37,8 +37,19 @@ vi.mock("@/lib/api/client", () => ({
       return Promise.reject({ message: "Email ou senha inválidos", status: 401 });
     }),
   },
+  publicApi: {
+    post: vi.fn((_endpoint: string, body: { email: string; password: string }) => {
+      if (body.email === "admin@doutocash.com" && body.password === "admin123") {
+        return Promise.resolve({ data: { token: ADMIN_TOKEN } });
+      }
+      if (body.email === "usuario@doutocash.com" && body.password === "user123") {
+        return Promise.resolve({ data: { token: USER_TOKEN } });
+      }
+      return Promise.reject({ message: "Email ou senha inválidos", status: 401 });
+    }),
+  },
   apiEndpoints: {
-    auth: { login: "/v1/auth/login", register: "/v1/auth/register" },
+    auth: { login: "/v1/auth/login", register: "/v1/auth/register", logout: "/v1/auth/logout" },
   },
 }));
 

@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import type { User, AuthContextType, UserPlan } from "@/types/auth";
 import { storage } from "@/lib/storage";
-import { api, apiEndpoints } from "@/lib/api/client";
+import { api, publicApi, apiEndpoints } from "@/lib/api/client";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -71,12 +71,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string): Promise<User> => {
     setIsLoading(true);
     try {
-      const response = await api.post<LoginApiResponse>(apiEndpoints.auth.login, { email, password });
+      const response = await publicApi.post<LoginApiResponse>(apiEndpoints.auth.login, { email, password });
       const raw = response as unknown as Record<string, unknown>;
       const nested = (raw.data ?? {}) as Record<string, unknown>;
       const token = (raw.token ?? raw.accessToken ?? nested.token ?? nested.accessToken ?? "") as string;
       const claims = decodeJwt(token);
       const user = userFromClaims(claims, email);
+
+      console.log("[Auth] Resposta da API (login):", response);
+      console.log("[Auth] Claims do JWT:", claims);
+      console.log("[Auth] Usuário:", user);
 
       storage.setToken(token);
       storage.setUser(user);
@@ -88,14 +92,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload): Promise<void> => {
-    const response = await api.post<RegisterApiResponse>(apiEndpoints.auth.register, payload);
+    const response = await publicApi.post<RegisterApiResponse>(apiEndpoints.auth.register, payload);
     // API pode retornar token no nível raiz ou aninhado em `data`
     const raw = response as unknown as Record<string, unknown>;
     const nested = (raw.data ?? {}) as Record<string, unknown>;
     const token = (raw.accessToken ?? raw.token ?? nested.accessToken ?? nested.token) as string | undefined;
+    console.log("[Auth] Resposta da API (cadastro):", response);
     if (token) {
       const claims = decodeJwt(token);
       const user = userFromClaims(claims, payload.email);
+      console.log("[Auth] Claims do JWT (cadastro):", claims);
+      console.log("[Auth] Usuário (cadastro):", user);
       storage.setToken(token);
       storage.setUser(user);
       setUser(user);

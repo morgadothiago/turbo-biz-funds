@@ -1,195 +1,167 @@
 import { memo } from "react";
-import { MessageCircle, Sparkles, BarChart3, ArrowRight } from "lucide-react";
-import { useI18n } from "@/lib/i18n-provider";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 
-const StepCard = memo(({ step, index, total }: { step: { number: string; icon: typeof MessageCircle; title: string; description: string }; index: number; total: number }) => {
-  const colors: Record<string, { bg: string; border: string; text: string; number: string }> = {
-    "01": { bg: "bg-cyan-400/10", border: "border-cyan-400/20", text: "text-cyan-400", number: "text-cyan-400/20" },
-    "02": { bg: "bg-white/10", border: "border-white/20", text: "text-white", number: "text-white/20" },
-    "03": { bg: "bg-[#1a3799]/30", border: "border-[#1a3799]/50", text: "text-blue-300", number: "text-blue-300/20" },
-  };
-  const color = colors[step.number];
-
-  return (
-    <div className="relative">
-      <div className="group bg-white/10 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 hover:bg-white/15 hover:shadow-lg transition-all duration-300 h-full">
-        <div className={`absolute top-4 right-4 text-5xl font-bold ${color.number}`}>
-          {step.number}
+// Card 1 — Registro automático (WhatsApp chat simulation)
+const RegistroCard = memo(() => (
+  <div className="bg-white rounded-2xl p-5 shadow-sm flex flex-col gap-3 h-full">
+    {/* Chat bubble mockup */}
+    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+      <div className="text-xs text-gray-400 mb-2 font-medium">WhatsApp</div>
+      <div className="space-y-2">
+        {/* User message */}
+        <div className="flex justify-end">
+          <div className="bg-[#dcf8c6] rounded-2xl rounded-tr-sm px-3 py-2 text-xs text-gray-800 max-w-[85%]">
+            Você enviou: "Gastei 45 no mercado"
+          </div>
         </div>
-
-        <div className={`w-14 h-14 rounded-xl ${color.bg} border ${color.border} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-          <step.icon className={`w-7 h-7 ${color.text}`} />
+        {/* Bot reply */}
+        <div className="flex justify-start">
+          <div className="bg-white rounded-2xl rounded-tl-sm px-3 py-2 text-xs text-gray-800 max-w-[85%] border border-gray-100 shadow-sm">
+            Registrado em Alimentação
+          </div>
         </div>
-
-        <h3 className="text-xl font-bold text-white mb-3">
-          {step.title}
-        </h3>
-        <p className="text-white/60 leading-relaxed">
-          {step.description}
-        </p>
       </div>
-
-      {index < total - 1 && (
-        <div className="hidden md:flex absolute top-1/2 -right-4 z-10 items-center justify-center w-8 h-8">
-          <ArrowRight className="w-5 h-5 text-white/30" />
-        </div>
-      )}
     </div>
-  );
-});
+    <div className="mt-auto text-center">
+      <span className="inline-block bg-green-50 text-green-600 text-xs font-semibold px-3 py-1 rounded-full">
+        Registro automático
+      </span>
+    </div>
+  </div>
+));
 
-StepCard.displayName = "StepCard";
+RegistroCard.displayName = "RegistroCard";
+
+// Card 2 — Múltiplos formatos
+const FormatosCard = memo(() => (
+  <div className="bg-white rounded-2xl p-5 shadow-sm flex flex-col gap-3 h-full">
+    <div className="text-sm font-bold text-gray-800 mb-1">Múltiplos formatos</div>
+    <div className="space-y-3 flex-1">
+      <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2">
+        <span className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-base flex-shrink-0">
+          🎤
+        </span>
+        <span className="text-sm text-gray-700 font-medium">Áudio</span>
+      </div>
+      <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2">
+        <span className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-base flex-shrink-0">
+          📷
+        </span>
+        <span className="text-sm text-gray-700 font-medium">Foto</span>
+      </div>
+      <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2">
+        <span className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-base flex-shrink-0">
+          ✍️
+        </span>
+        <span className="text-sm text-gray-700 font-medium">Texto</span>
+      </div>
+    </div>
+    <div className="text-center">
+      <span className="inline-block bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">
+        Fácil e natural
+      </span>
+    </div>
+  </div>
+));
+
+FormatosCard.displayName = "FormatosCard";
+
+// Card 3 — Dashboard Mobile
+const DashboardCard = memo(() => (
+  <div className="bg-white rounded-2xl p-5 shadow-sm flex flex-col gap-3 h-full">
+    <div className="text-sm font-bold text-gray-800 mb-1">Dashboard Mobile</div>
+    <div className="space-y-2 flex-1">
+      <div className="flex justify-between items-center bg-gray-50 rounded-xl px-3 py-2">
+        <span className="text-sm text-gray-500">Saldo</span>
+        <span className="text-sm font-bold text-green-600">R$ 2.340</span>
+      </div>
+      <div className="flex justify-between items-center bg-gray-50 rounded-xl px-3 py-2">
+        <span className="text-sm text-gray-500">Gastos</span>
+        <span className="text-sm font-bold text-red-500">R$ 1.850</span>
+      </div>
+      {/* Progress bar */}
+      <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden mt-1">
+        <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style={{ width: "65%" }} />
+      </div>
+      {/* Color bars */}
+      <div className="flex gap-1 mt-1">
+        <div className="h-1.5 flex-1 bg-green-400 rounded-full" />
+        <div className="h-1.5 flex-1 bg-blue-400 rounded-full" />
+        <div className="h-1.5 flex-1 bg-yellow-400 rounded-full" />
+        <div className="h-1.5 flex-1 bg-purple-400 rounded-full" />
+      </div>
+    </div>
+    <div className="text-center">
+      <span className="inline-block bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1 rounded-full">
+        Funciona no celular
+      </span>
+    </div>
+  </div>
+));
+
+DashboardCard.displayName = "DashboardCard";
 
 const HowItWorks = memo(() => {
-  const { t, locale } = useI18n();
-
-  const STEPS = [
-    {
-      number: "01",
-      icon: MessageCircle,
-      title: t("landing", "step1Title"),
-      description: t("landing", "step1Description"),
-    },
-    {
-      number: "02",
-      icon: Sparkles,
-      title: t("landing", "step2Title"),
-      description: t("landing", "step2Description"),
-    },
-    {
-      number: "03",
-      icon: BarChart3,
-      title: t("landing", "step3Title"),
-      description: t("landing", "step3Description"),
-    },
-  ];
-
-  const DASHBOARD_STATS = locale === "pt" 
-    ? [{ label: "Saldo", value: "R$ 2.340", color: "text-accent" }, { label: "Gastos", value: "R$ 1.850", color: "text-secondary" }, { label: "Economia", value: "R$ 490", color: "text-primary" }, { label: "Meta", value: "76%", color: "text-accent" }]
-    : locale === "en"
-    ? [{ label: "Balance", value: "$2,340", color: "text-accent" }, { label: "Expenses", value: "$1,850", color: "text-secondary" }, { label: "Savings", value: "$490", color: "text-primary" }, { label: "Goal", value: "76%", color: "text-accent" }]
-    : [{ label: "Saldo", value: "$2.340", color: "text-accent" }, { label: "Gastos", value: "$1.850", color: "text-secondary" }, { label: "Ahorro", value: "$490", color: "text-primary" }, { label: "Meta", value: "76%", color: "text-accent" }];
-
-  const CATEGORIES = locale === "pt"
-    ? [{ name: "Alimentação", value: "R$ 680", percent: 37, color: "bg-accent" }, { name: "Transporte", value: "R$ 420", percent: 23, color: "bg-secondary" }, { name: "Moradia", value: "R$ 450", percent: 24, color: "bg-primary" }, { name: "Lazer", value: "R$ 300", percent: 16, color: "bg-warning" }]
-    : locale === "en"
-    ? [{ name: "Food", value: "$680", percent: 37, color: "bg-accent" }, { name: "Transport", value: "$420", percent: 23, color: "bg-secondary" }, { name: "Housing", value: "$450", percent: 24, color: "bg-primary" }, { name: "Leisure", value: "$300", percent: 16, color: "bg-warning" }]
-    : [{ name: "Alimentación", value: "$680", percent: 37, color: "bg-accent" }, { name: "Transporte", value: "$420", percent: 23, color: "bg-secondary" }, { name: "Vivienda", value: "$450", percent: 24, color: "bg-primary" }, { name: "Ocio", value: "$300", percent: 16, color: "bg-warning" }];
-
-  const WHATSAPP_COMMANDS = locale === "pt"
-    ? ["quanto gastei hoje?", "sobra quanto?", "gastos do mês"]
-    : locale === "en"
-    ? ["how much did i spend today?", "any money left?", "monthly expenses"]
-    : ["cuánto gasté hoy?", "sobra algo?", "gastos del mes"];
-
   return (
-    <section id="como-funciona" className="py-16 md:py-24 bg-transparent">
+    <section id="como-funciona" className="py-16 md:py-24 bg-[#06091c]">
       <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-400 text-sm font-medium mb-4">
-            {t("landing", "howItWorksBadge")}
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55 }}
+          className="max-w-3xl mx-auto text-center mb-12"
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-blue-300 text-sm font-medium mb-4 uppercase tracking-wide">
+            Como funciona
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            {t("landing", "howItWorksTitle")}
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Simples como mandar uma mensagem
           </h2>
           <p className="text-lg text-white/60">
-            {t("landing", "howItWorksSubtitle")}
+            Você conversa, o sistema organiza. Sem planilhas, sem complicação.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {STEPS.map((step, index) => (
-              <StepCard key={step.number} step={step} index={index} total={STEPS.length} />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-20 max-w-5xl mx-auto">
-          <div className="text-center mb-8">
-            <p className="text-lg text-white/70">
-              <span className="font-semibold text-white">✨ Você conversa, o sistema organiza</span>
-            </p>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl border border-white/10 overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-3 bg-white/5 border-b border-white/10">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-400/60" />
-                <div className="w-3 h-3 rounded-full bg-yellow-400/60" />
-                <div className="w-3 h-3 rounded-full bg-green-400/60" />
-              </div>
-              <div className="flex-1 mx-4">
-                <div className="bg-white/10 rounded-md px-4 py-1.5 text-xs text-white/50 text-center">
-                  {t("landing", "dashboardLabel")}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 md:p-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {DASHBOARD_STATS.map((stat, i) => (
-                  <div key={i} className="bg-[#1a3799] rounded-xl p-4 border border-white/10">
-                    <div className="text-sm text-white/60 mb-1">{stat.label}</div>
-                    <div className="text-2xl font-bold text-white">{stat.value}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-white/5 rounded-xl p-4">
-                <div className="text-sm font-medium text-white mb-3">{t("landing", "expensesByCategory")}</div>
-                <div className="space-y-3">
-                  {CATEGORIES.map((cat, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="flex-1">
-                        <div className="flex justify-between text-sm mb-1 text-white/80">
-                          <span>{cat.name}</span>
-                          <span className="font-medium">{cat.value}</span>
-                        </div>
-                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${cat.color} rounded-full transition-all`}
-                            style={{ width: `${cat.percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {/* 3-card container with dashed border */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="max-w-5xl mx-auto"
+        >
+          <div className="border-2 border-blue-500/40 border-dashed rounded-3xl p-6 md:p-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <RegistroCard />
+              <FormatosCard />
+              <DashboardCard />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-12 max-w-4xl mx-auto">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 rounded-full bg-[#25D366]/20 flex items-center justify-center">
-                  <MessageCircle className="w-8 h-8 text-[#25D366]" />
-                </div>
-              </div>
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  {t("landing", "whatsappFeature")}
-                </h3>
-                <p className="text-white/60 mb-4">
-                  {t("landing", "whatsappFeatureDescription")}
-                </p>
-                <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                  {WHATSAPP_COMMANDS.map((command) => (
-                    <span
-                      key={command}
-                      className="px-3 py-1.5 bg-white/10 text-white/80 rounded-full text-sm font-medium border border-white/10"
-                    >
-                      "{command}"
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* CTA button */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex justify-center mt-10"
+        >
+          <Button
+            className="bg-[#1a3799] hover:bg-[#2b3fcb] text-white font-bold text-base px-8 py-4 rounded-full h-auto shadow-lg shadow-blue-900/40 transition-all duration-200"
+            asChild
+          >
+            <Link to="/cadastro">
+              ADQUIRIR O DOUTOR CASH
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
