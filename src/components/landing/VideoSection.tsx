@@ -20,11 +20,12 @@ const VideoSection = memo(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          video.preload = "metadata";
+          // Buffer agressivo quando entra no viewport — evita stutter no play
+          video.preload = "auto";
           observer.disconnect();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "300px" }
     );
     observer.observe(section);
     return () => observer.disconnect();
@@ -34,8 +35,15 @@ const VideoSection = memo(() => {
     const v = videoRef.current;
     if (!v) return;
     if (v.paused) {
-      v.play();
-      setIsPlaying(true);
+      // Garante buffer antes de dar play
+      if (v.readyState < 3) {
+        v.preload = "auto";
+        v.load();
+        v.addEventListener("canplay", () => { v.play(); setIsPlaying(true); }, { once: true });
+      } else {
+        v.play();
+        setIsPlaying(true);
+      }
     } else {
       v.pause();
       setIsPlaying(false);
