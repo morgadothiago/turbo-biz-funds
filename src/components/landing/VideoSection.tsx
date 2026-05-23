@@ -1,59 +1,20 @@
-import { memo, useRef, useState, useEffect } from "react";
-import { Play, Pause } from "lucide-react";
+import { memo, useState } from "react";
+import { Play } from "lucide-react";
 import { motion } from "framer-motion";
 import { analytics } from "@/lib/analytics";
 import CTAButton from "@/components/landing/CTAButton";
 
 const logoWeb = "/logoweb.png";
+const YT_ID = "pWjmpSD-ph0";
+const YT_THUMB = `https://img.youtube.com/vi/${YT_ID}/maxresdefault.jpg`;
+const YT_EMBED = `https://www.youtube.com/embed/${YT_ID}?autoplay=1&rel=0&modestbranding=1`;
 
 const VideoSection = memo(() => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [active, setActive] = useState(false);
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    const video = videoRef.current;
-    if (!section || !video) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          // Buffer agressivo quando entra no viewport — evita stutter no play
-          video.preload = "auto";
-          observer.disconnect();
-        }
-      },
-      { rootMargin: "300px" }
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
-
-  const togglePlay = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (v.paused) {
-      // Garante buffer antes de dar play
-      if (v.readyState < 3) {
-        v.preload = "auto";
-        v.load();
-        v.addEventListener("canplay", () => { v.play(); setIsPlaying(true); }, { once: true });
-      } else {
-        v.play();
-        setIsPlaying(true);
-      }
-    } else {
-      v.pause();
-      setIsPlaying(false);
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    const v = videoRef.current;
-    if (!v || !v.duration) return;
-    setProgress((v.currentTime / v.duration) * 100);
+  const handlePlay = () => {
+    analytics.click("video_play", "video_section");
+    setActive(true);
   };
 
   return (
@@ -77,47 +38,42 @@ const VideoSection = memo(() => {
           />
         </div>
 
-        {/* Player de vídeo customizado */}
+        {/* Player */}
         <div
-          ref={sectionRef}
-          className="relative w-full rounded-b-2xl overflow-hidden border border-[#0047FF]/50 bg-black cursor-pointer"
+          className="relative w-full rounded-b-2xl overflow-hidden border border-[#0047FF]/50 bg-black"
           style={{ aspectRatio: "16/9" }}
-          onClick={togglePlay}
         >
-          <video
-            ref={videoRef}
-            className="w-full h-full object-cover"
-            preload="none"
-            poster="/vsl-poster.jpg"
-            onTimeUpdate={handleTimeUpdate}
-            onEnded={() => setIsPlaying(false)}
-          >
-            <source src="/vsl-doutorcash.webm" type="video/webm" />
-            <source src="/vsl-doutorcash.mp4" type="video/mp4" />
-          </video>
-
-          {/* Play/Pause overlay */}
-          <div
-            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
-              isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
-            }`}
-          >
-            <div className="w-16 h-16 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/50">
-              {isPlaying ? (
-                <Pause className="w-7 h-7 text-[#0047FF] fill-[#0047FF]" />
-              ) : (
-                <Play className="w-7 h-7 text-[#0047FF] fill-[#0047FF] translate-x-0.5" />
-              )}
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20">
-            <div
-              className="h-full bg-gradient-to-r from-[#3060e8] to-[#60a0ff] transition-all duration-100"
-              style={{ width: `${progress}%` }}
+          {active ? (
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={YT_EMBED}
+              title="Doutor Cash VSL"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowFullScreen
             />
-          </div>
+          ) : (
+            <button
+              type="button"
+              className="absolute inset-0 w-full h-full cursor-pointer group"
+              onClick={handlePlay}
+              aria-label="Reproduzir vídeo"
+            >
+              <img
+                src={YT_THUMB}
+                alt="Thumbnail do vídeo Doutor Cash"
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              {/* Overlay escuro sutil */}
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-200" />
+              {/* Botão play */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-full bg-[#0047FF]/90 backdrop-blur-sm flex items-center justify-center border-2 border-white/50 group-hover:scale-110 transition-transform duration-200">
+                  <Play className="w-8 h-8 text-white fill-white translate-x-0.5" />
+                </div>
+              </div>
+            </button>
+          )}
         </div>
 
         {/* Botão abaixo do vídeo */}
