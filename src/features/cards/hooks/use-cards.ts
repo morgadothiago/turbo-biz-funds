@@ -13,9 +13,34 @@ export interface CreateCardPayload {
   flag?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapCard(raw: any): CreditCard {
+  return {
+    id: raw.id,
+    name: raw.name ?? "",
+    number: raw.number ?? "",
+    limit: raw.limit ?? 0,
+    used: raw.used ?? 0,
+    dueDate: raw.dueDate ?? raw.due_date ?? "",
+    color: raw.color ?? "",
+    flag: raw.flag ?? "",
+  };
+}
+
 async function fetchCards(): Promise<CreditCard[]> {
-  const res = await api.get<ApiListResponse<CreditCard>>(apiEndpoints.cards.list);
-  return res.data;
+  try {
+    const res = await api.get<ApiListResponse<CreditCard> | { data: CreditCard[] }>(apiEndpoints.cards.list);
+    const raw = Array.isArray(res) ? res : (res as ApiListResponse<CreditCard>).data ?? [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return raw.map((r: any) => mapCard(r));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    console.error("[fetchCards] Erro:", error);
+    if (error?.status === 404 || error?.status === 500) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export function useCards() {

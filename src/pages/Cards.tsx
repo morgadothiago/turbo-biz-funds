@@ -52,7 +52,7 @@ const CardsPage = memo(() => {
     createCard.mutate(
       {
         name: form.name.trim(),
-        number: form.number.replace(/\s/g, "").slice(-4).padStart(16, "*"),
+        number: form.number.replace(/\s/g, ""),
         limit: parseFloat(form.limit),
         dueDate: form.dueDate,
         flag: form.flag,
@@ -202,14 +202,14 @@ const CardsPage = memo(() => {
               />
             </div>
             <div className="space-y-2">
-              <Label>Número do cartão (últimos 4 dígitos)</Label>
+              <Label>Número do cartão</Label>
               <Input
                 type="text"
                 inputMode="numeric"
-                placeholder="0000"
-                maxLength={4}
-                value={form.number}
-                onChange={(e) => setForm({ ...form, number: e.target.value.replace(/\D/g, "") })}
+                placeholder="0000 0000 0000 0000"
+                maxLength={19}
+                value={form.number.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim()}
+                onChange={(e) => setForm({ ...form, number: e.target.value.replace(/\D/g, "").slice(0, 16) })}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -225,13 +225,11 @@ const CardsPage = memo(() => {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Dia de vencimento</Label>
+                <Label>Vencimento</Label>
                 <Input
-                  type="text"
-                  placeholder="Ex: 10"
-                  maxLength={2}
+                  type="date"
                   value={form.dueDate}
-                  onChange={(e) => setForm({ ...form, dueDate: e.target.value.replace(/\D/g, "") })}
+                  onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
                 />
               </div>
             </div>

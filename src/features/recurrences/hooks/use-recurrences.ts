@@ -53,15 +53,15 @@ export function useCreateRecurrence() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: RecurrencePayload) => {
-      // Formata o payload para o formato snake_case do backend
+      // Formata o payload para o formato camelCase do backend
       const backendPayload = {
-        category_id: payload.categoryId,
+        categoryId: payload.categoryId,
         type: payload.type,
         amount: payload.amount,
-        description: payload.description || "",
-        frequency: payload.frequency,
-        start_date: payload.startDate,
-        end_date: payload.endDate || null,
+        description: payload.description || undefined,
+        frequency: payload.frequency.toUpperCase(),
+        startDate: payload.startDate,
+        endDate: payload.endDate || null,
       };
       
       console.log("[useCreateRecurrence] Enviando payload:", JSON.stringify(backendPayload));
@@ -80,10 +80,10 @@ export function useUpdateRecurrence() {
   return useMutation({
     mutationFn: ({ id, ...payload }: Partial<RecurrencePayload> & { id: string; active?: boolean }) => {
       const backendPayload: Record<string, unknown> = { ...payload };
-      if ("categoryId" in payload) { backendPayload.category_id = payload.categoryId; delete backendPayload.categoryId; }
-      if ("startDate" in payload) { backendPayload.start_date = payload.startDate; delete backendPayload.startDate; }
-      if ("endDate" in payload) { backendPayload.end_date = payload.endDate; delete backendPayload.endDate; }
-      return api.put<ApiItemResponse<Recurrence>>(apiEndpoints.recurrences.update(id), backendPayload);
+      if (typeof backendPayload.frequency === "string") {
+        backendPayload.frequency = (backendPayload.frequency as string).toUpperCase();
+      }
+      return api.patch<ApiItemResponse<Recurrence>>(apiEndpoints.recurrences.update(id), backendPayload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurrences"] });
