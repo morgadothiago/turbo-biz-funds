@@ -23,7 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
-.env*.local
+.env
+.env.*
+!.env.example
 # Agents IA
 
 /.github
