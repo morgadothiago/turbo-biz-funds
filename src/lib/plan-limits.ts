@@ -4,10 +4,10 @@ export type PlanResource = "transactions" | "goals" | "cards" | "recurrences";
 
 const LIMITS: Record<UserPlan, Record<PlanResource, number>> = {
   free: {
-    transactions: 3,
-    goals: 1,
-    cards: 1,
-    recurrences: 1,
+    transactions: Infinity,
+    goals: Infinity,
+    cards: Infinity,
+    recurrences: Infinity,
   },
   pro: {
     transactions: Infinity,
