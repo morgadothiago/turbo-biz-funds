@@ -141,14 +141,9 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/@tanstack/')) {
             return 'vendor-query';
           }
-          // Radix UI — grande, mas cacheia separado do resto
-          if (id.includes('node_modules/@radix-ui/')) {
-            return 'vendor-radix';
-          }
-          // Framer Motion — pesado, só landing page usa animações
-          if (id.includes('node_modules/framer-motion')) {
-            return 'vendor-motion';
-          }
+          // @radix-ui — NÃO isolar (usa useLayoutEffect/createContext do React;
+          // chunk separado causa "Cannot read properties of undefined" em produção)
+          // framer-motion — NÃO isolar (mesmo motivo: depende de React hooks)
           // recharts/d3 — NÃO isolar em chunk separado (deps circulares causam
           // "Cannot access before initialization" em produção)
           // Formulários
