@@ -157,18 +157,8 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform/') || id.includes('node_modules/zod')) {
             return 'vendor-forms';
           }
-          // Utilitários UI pequenos — sonner, vaul, cmdk, next-themes, etc.
-          if (
-            id.includes('node_modules/sonner') ||
-            id.includes('node_modules/vaul') ||
-            id.includes('node_modules/cmdk') ||
-            id.includes('node_modules/next-themes') ||
-            id.includes('node_modules/class-variance-authority') ||
-            id.includes('node_modules/clsx') ||
-            id.includes('node_modules/tailwind-merge')
-          ) {
-            return 'vendor-ui-utils';
-          }
+          // vendor-ui-utils removido — next-themes/cmdk usam import * as React
+          // e causam createContext crash quando em chunk separado do vendor-react
         },
       },
       treeshake: {
