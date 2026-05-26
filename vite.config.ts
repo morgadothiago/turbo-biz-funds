@@ -149,10 +149,8 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/framer-motion')) {
             return 'vendor-motion';
           }
-          // Recharts — já lazy, mas isola no próprio chunk
-          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-')) {
-            return 'vendor-charts';
-          }
+          // recharts/d3 — NÃO isolar em chunk separado (deps circulares causam
+          // "Cannot access before initialization" em produção)
           // Formulários
           if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform/') || id.includes('node_modules/zod')) {
             return 'vendor-forms';
