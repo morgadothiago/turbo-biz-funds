@@ -172,9 +172,7 @@ export default defineConfig(({ mode }) => ({
         },
       },
       treeshake: {
-        moduleSideEffects: 'no-external',
-        propertyReadSideEffects: false,
-        unknownGlobalSideEffects: false,
+        moduleSideEffects: true,
       },
     },
   },
