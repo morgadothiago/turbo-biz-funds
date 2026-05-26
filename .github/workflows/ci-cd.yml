@@ -1,10 +1,7 @@
 name: CI/CD - Test & Deploy
 
 on:
-  push:
-    branches: [ main, master, develop, new_layout ]
-  pull_request:
-    branches: [ main, master, develop ]
+  workflow_dispatch: # desativado — trigger manual apenas
 
 jobs:
   # Job 1: Lint e Type Check
