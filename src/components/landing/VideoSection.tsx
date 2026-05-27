@@ -1,20 +1,20 @@
-import { memo, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { Play } from "lucide-react";
 import { motion } from "framer-motion";
 import { analytics } from "@/lib/analytics";
 import CTAButton from "@/components/landing/CTAButton";
 
 const logoWeb = "/logoweb.png";
-const YT_ID = "ydOUCjXut48";
-const YT_THUMB = `https://img.youtube.com/vi/${YT_ID}/maxresdefault.jpg`;
-const YT_EMBED = `https://www.youtube.com/embed/${YT_ID}?autoplay=1&rel=0&modestbranding=1`;
+const VIDEO_SRC = "/vsl-new.mp4";
 
 const VideoSection = memo(() => {
   const [active, setActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handlePlay = () => {
     analytics.click("video_play", "video_section");
     setActive(true);
+    setTimeout(() => videoRef.current?.play(), 50);
   };
 
   return (
@@ -43,27 +43,26 @@ const VideoSection = memo(() => {
           className="relative w-full rounded-b-2xl overflow-hidden border border-[#0047FF]/50 bg-black"
           style={{ aspectRatio: "16/9" }}
         >
-          {active ? (
-            <iframe
-              className="absolute inset-0 w-full h-full"
-              src={YT_EMBED}
-              title="Doutor Cash VSL"
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-            />
-          ) : (
+          {/* Vídeo sempre montado, oculto até clicar */}
+          <video
+            ref={videoRef}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${active ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+            src={VIDEO_SRC}
+            controls={active}
+            playsInline
+            preload="none"
+          />
+
+          {/* Overlay de play — some após clicar */}
+          {!active && (
             <button
               type="button"
               className="absolute inset-0 w-full h-full cursor-pointer group"
               onClick={handlePlay}
               aria-label="Reproduzir vídeo"
             >
-              <img
-                src={YT_THUMB}
-                alt="Thumbnail do vídeo Doutor Cash"
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
+              {/* Thumbnail gerada do vídeo (primeiro frame) */}
+              <div className="absolute inset-0 bg-[#06091c]" />
               {/* Overlay escuro sutil */}
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-200" />
               {/* Botão play */}
