@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Content Security Policy — reforçar no backend via header HTTP -->
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.doutorcashapp.com.br https://www.google-analytics.com; frame-src https://www.youtube.com; frame-ancestors 'none';" />
+    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://i.pravatar.cc; connect-src 'self' https://api.doutorcashapp.com.br https://www.google-analytics.com https://va.vercel-scripts.com; frame-src https://www.youtube.com;" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
   <title>doutorcash - Organize suas contas pelo WhatsApp</title>
@@ -60,8 +60,12 @@
   <link rel="icon" type="image/svg+xml" href="/public/logoweb.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-  <!-- Preload critical assets -->
-  <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml" />
+  <!-- Preconnect avatars externos -->
+  <link rel="preconnect" href="https://i.pravatar.cc" />
+
+  <!-- Preload logo crítico — evita layout shift -->
+  <link rel="preload" href="/logoweb.png" as="image" type="image/png" fetchpriority="high" />
+  <!-- favicon.svg não precisa de preload — browser carrega via link rel=icon automaticamente -->
 </head>
 
 <body>

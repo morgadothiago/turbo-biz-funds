@@ -12,7 +12,9 @@ const FAQ = lazy(() => import("@/components/landing/FAQ"));
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
 // Simple loading fallback that doesn't block rendering
-const SectionFallback = () => <div className="min-h-[200px]" />;
+const SectionFallback = ({ height = 400 }: { height?: number }) => (
+  <div style={{ minHeight: height }} />
+);
 
 // Hook to detect when element is near viewport for lazy loading
 const useNearViewport = (options = {}) => {
@@ -41,17 +43,17 @@ const useNearViewport = (options = {}) => {
 };
 
 // Lazy section wrapper
-const LazySection = ({ children }: { children: React.ReactNode }) => {
+const LazySection = ({ children, height = 400 }: { children: React.ReactNode; height?: number }) => {
   const { ref, isNear } = useNearViewport();
 
   return (
-    <div ref={ref} style={{ contentVisibility: 'auto', containIntrinsicSize: '0 200px' }}>
+    <div ref={ref} style={{ contentVisibility: 'auto', containIntrinsicSize: `0 ${height}px` }}>
       {isNear ? (
-        <Suspense fallback={<SectionFallback />}>
+        <Suspense fallback={<SectionFallback height={height} />}>
           {children}
         </Suspense>
       ) : (
-        <SectionFallback />
+        <SectionFallback height={height} />
       )}
     </div>
   );
@@ -65,30 +67,27 @@ const Index = () => {
         <Hero />
 
         {/* Lazy load sections below the fold */}
-        <LazySection>
+        <LazySection height={500}>
           <Problem />
         </LazySection>
 
-        <LazySection>
+        <LazySection height={600}>
           <HowItWorks />
         </LazySection>
 
-
-
-        <LazySection>
+        <LazySection height={700}>
           <Pricing />
         </LazySection>
 
-
-        <LazySection>
+        <LazySection height={500}>
           <Testimonials />
         </LazySection>
 
-        <LazySection>
+        <LazySection height={400}>
           <FAQ />
         </LazySection>
 
-        <LazySection>
+        <LazySection height={200}>
           <Footer />
         </LazySection>
 

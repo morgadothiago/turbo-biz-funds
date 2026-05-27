@@ -12,10 +12,9 @@ const staggerContainer = {
 };
 
 const staggerItem = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
     transition: { duration: 0.55, ease: "easeOut" },
   },
 };
@@ -143,6 +142,8 @@ const AvatarStack = memo(() => (
           alt={`Usuário ${i + 1}`}
           width={36}
           height={36}
+          loading="eager"
+          decoding="async"
           className="w-9 h-9 rounded-full border-2 border-[#06091c] object-cover"
           style={{ zIndex: AVATAR_SRCS.length - i }}
         />

@@ -48,6 +48,8 @@ const Navbar = memo(() => {
             <img
               src={logoWeb}
               alt="DC"
+              width={120}
+              height={64}
               className="h-16 w-auto transition-transform duration-200 group-hover:scale-105"
             />
             <span className="text-white font-bold text-[15px] leading-snug hidden sm:flex flex-col justify-center">
@@ -111,7 +113,7 @@ const Navbar = memo(() => {
             >
               <div className="flex flex-col gap-6 pt-6 flex-1">
                 <Link to="/" onClick={closeMenu} className="flex items-center gap-1">
-                  <img src={logoWeb} alt="DC" className="h-16 w-auto" />
+                  <img src={logoWeb} alt="DC" width={120} height={64} className="h-16 w-auto" />
                   <span className="text-white font-bold text-[15px] leading-snug flex flex-col justify-center">
                     <span>Doutor</span>
                     <span>Cash</span>
