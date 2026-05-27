@@ -1,6 +1,5 @@
 import { memo, useState } from "react";
 import { Play } from "lucide-react";
-import { motion } from "framer-motion";
 import { analytics } from "@/lib/analytics";
 import CTAButton from "@/components/landing/CTAButton";
 
@@ -19,13 +18,7 @@ const VideoSection = memo(() => {
 
   return (
     <section className="py-0 bg-[#06091c]">
-      <motion.div
-        initial={{ opacity: 0, y: 32 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="max-w-3xl mx-auto px-4"
-      >
+      <div className="max-w-3xl mx-auto px-4 animate-fade-in-up">
         {/* Banner superior azul */}
         <div className="flex items-center justify-between bg-[#0047FF] px-6 py-3 rounded-t-2xl">
           <span className="text-white font-bold uppercase tracking-widest text-sm md:text-base">
@@ -84,7 +77,7 @@ const VideoSection = memo(() => {
             ADQUIRIR O DOUTOR CASH
           </CTAButton>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 });

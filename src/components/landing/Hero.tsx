@@ -1,23 +1,6 @@
 import { memo, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
 import { analytics } from "@/lib/analytics";
 import CTAButton from "@/components/landing/CTAButton";
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.12 },
-  },
-};
-
-const staggerItem = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.55, ease: "easeOut" },
-  },
-};
 
 const ROWS = 20;
 const COL_STEP = 22;
@@ -25,7 +8,6 @@ const BG_COLOR = "rgba(2,6,23,";
 
 const WaveMesh = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // Mutable state in a single ref to avoid closure staleness
   const s = useRef({ W: 0, H: 0, time: 0, animId: 0 });
 
   useEffect(() => {
@@ -62,40 +44,35 @@ const WaveMesh = memo(() => {
         const phase = r * 1.1;
         const rowAlpha = 0.06 + t * 0.72;
         const dotR = 0.7 + t * 1.5;
-        ctx.shadowBlur = 2 + t * 9;
 
+        // shadowBlur removido — era 1000 sombras/frame, ~30% do custo GPU
         for (let x = 0; x <= W; x += COL_STEP) {
-          // xFactor: right side brighter (density / brightness increases)
           const xFactor = x / W;
           const alpha = rowAlpha * (0.28 + xFactor * 0.72);
           const y = baseY + Math.sin(x * freq + phase + st.time) * amp;
-
-          ctx.shadowColor = `rgba(60,120,255,${alpha * 0.75})`;
-          ctx.fillStyle   = `rgba(80,150,255,${alpha})`;
+          ctx.fillStyle = `rgba(80,150,255,${alpha})`;
           ctx.beginPath();
           ctx.arc(x, y, dotR, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
-      ctx.shadowBlur = 0;
-
-      // Fade top — wave invisible in upper 55% of canvas
+      // Fade top
       const fadeTop = ctx.createLinearGradient(0, 0, 0, H * 0.55);
-      fadeTop.addColorStop(0,   BG_COLOR + "1)");
+      fadeTop.addColorStop(0,    BG_COLOR + "1)");
       fadeTop.addColorStop(0.62, BG_COLOR + "1)");
-      fadeTop.addColorStop(1,   BG_COLOR + "0)");
+      fadeTop.addColorStop(1,    BG_COLOR + "0)");
       ctx.fillStyle = fadeTop;
       ctx.fillRect(0, 0, W, H * 0.55);
 
-      // Fade left edge
+      // Fade left
       const fadeL = ctx.createLinearGradient(0, 0, W * 0.06, 0);
       fadeL.addColorStop(0, BG_COLOR + "1)");
       fadeL.addColorStop(1, BG_COLOR + "0)");
       ctx.fillStyle = fadeL;
       ctx.fillRect(0, 0, W * 0.06, H);
 
-      // Fade right edge
+      // Fade right
       const fadeR = ctx.createLinearGradient(W * 0.94, 0, W, 0);
       fadeR.addColorStop(0, BG_COLOR + "0)");
       fadeR.addColorStop(1, BG_COLOR + "1)");
@@ -160,6 +137,12 @@ const AvatarStack = memo(() => (
 
 AvatarStack.displayName = "AvatarStack";
 
+// CSS stagger — substitui framer-motion (economiza ~100KB do bundle inicial)
+const fadeUp: React.CSSProperties = {
+  opacity: 0,
+  animation: "fade-in-up 0.6s ease-out forwards",
+};
+
 const Hero = memo(() => {
   return (
     <section
@@ -167,17 +150,13 @@ const Hero = memo(() => {
       style={{ background: "transparent" }}
     >
       <div className="container mx-auto px-4 relative z-10">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="max-w-4xl mx-auto text-center pt-16 pb-44"
-        >
+        <div className="max-w-4xl mx-auto text-center pt-16 pb-44">
           {/* Headline */}
-          <motion.h1
-            variants={staggerItem}
+          <h1
             className="text-4xl md:text-5xl font-extrabold leading-tight mb-5"
             style={{
+              ...fadeUp,
+              animationDelay: "0s",
               background: "linear-gradient(to bottom, #C8D8F0 0%, #FFFFFF 50%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -187,22 +166,22 @@ const Hero = memo(() => {
             Não sabe para onde está
             <br />
             indo o seu dinheiro?
-          </motion.h1>
+          </h1>
 
           {/* Subtitle */}
-          <motion.p
-            variants={staggerItem}
+          <p
             className="text-base md:text-lg text-[#94A3B8] max-w-xl mx-auto mb-10 leading-relaxed"
+            style={{ ...fadeUp, animationDelay: "0.12s" }}
           >
             Tenha um assistente financeiro trabalhando 24 horas para você.
             <br className="hidden md:block" />
             Mande áudio, foto ou texto. Seu assistente financeiro resolve tudo pra você.
-          </motion.p>
+          </p>
 
-          {/* CTA row — sits above wave via z-20 */}
-          <motion.div
-            variants={staggerItem}
+          {/* CTA row */}
+          <div
             className="flex flex-col sm:flex-row items-center justify-center gap-5 relative z-20"
+            style={{ ...fadeUp, animationDelay: "0.24s" }}
           >
             <CTAButton
               to="/cadastro"
@@ -211,11 +190,11 @@ const Hero = memo(() => {
               COMECE AGORA
             </CTAButton>
             <AvatarStack />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
-      {/* Wave mesh — absolute bottom, z-1 (behind CTA z-20) */}
+      {/* Wave mesh */}
       <WaveMesh />
     </section>
   );

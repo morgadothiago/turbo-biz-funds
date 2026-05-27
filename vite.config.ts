@@ -72,8 +72,25 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Precacheia só assets críticos da landing + shell.
+        // Antes: todos os chunks (2.3 MB) eram precacheados no first load.
+        // Chunks grandes (recharts, dashboard) são carregados on-demand.
+        globPatterns: ['**/*.{html,css,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 300 * 1024, // ignora chunks > 300 KB
         runtimeCaching: [
+          {
+            // Chunks JS do app — StaleWhileRevalidate: responde rápido do cache,
+            // atualiza em background. Só chunks pequenos (vendor-react, vendor-router, etc.)
+            urlPattern: /\/assets\/.*\.js$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'js-chunks-cache',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 dias
+              },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
@@ -141,9 +158,13 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/@tanstack/')) {
             return 'vendor-query';
           }
+          // framer-motion — chunk separado: agora só usado em componentes lazy
+          // (Hero e HowItWorks não dependem mais dele → não entra no bundle inicial)
+          if (id.includes('node_modules/framer-motion')) {
+            return 'vendor-framer';
+          }
           // @radix-ui — NÃO isolar (usa useLayoutEffect/createContext do React;
           // chunk separado causa "Cannot read properties of undefined" em produção)
-          // framer-motion — NÃO isolar (mesmo motivo: depende de React hooks)
           // recharts/d3 — NÃO isolar em chunk separado (deps circulares causam
           // "Cannot access before initialization" em produção)
           // Formulários

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useCards, useCreateCard, useDeleteCard } from "@/features/cards/hooks/use-cards";
+import { fmtBRL } from "@/lib/format";
 
 const CARD_COLORS = [
   "from-blue-500 to-blue-700",
@@ -147,13 +148,13 @@ const CardsPage = memo(() => {
                   <div>
                     <p className="text-sm text-muted-foreground">Limite Utilizado</p>
                     <p className="text-lg font-semibold text-foreground">
-                      R$ {card.used.toLocaleString("pt-BR")}
+                      {fmtBRL(card.used)}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Limite Total</p>
                     <p className="text-lg font-semibold text-foreground">
-                      R$ {card.limit.toLocaleString("pt-BR")}
+                      {fmtBRL(card.limit)}
                     </p>
                   </div>
                 </div>

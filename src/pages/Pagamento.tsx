@@ -18,6 +18,7 @@ import {
 import { usePlanInfo } from "@/features/payments/hooks/use-plan-info";
 import { api, apiEndpoints } from "@/lib/api/client";
 import { toast } from "sonner";
+import { fmtBRL } from "@/lib/format";
 
 const logoWeb = "/logoweb.png";
 const INSTALLMENTS = [1, 2, 3, 6, 12];
@@ -57,11 +58,11 @@ function formatExpiry(value: string) {
 function calcInstallment(price: string | number, n: number): string {
   const raw = typeof price === "number" ? price : parseFloat(String(price).replace(/[^\d.,]/g, "").replace(",", "."));
   if (isNaN(raw) || raw === 0) return "—";
-  return `R$ ${(raw / n).toFixed(2).replace(".", ",")}`;
+  return fmtBRL(raw / n);
 }
 
 function toDisplay(price: string | number): string {
-  if (typeof price === "number") return `R$ ${price.toFixed(2).replace(".", ",")}`;
+  if (typeof price === "number") return fmtBRL(price);
   return String(price);
 }
 

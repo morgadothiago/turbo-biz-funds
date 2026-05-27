@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import { TrendingDown } from "lucide-react";
 import { ExpenseByDay } from "../types";
+import { fmtBRL } from "@/lib/format";
 
 interface ExpenseChartProps {
   data: ExpenseByDay[];
@@ -58,10 +59,7 @@ export const ExpenseChart = ({ data }: ExpenseChartProps) => {
                   fontSize: 12,
                   padding: "8px 12px",
                 }}
-                formatter={(value: number) => [
-                  `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
-                  "Despesa",
-                ]}
+                formatter={(value: number) => [fmtBRL(value), "Despesa"]}
                 cursor={{ stroke: "#e5e7eb", strokeWidth: 1 }}
               />
               <Line

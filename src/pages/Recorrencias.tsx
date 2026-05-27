@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
-import { RefreshCw, Plus, Repeat, TrendingUp, TrendingDown, Trash2, Loader2, Zap, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { RefreshCw, Plus, Repeat, TrendingUp, TrendingDown, Trash2, Loader2, Zap, Lock, CreditCard, Pencil } from "lucide-react";
 import { usePlanGuard } from "@/hooks/use-plan-guard";
 import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +32,7 @@ import {
 } from "@/features/recurrences/hooks/use-recurrences";
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import type { RecurrencePayload } from "@/shared/types";
+import { fmtBRL, fmtNumber, parseBRNumber as parseBR } from "@/lib/format";
 
 const FREQUENCY_LABELS: Record<string, string> = {
   daily: "Diário",
@@ -50,6 +52,7 @@ const defaultForm = (): RecurrencePayload => ({
 });
 
 const RecorrenciasPage = memo(() => {
+  const navigate = useNavigate();
   const { recurrences, isLoading } = useActiveRecurrences();
   const { categories } = useCategories();
   const createRecurrence = useCreateRecurrence();
@@ -58,7 +61,30 @@ const RecorrenciasPage = memo(() => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
+  const [isInstallment, setIsInstallment] = useState(false);
+  const [installments, setInstallments] = useState(2);
+  const [acrescimo, setAcrescimo] = useState(0);
+
+  // Estado do modal de edição
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{
+    amount: string;
+    description: string;
+    categoryId: string;
+    frequency: RecurrencePayload["frequency"];
+    startDate: string;
+    endDate: string;
+  }>({ amount: "", description: "", categoryId: "", frequency: "monthly", startDate: "", endDate: "" });
   const planGuard = usePlanGuard("recurrences", recurrences.length);
+
+  const calcEndDate = (startDate: string, numInstallments: number): string => {
+    if (!startDate) return "";
+    const d = new Date(startDate);
+    d.setMonth(d.getMonth() + numInstallments - 1);
+    return d.toISOString().split("T")[0];
+  };
+
+  // parseBRNumber = parseBR (importado de @/lib/format)
 
   const [form, setForm] = useState<RecurrencePayload & { amount: string }>(
     { ...defaultForm(), amount: "" } as RecurrencePayload & { amount: string }
@@ -80,16 +106,25 @@ const RecorrenciasPage = memo(() => {
     const payload: RecurrencePayload = {
       categoryId: form.categoryId,
       type: form.type,
-      amount: parseFloat(String(form.amount)),
+      amount: isInstallment
+        ? (parseBR(form.amount) * (1 + acrescimo / 100)) / installments
+        : parseBR(form.amount),
       description: form.description?.trim() || undefined,
-      frequency: form.frequency,
+      frequency: isInstallment ? "monthly" : form.frequency,
       startDate: new Date(form.startDate).toISOString(),
-      endDate: form.endDate ? new Date(form.endDate).toISOString() : undefined,
+      endDate: isInstallment
+        ? new Date(calcEndDate(form.startDate, installments)).toISOString()
+        : form.endDate
+        ? new Date(form.endDate).toISOString()
+        : undefined,
     };
     createRecurrence.mutate(payload, {
       onSuccess: () => {
         toast.success("Recorrência criada!");
         setIsDialogOpen(false);
+        setIsInstallment(false);
+        setInstallments(2);
+        setAcrescimo(0);
         setForm({ ...defaultForm(), amount: "" } as RecurrencePayload & { amount: string });
       },
       onError: () => toast.error("Erro ao criar recorrência"),
@@ -113,8 +148,44 @@ const RecorrenciasPage = memo(() => {
     });
   };
 
-  const fmt = (v: number) =>
-    v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const openEdit = (rec: typeof recurrences[0]) => {
+    setEditingId(rec.id);
+    setEditForm({
+      amount: String(rec.amount),
+      description: rec.description ?? "",
+      categoryId: rec.categoryId,
+      frequency: rec.frequency,
+      startDate: rec.startDate.split("T")[0],
+      endDate: rec.endDate ? rec.endDate.split("T")[0] : "",
+    });
+  };
+
+  const handleUpdate = () => {
+    if (!editingId) return;
+    const amt = parseBR(editForm.amount);
+    if (!amt || !editForm.categoryId || !editForm.startDate) {
+      toast.error("Preencha categoria, valor e data de início");
+      return;
+    }
+    updateRecurrence.mutate(
+      {
+        id: editingId,
+        amount: amt,
+        description: editForm.description.trim() || undefined,
+        categoryId: editForm.categoryId,
+        frequency: editForm.frequency,
+        startDate: new Date(editForm.startDate).toISOString(),
+        endDate: editForm.endDate ? new Date(editForm.endDate).toISOString() : undefined,
+      },
+      {
+        onSuccess: () => { toast.success("Recorrência atualizada!"); setEditingId(null); },
+        onError: () => toast.error("Erro ao atualizar recorrência"),
+      }
+    );
+  };
+
+  // Alias local para compatibilidade com usos existentes
+  const fmt = fmtNumber;
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto">
@@ -160,7 +231,7 @@ const RecorrenciasPage = memo(() => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Receitas Fixas</p>
-                <p className="text-2xl font-bold text-emerald-500">R$ {fmt(totalIncome)}</p>
+                <p className="text-2xl font-bold text-emerald-500">{fmtBRL(totalIncome)}</p>
               </div>
             </div>
           </CardContent>
@@ -220,7 +291,8 @@ const RecorrenciasPage = memo(() => {
             return (
               <Card
                 key={rec.id}
-                className="border-border shadow-sm transition-all duration-200 hover:shadow-md group"
+                className="border-border shadow-sm transition-all duration-200 hover:shadow-md group cursor-pointer"
+                onClick={() => navigate(`/dashboard/recorrencias/${rec.id}`)}
               >
                 <CardContent className="p-4 flex items-center gap-4">
                   <div
@@ -265,9 +337,18 @@ const RecorrenciasPage = memo(() => {
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label="Editar recorrência"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground hover:bg-muted"
+                    onClick={(e) => { e.stopPropagation(); openEdit(rec); }}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     aria-label="Desativar recorrência"
                     className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => handleDeactivate(rec.id)}
+                    onClick={(e) => { e.stopPropagation(); handleDeactivate(rec.id); }}
                     disabled={updateRecurrence.isPending}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -279,35 +360,263 @@ const RecorrenciasPage = memo(() => {
         </div>
       )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setIsInstallment(false);
+            setInstallments(2);
+            setForm({ ...defaultForm(), amount: "" } as RecurrencePayload & { amount: string });
+          }
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Nova Recorrência</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Tipo</Label>
-                <Select
-                  value={form.type}
-                  onValueChange={(v) => setForm({ ...form, type: v as "INCOME" | "EXPENSE" })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="INCOME">Receita</SelectItem>
-                    <SelectItem value="EXPENSE">Despesa</SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* 1. Tipo — botões visuais */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Tipo</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {(["EXPENSE", "INCOME"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => {
+                      setForm({ ...form, type: t });
+                      if (t === "INCOME") { setIsInstallment(false); setInstallments(2); }
+                    }}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                      form.type === t
+                        ? t === "INCOME"
+                          ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"
+                          : "bg-red-500 text-white border-red-500 shadow-sm"
+                        : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {t === "INCOME"
+                      ? <><TrendingUp className="w-4 h-4" /> Receita</>
+                      : <><TrendingDown className="w-4 h-4" /> Despesa</>
+                    }
+                  </button>
+                ))}
               </div>
-              <div className="space-y-2">
-                <Label>Frequência</Label>
+            </div>
+
+            {/* 2. Descrição */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Descrição</Label>
+              <Input
+                placeholder={form.type === "INCOME" ? "Ex: Salário, Freelance..." : "Ex: Aluguel, Netflix..."}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+
+            {/* 3. Categoria */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoria</Label>
+              <Select
+                value={form.categoryId}
+                onValueChange={(v) => setForm({ ...form, categoryId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 4. Valor — destacado */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Valor total (R$)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-sm">R$</span>
+                <Input
+                  type="number"
+                  placeholder="0,00"
+                  className="pl-9 text-lg font-semibold h-11"
+                  value={form.amount}
+                  onChange={(e) => setForm({ ...form, amount: e.target.value as unknown as number })}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            {/* 5. Parcelado (só EXPENSE) ou Frequência */}
+            {form.type === "EXPENSE" ? (
+              <div className="space-y-3">
+                {/* Toggle parcelado */}
+                <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <span className="text-sm font-medium">Parcelado</span>
+                      <p className="text-xs text-muted-foreground">Divide em parcelas mensais</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isInstallment}
+                    onClick={() => setIsInstallment((v) => !v)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                      isInstallment ? "bg-primary" : "bg-muted-foreground/30"
+                    }`}
+                  >
+                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                      isInstallment ? "translate-x-4" : "translate-x-1"
+                    }`} />
+                  </button>
+                </div>
+
+                {/* Se parcelado: select de parcelas + tabela */}
+                {isInstallment ? (
+                  <div className="space-y-3 p-3 rounded-xl border border-primary/20 bg-primary/5">
+                    {/* Nº parcelas + Acréscimo (11x+) */}
+                    <div className={`grid gap-3 ${installments >= 11 ? "grid-cols-2" : "grid-cols-1"}`}>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Nº de parcelas</Label>
+                        <Select
+                          value={String(installments)}
+                          onValueChange={(v) => { setInstallments(Number(v)); if (Number(v) < 11) setAcrescimo(0); }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[2,3,4,5,6,7,8,9,10,11,12,18,24,36,48,60].map((n) => {
+                              const amt = parseBR(form.amount);
+                              const total = amt * (1 + acrescimo / 100);
+                              const parcel = amt > 0
+                                ? `${fmtBRL(total / n)} - ${n}x`
+                                : `${n}x`;
+                              return <SelectItem key={n} value={String(n)}>{parcel}</SelectItem>;
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {installments >= 11 && (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            Acréscimo (%)
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              min={0}
+                              max={100}
+                              step={0.1}
+                              placeholder="0,00"
+                              value={acrescimo === 0 ? "" : acrescimo}
+                              onChange={(e) => setAcrescimo(Math.max(0, Number(e.target.value)))}
+                              className="pr-7"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
+                          </div>
+                          {acrescimo > 0 && parseBR(form.amount) > 0 && (
+                            <p className="text-xs text-amber-600 font-medium">
+                              +{fmtBRL(parseBR(form.amount) * acrescimo / 100)} de juros
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {parseBR(form.amount) > 0 && (() => {
+                      const totalComAcrescimo = parseBR(form.amount) * (1 + acrescimo / 100);
+                      const parcelAmt = totalComAcrescimo / installments;
+                      return (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            {acrescimo > 0 ? `Total c/ ${acrescimo}% acréscimo` : "Resumo"}
+                          </span>
+                          <span className="font-bold text-red-500">
+                            {fmtBRL(totalComAcrescimo)} total
+                          </span>
+                        </div>
+                        <div className="rounded-lg border border-border overflow-hidden max-h-36 overflow-y-auto">
+                          <table className="w-full text-xs">
+                            <thead className="sticky top-0 z-10 bg-muted">
+                              <tr>
+                                <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Parcela</th>
+                                <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Vencimento</th>
+                                {acrescimo > 0 && <th className="text-right px-3 py-1.5 font-medium text-muted-foreground">Base</th>}
+                                {acrescimo > 0 && <th className="text-right px-3 py-1.5 font-medium text-amber-600">Juros</th>}
+                                <th className="text-right px-3 py-1.5 font-medium text-muted-foreground">Total</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                              {Array.from({ length: installments }, (_, i) => {
+                                const d = new Date(form.startDate || new Date());
+                                d.setMonth(d.getMonth() + i);
+                                const baseAmt = parseBR(form.amount) / installments;
+                                const jurosAmt = baseAmt * (acrescimo / 100);
+                                return (
+                                  <tr key={i} className="bg-background hover:bg-muted/30 transition-colors">
+                                    <td className="px-3 py-1.5 font-medium">{i + 1}/{installments}</td>
+                                    <td className="px-3 py-1.5 text-muted-foreground">
+                                      {d.toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
+                                    </td>
+                                    {acrescimo > 0 && (
+                                      <td className="px-3 py-1.5 text-right text-muted-foreground">
+                                        {fmtBRL(baseAmt)}
+                                      </td>
+                                    )}
+                                    {acrescimo > 0 && (
+                                      <td className="px-3 py-1.5 text-right text-amber-600 font-medium">
+                                        +{fmtBRL(jurosAmt)}
+                                      </td>
+                                    )}
+                                    <td className="px-3 py-1.5 text-right font-semibold text-red-500">
+                                      {fmtBRL(parcelAmt)}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    );
+                    })()}
+                  </div>
+                ) : (
+                  /* Sem parcelamento: frequência */
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Frequência</Label>
+                    <Select
+                      value={form.frequency}
+                      onValueChange={(v) => setForm({ ...form, frequency: v as RecurrencePayload["frequency"] })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Diário</SelectItem>
+                        <SelectItem value="weekly">Semanal</SelectItem>
+                        <SelectItem value="monthly">Mensal</SelectItem>
+                        <SelectItem value="yearly">Anual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* INCOME: frequência */
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Frequência</Label>
                 <Select
                   value={form.frequency}
-                  onValueChange={(v) =>
-                    setForm({ ...form, frequency: v as RecurrencePayload["frequency"] })
-                  }
+                  onValueChange={(v) => setForm({ ...form, frequency: v as RecurrencePayload["frequency"] })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -320,64 +629,28 @@ const RecorrenciasPage = memo(() => {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+            )}
 
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Select
-                value={form.categoryId}
-                onValueChange={(v) => setForm({ ...form, categoryId: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Valor (R$)</Label>
-                <Input
-                  type="number"
-                  placeholder="0,00"
-                  value={form.amount}
-                  onChange={(e) => setForm({ ...form, amount: e.target.value as unknown as number })}
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Descrição</Label>
-                <Input
-                  placeholder="Ex: Aluguel"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Data de início</Label>
+            {/* 6. Datas */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Data de início</Label>
                 <Input
                   type="date"
                   value={form.startDate}
                   onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Data de término (opcional)</Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {isInstallment ? "Término (auto)" : "Término (opcional)"}
+                </Label>
                 <Input
                   type="date"
-                  value={form.endDate}
-                  onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                  value={isInstallment ? calcEndDate(form.startDate, installments) : (form.endDate ?? "")}
+                  readOnly={isInstallment}
+                  className={isInstallment ? "bg-muted/50 cursor-default text-muted-foreground" : ""}
+                  onChange={(e) => { if (!isInstallment) setForm({ ...form, endDate: e.target.value }); }}
                 />
               </div>
             </div>
@@ -393,6 +666,110 @@ const RecorrenciasPage = memo(() => {
                 <>
                   <Plus className="w-4 h-4 mr-2" />
                   Criar
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Modal de Edição ── */}
+      <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Recorrência</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {/* Valor */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Valor</Label>
+              <Input
+                type="text"
+                inputMode="decimal"
+                placeholder="0,00"
+                value={editForm.amount}
+                onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
+              />
+            </div>
+
+            {/* Descrição */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Descrição (opcional)</Label>
+              <Input
+                placeholder="Ex: Aluguel, Salário..."
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+              />
+            </div>
+
+            {/* Categoria */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Categoria</Label>
+              <Select
+                value={editForm.categoryId}
+                onValueChange={(v) => setEditForm({ ...editForm, categoryId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Frequência */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Frequência</Label>
+              <Select
+                value={editForm.frequency}
+                onValueChange={(v) => setEditForm({ ...editForm, frequency: v as RecurrencePayload["frequency"] })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Diário</SelectItem>
+                  <SelectItem value="weekly">Semanal</SelectItem>
+                  <SelectItem value="monthly">Mensal</SelectItem>
+                  <SelectItem value="yearly">Anual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Datas */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Data de início</Label>
+                <Input
+                  type="date"
+                  value={editForm.startDate}
+                  onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Término (opcional)</Label>
+                <Input
+                  type="date"
+                  value={editForm.endDate}
+                  onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingId(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdate} disabled={updateRecurrence.isPending}>
+              {updateRecurrence.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Salvar
                 </>
               )}
             </Button>

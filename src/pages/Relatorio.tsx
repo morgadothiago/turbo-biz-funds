@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { api, apiEndpoints } from "@/lib/api/client";
+import { useActiveRecurrences } from "@/features/recurrences/hooks/use-recurrences";
+import { fmtBRL, fmtNumber } from "@/lib/format";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -83,12 +85,8 @@ const FREQUENCY_LABELS: Record<Recurrence["frequency"], string> = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function fmt(value: number): string {
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
+// fmt = fmtNumber (importado de @/lib/format)
+const fmt = fmtNumber;
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("pt-BR", {
@@ -284,8 +282,7 @@ function ChartTooltip({ active, payload, label }: any) {
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       {payload.map((p: any) => (
         <p key={p.name} style={{ color: p.color }}>
-          {p.name === "income" ? "Receitas" : "Despesas"}: R${" "}
-          {p.value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          {p.name === "income" ? "Receitas" : "Despesas"}: {fmtBRL(p.value)}
         </p>
       ))}
     </div>
@@ -337,20 +334,14 @@ export default function RelatorioPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch recurrences
-  const { data: recurrencesRes, isLoading: isLoadingRecurrences } = useQuery({
-    queryKey: ["recurrences", "active"],
-    queryFn: () =>
-      api.get<{ data: Recurrence[] }>(apiEndpoints.recurrences.active),
-    staleTime: 5 * 60 * 1000,
-  });
+  // Fetch recurrences — usa o mesmo hook (e mesma query key) das outras páginas
+  const { recurrences, isLoading: isLoadingRecurrences } = useActiveRecurrences();
 
   const isLoading =
     isLoadingTransactions || isLoadingCategories || isLoadingRecurrences;
 
   const allTransactions = transactionsRes?.data ?? [];
   const categories = categoriesRes?.data ?? [];
-  const recurrences = recurrencesRes?.data ?? [];
 
   const catMap = useMemo(
     () => new Map(categories.map((c) => [c.id, c.name])),
@@ -801,7 +792,7 @@ export default function RelatorioPage() {
                     />
                     <Tooltip
                       formatter={(value: number) => [
-                        `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+                        fmtBRL(value),
                         "Valor",
                       ]}
                       contentStyle={{

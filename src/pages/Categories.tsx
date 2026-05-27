@@ -26,6 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { fmtBRL } from "@/lib/format";
 
 interface ApiCategory {
   id: string;
@@ -165,7 +166,7 @@ const CategoriesPage = memo(() => {
               <div>
                 <p className="text-sm text-muted-foreground">Gasto Total (30d)</p>
                 <p className="text-2xl font-bold text-foreground">
-                  R$ {totalSpent.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  {fmtBRL(totalSpent)}
                 </p>
               </div>
             </div>
@@ -214,12 +215,12 @@ const CategoriesPage = memo(() => {
                     <div className="flex items-center gap-4">
                       {expense > 0 && (
                         <span className="text-sm text-destructive">
-                          -R$ {expense.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          -{fmtBRL(expense)}
                         </span>
                       )}
                       {income > 0 && (
                         <span className="text-sm text-success">
-                          +R$ {income.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                          +{fmtBRL(income)}
                         </span>
                       )}
                       {!expense && !income && (

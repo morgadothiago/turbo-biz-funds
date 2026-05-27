@@ -7,6 +7,7 @@ import {
 } from "recharts";
 import { TrendingDown } from "lucide-react";
 import { CategoryExpense } from "../types";
+import { fmtBRL } from "@/lib/format";
 
 interface CategoryChartProps {
   data: CategoryExpense[];
@@ -58,10 +59,7 @@ export const CategoryChart = ({ data }: CategoryChartProps) => {
                     fontSize: 12,
                     padding: "8px 12px",
                   }}
-                  formatter={(value: number, name: string) => [
-                    `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
-                    name,
-                  ]}
+                  formatter={(value: number, name: string) => [fmtBRL(value), name]}
                 />
               </RePieChart>
             </ResponsiveContainer>

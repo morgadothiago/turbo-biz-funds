@@ -39,6 +39,7 @@ const CardsPage = lazy(() => import(/* webpackChunkName: "pages-cards" */ "./pag
 const WhatsAppPage = lazy(() => import(/* webpackChunkName: "pages-whatsapp" */ "./pages/WhatsApp"));
 const SettingsPage = lazy(() => import(/* webpackChunkName: "pages-settings" */ "./pages/Settings"));
 const RecorrenciasPage = lazy(() => import(/* webpackChunkName: "pages-recorrencias" */ "./pages/Recorrencias"));
+const RecorrenciaDetalhePage = lazy(() => import(/* webpackChunkName: "pages-recorrencia-detalhe" */ "./pages/RecorrenciaDetalhe"));
 const RelatorioPage = lazy(() => import(/* webpackChunkName: "pages-relatorio" */ "./pages/Relatorio"));
 
 const PageLoading = () => (
@@ -166,6 +167,7 @@ function AppRoutes() {
           <Route path="metas" element={<GoalsPage />} />
           <Route path="cartoes" element={<CardsPage />} />
           <Route path="recorrencias" element={<RecorrenciasPage />} />
+          <Route path="recorrencias/:id" element={<RecorrenciaDetalhePage />} />
           <Route path="whatsapp" element={<WhatsAppPage />} />
           <Route path="configuracoes" element={<SettingsPage />} />
           <Route path="notificacoes" element={<NotificationsPage />} />

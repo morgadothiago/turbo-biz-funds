@@ -2,6 +2,7 @@ import { memo } from "react";
 import { ArrowUpRight, ArrowDownRight, Receipt } from "lucide-react";
 import type { Transaction } from "@/shared/types";
 import { cn } from "@/lib/utils";
+import { fmtBRL } from "@/lib/format";
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -58,8 +59,7 @@ export const TransactionList = memo(({ transactions }: TransactionListProps) => 
                     "text-sm font-semibold shrink-0",
                     isIncome ? "text-emerald-600" : "text-gray-800"
                   )}>
-                    {isIncome ? "+" : ""}R${" "}
-                    {Math.abs(transaction.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    {isIncome ? "+" : ""}{fmtBRL(Math.abs(transaction.amount))}
                   </span>
                 </div>
               );

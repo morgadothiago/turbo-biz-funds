@@ -3,6 +3,7 @@ import { api, apiEndpoints } from "@/lib/api/client";
 import { Wallet, TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import type { DashboardData, DashboardStat, ExpenseByDay, CategoryExpense, Goal } from "../types";
 import type { Transaction } from "@/shared/types";
+import { fmtBRL } from "@/lib/format";
 
 const CHART_COLORS = [
   "#10b981", "#3b82f6", "#f59e0b", "#ef4444",
@@ -52,7 +53,7 @@ async function fetchDashboard(): Promise<DashboardData> {
     {
       id: "balance",
       title: "Saldo do Mês",
-      value: `R$ ${balance.balance.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+      value: fmtBRL(balance.balance),
       change: balance.balance >= 0 ? "positivo" : "negativo",
       trend: balance.balance >= 0 ? "up" : "down",
       icon: Wallet,
@@ -62,7 +63,7 @@ async function fetchDashboard(): Promise<DashboardData> {
     {
       id: "income",
       title: "Receitas",
-      value: `R$ ${balance.income.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+      value: fmtBRL(balance.income),
       change: "",
       trend: "up",
       icon: TrendingUp,
@@ -72,7 +73,7 @@ async function fetchDashboard(): Promise<DashboardData> {
     {
       id: "expenses",
       title: "Despesas",
-      value: `R$ ${balance.expense.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+      value: fmtBRL(balance.expense),
       change: "",
       trend: "down",
       icon: TrendingDown,

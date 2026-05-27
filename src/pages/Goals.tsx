@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useGoals, useCreateGoal, useDeleteGoal } from "@/features/goals/hooks/use-goals";
+import { fmtBRL } from "@/lib/format";
 
 const GOAL_COLORS = [
   "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-purple-500",
@@ -154,7 +155,7 @@ const GoalsPage = memo(() => {
               <div>
                 <p className="text-sm text-muted-foreground">Total Economizado</p>
                 <p className="text-2xl font-bold text-primary">
-                  R$ {goals.reduce((acc, g) => acc + g.current, 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  {fmtBRL(goals.reduce((acc, g) => acc + g.current, 0))}
                 </p>
               </div>
             </div>
@@ -250,10 +251,10 @@ const GoalsPage = memo(() => {
 
                     <div className="flex justify-between text-sm pt-1">
                       <span className="text-primary font-medium">
-                        R$ {goal.current.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        {fmtBRL(goal.current)}
                       </span>
                       <span className="text-muted-foreground">
-                        R$ {goal.target.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        {fmtBRL(goal.target)}
                       </span>
                     </div>
                   </div>

@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { fmtBRL, fmtNumber } from "@/lib/format";
 
 interface ApiTransaction {
   id: string;
@@ -177,8 +178,7 @@ const TransactionsPage = memo(() => {
     );
   });
 
-  const fmt = (v: number) =>
-    v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt = fmtNumber;
 
   if (isLoading) return <TransactionsPageSkeleton />;
 
@@ -210,7 +210,7 @@ const TransactionsPage = memo(() => {
             </div>
             <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Receitas</p>
-              <p className="text-xl font-bold text-emerald-500">R$ {fmt(totalIncome)}</p>
+              <p className="text-xl font-bold text-emerald-500">{fmtBRL(totalIncome)}</p>
             </div>
           </CardContent>
         </Card>
@@ -221,7 +221,7 @@ const TransactionsPage = memo(() => {
             </div>
             <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Despesas</p>
-              <p className="text-xl font-bold text-red-500">R$ {fmt(totalExpense)}</p>
+              <p className="text-xl font-bold text-red-500">{fmtBRL(totalExpense)}</p>
             </div>
           </CardContent>
         </Card>
@@ -233,7 +233,7 @@ const TransactionsPage = memo(() => {
             <div>
               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Saldo</p>
               <p className={`text-xl font-bold ${balance >= 0 ? "text-primary" : "text-red-500"}`}>
-                R$ {fmt(Math.abs(balance))}
+                {fmtBRL(Math.abs(balance))}
               </p>
             </div>
           </CardContent>
@@ -348,7 +348,7 @@ const TransactionsPage = memo(() => {
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <span className={`font-bold text-base ${isIncome ? "text-emerald-500" : "text-foreground"}`}>
-                          {isIncome ? "+" : "−"}R$ {fmt(transaction.amount)}
+                          {isIncome ? "+" : "−"}{fmtBRL(transaction.amount)}
                         </span>
                         <p className="text-xs text-muted-foreground capitalize">{isIncome ? "receita" : "despesa"}</p>
                       </div>

@@ -24,7 +24,11 @@ function Header() {
   const { user } = useAuth();
   const location = useLocation();
 
-  const page = PAGE_TITLES[location.pathname] ?? { title: "doutorcash", subtitle: "" };
+  const page =
+    PAGE_TITLES[location.pathname] ??
+    (location.pathname.startsWith("/dashboard/recorrencias/")
+      ? { title: "Detalhes", subtitle: "Informações da recorrência" }
+      : { title: "doutorcash", subtitle: "" });
 
   const getUserInitials = () => {
     if (!user?.name) return "U";
