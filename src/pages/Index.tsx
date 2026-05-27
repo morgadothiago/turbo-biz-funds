@@ -1,7 +1,6 @@
 import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
-import VideoSection from "@/components/landing/VideoSection";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
 // Lazy load components below the fold for better performance
@@ -64,7 +63,6 @@ const Index = () => {
       <div className="min-h-screen relative" style={{ background: "linear-gradient(to bottom, #030712, #020617 40%, #010409)" }}>
         <Navbar />
         <Hero />
-        <VideoSection />
 
         {/* Lazy load sections below the fold */}
         <LazySection>
