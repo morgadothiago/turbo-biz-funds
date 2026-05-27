@@ -17,6 +17,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   "/dashboard/configuracoes": { title: "Configurações", subtitle: "Sua conta" },
   "/dashboard/notificacoes": { title: "Notificações", subtitle: "Central de avisos" },
   "/dashboard/suporte": { title: "Suporte", subtitle: "Ajuda e contato" },
+  "/dashboard/relatorio": { title: "Relatório", subtitle: "Seu desempenho financeiro" },
 };
 
 function Header() {

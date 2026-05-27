@@ -1,0 +1,841 @@
+import { useState, useMemo } from "react";
+import * as XLSX from "xlsx";
+import {
+  BarChart2,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  ArrowUpRight,
+  ArrowDownRight,
+  RefreshCw,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  FileSpreadsheet,
+} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { api, apiEndpoints } from "@/lib/api/client";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface ApiTransaction {
+  id: string;
+  categoryId: string;
+  type: "INCOME" | "EXPENSE";
+  amount: number;
+  description: string | null;
+  occurredAt: string;
+}
+
+interface ApiCategory {
+  id: string;
+  name: string;
+}
+
+interface Recurrence {
+  id: string;
+  categoryId: string;
+  type: "INCOME" | "EXPENSE";
+  amount: number;
+  description?: string;
+  frequency: "daily" | "weekly" | "monthly" | "yearly";
+  startDate: string;
+  endDate?: string;
+  active: boolean;
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_MONTH = new Date().getMonth();
+const START_YEAR = 2026;
+const AVAILABLE_YEARS = Array.from(
+  { length: CURRENT_YEAR - START_YEAR + 1 },
+  (_, i) => START_YEAR + i
+);
+
+const MONTH_NAMES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
+const FREQUENCY_LABELS: Record<Recurrence["frequency"], string> = {
+  daily: "Diário",
+  weekly: "Semanal",
+  monthly: "Mensal",
+  yearly: "Anual",
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function fmt(value: number): string {
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+interface MonthGroupProps {
+  monthIndex: number;
+  transactions: ApiTransaction[];
+  catMap: Map<string, string>;
+}
+
+function MonthGroup({ monthIndex, transactions, catMap }: MonthGroupProps) {
+  const [expanded, setExpanded] = useState(true);
+
+  const income = transactions
+    .filter((t) => t.type === "INCOME")
+    .reduce((s, t) => s + t.amount, 0);
+  const expense = transactions
+    .filter((t) => t.type === "EXPENSE")
+    .reduce((s, t) => s + t.amount, 0);
+
+  return (
+    <div className="rounded-xl border border-border overflow-hidden">
+      {/* Month header */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 bg-muted/40 hover:bg-muted/60 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-primary" />
+          <span className="font-semibold text-foreground text-sm">
+            {MONTH_NAMES[monthIndex]}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            ({transactions.length} transaç{transactions.length === 1 ? "ão" : "ões"})
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-xs font-medium text-emerald-500 hidden sm:inline">
+            +R$ {fmt(income)}
+          </span>
+          <span className="text-xs font-medium text-red-500 hidden sm:inline">
+            −R$ {fmt(expense)}
+          </span>
+          {expanded ? (
+            <ChevronUp className="w-4 h-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          )}
+        </div>
+      </button>
+
+      {/* Transaction rows */}
+      {expanded && (
+        <div className="divide-y divide-border">
+          {transactions.map((transaction) => {
+            const isIncome = transaction.type === "INCOME";
+            const catName = catMap.get(transaction.categoryId) ?? "Sem categoria";
+            return (
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between px-4 py-3 bg-card hover:bg-accent/40 transition-all duration-150"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      isIncome ? "bg-emerald-500/10" : "bg-red-500/10"
+                    }`}
+                  >
+                    {isIncome ? (
+                      <ArrowUpRight className="w-4 h-4 text-emerald-500" />
+                    ) : (
+                      <ArrowDownRight className="w-4 h-4 text-red-500" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground text-sm leading-tight">
+                      {transaction.description ?? "Sem descrição"}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Badge
+                        variant="outline"
+                        className="text-xs px-2 py-0 h-5 bg-background font-normal"
+                      >
+                        {catName}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(transaction.occurredAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right shrink-0 ml-3">
+                  <span
+                    className={`font-bold text-sm ${
+                      isIncome ? "text-emerald-500" : "text-foreground"
+                    }`}
+                  >
+                    {isIncome ? "+" : "−"}R$ {fmt(transaction.amount)}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface RecurrenceCardProps {
+  recurrence: Recurrence;
+  catMap: Map<string, string>;
+}
+
+function RecurrenceCard({ recurrence, catMap }: RecurrenceCardProps) {
+  const isIncome = recurrence.type === "INCOME";
+  const catName = catMap.get(recurrence.categoryId) ?? "Sem categoria";
+
+  return (
+    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-accent/40 transition-all duration-150">
+      <div className="flex items-center gap-3">
+        <div
+          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+            isIncome ? "bg-emerald-500/10" : "bg-red-500/10"
+          }`}
+        >
+          <RefreshCw
+            className={`w-4 h-4 ${isIncome ? "text-emerald-500" : "text-red-500"}`}
+          />
+        </div>
+        <div>
+          <p className="font-medium text-foreground text-sm leading-tight">
+            {recurrence.description ?? "Sem descrição"}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            <Badge
+              variant="outline"
+              className="text-xs px-2 py-0 h-5 bg-background font-normal"
+            >
+              {catName}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="text-xs px-2 py-0 h-5 bg-primary/5 border-primary/20 text-primary font-normal"
+            >
+              {FREQUENCY_LABELS[recurrence.frequency]}
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`text-xs px-2 py-0 h-5 font-normal ${
+                recurrence.active
+                  ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {recurrence.active ? "Ativo" : "Inativo"}
+            </Badge>
+          </div>
+        </div>
+      </div>
+      <div className="text-right shrink-0 ml-3">
+        <span
+          className={`font-bold text-base ${
+            isIncome ? "text-emerald-500" : "text-foreground"
+          }`}
+        >
+          {isIncome ? "+" : "−"}R$ {fmt(recurrence.amount)}
+        </span>
+        <p className="text-xs text-muted-foreground capitalize">
+          {isIncome ? "receita" : "despesa"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Chart Tooltip ─────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ChartTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-background border border-border rounded-lg p-3 shadow-md text-xs space-y-1">
+      <p className="font-semibold text-foreground mb-1">{label}</p>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      {payload.map((p: any) => (
+        <p key={p.name} style={{ color: p.color }}>
+          {p.name === "income" ? "Receitas" : "Despesas"}: R${" "}
+          {p.value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+// ── Skeleton ───────────────────────────────────────────────────────────────────
+
+function RelatorioSkeleton() {
+  return (
+    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-pulse">
+      <div className="h-14 rounded-xl bg-muted" />
+      <div className="grid grid-cols-3 gap-4">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-24 rounded-xl bg-muted" />
+        ))}
+      </div>
+      <div className="h-10 rounded-lg bg-muted w-48" />
+      <div className="space-y-3">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-14 rounded-xl bg-muted" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+
+export default function RelatorioPage() {
+  const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+
+  // Fetch transactions (30d window — filtered client-side by year)
+  const { data: transactionsRes, isLoading: isLoadingTransactions } = useQuery({
+    queryKey: ["transactions", "relatorio", "30d"],
+    queryFn: () =>
+      api.get<{ data: ApiTransaction[] }>(
+        `${apiEndpoints.transactions.list}?period=30d`
+      ),
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Fetch categories
+  const { data: categoriesRes, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () =>
+      api.get<{ data: ApiCategory[] }>(apiEndpoints.categories.list),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch recurrences
+  const { data: recurrencesRes, isLoading: isLoadingRecurrences } = useQuery({
+    queryKey: ["recurrences", "active"],
+    queryFn: () =>
+      api.get<{ data: Recurrence[] }>(apiEndpoints.recurrences.active),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isLoading =
+    isLoadingTransactions || isLoadingCategories || isLoadingRecurrences;
+
+  const allTransactions = transactionsRes?.data ?? [];
+  const categories = categoriesRes?.data ?? [];
+  const recurrences = recurrencesRes?.data ?? [];
+
+  const catMap = useMemo(
+    () => new Map(categories.map((c) => [c.id, c.name])),
+    [categories]
+  );
+
+  // Filter transactions by selected year
+  const yearTransactions = useMemo(
+    () =>
+      allTransactions.filter((t) => {
+        const year = new Date(t.occurredAt).getFullYear();
+        return year === selectedYear;
+      }),
+    [allTransactions, selectedYear]
+  );
+
+  // Visible months for the month selector
+  const visibleMonths = useMemo(() => {
+    const start = selectedYear === CURRENT_YEAR ? CURRENT_MONTH : 0;
+    return Array.from({ length: 12 - start }, (_, i) => start + i);
+  }, [selectedYear]);
+
+  // Filter by selected month
+  const filteredTransactions = useMemo(
+    () =>
+      selectedMonth !== null
+        ? yearTransactions.filter(
+            (t) => new Date(t.occurredAt).getMonth() === selectedMonth
+          )
+        : yearTransactions,
+    [yearTransactions, selectedMonth]
+  );
+
+  // Summary totals
+  const totalIncome = filteredTransactions
+    .filter((t) => t.type === "INCOME")
+    .reduce((s, t) => s + t.amount, 0);
+  const totalExpense = filteredTransactions
+    .filter((t) => t.type === "EXPENSE")
+    .reduce((s, t) => s + t.amount, 0);
+  const balance = totalIncome - totalExpense;
+
+  // Group by month (0-indexed)
+  const transactionsByMonth = useMemo(() => {
+    const map = new Map<number, ApiTransaction[]>();
+    for (const t of filteredTransactions) {
+      const month = new Date(t.occurredAt).getMonth();
+      const existing = map.get(month) ?? [];
+      map.set(month, [...existing, t]);
+    }
+    // Sort within each month by date descending
+    for (const [key, txs] of map.entries()) {
+      map.set(
+        key,
+        [...txs].sort(
+          (a, b) =>
+            new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+        )
+      );
+    }
+    return map;
+  }, [filteredTransactions]);
+
+  // Months present in data, sorted ascending
+  const presentMonths = useMemo(
+    () => [...transactionsByMonth.keys()].sort((a, b) => a - b),
+    [transactionsByMonth]
+  );
+
+  // Chart data — uses yearTransactions (full year, ignores month filter)
+  const chartData = useMemo(() => {
+    return visibleMonths.map((mIdx) => {
+      const monthTxs = yearTransactions.filter(
+        (t) => new Date(t.occurredAt).getMonth() === mIdx
+      );
+      const income = monthTxs
+        .filter((t) => t.type === "INCOME")
+        .reduce((s, t) => s + t.amount, 0);
+      const expense = monthTxs
+        .filter((t) => t.type === "EXPENSE")
+        .reduce((s, t) => s + t.amount, 0);
+      return {
+        month: MONTH_NAMES[mIdx].slice(0, 3),
+        monthIndex: mIdx,
+        income,
+        expense,
+      };
+    });
+  }, [visibleMonths, yearTransactions]);
+
+  function exportExcel() {
+    // Sheet 1: Transações
+    const txRows = filteredTransactions.map((t) => ({
+      Data: new Date(t.occurredAt).toLocaleDateString("pt-BR"),
+      Tipo: t.type === "INCOME" ? "Receita" : "Despesa",
+      Categoria: catMap.get(t.categoryId) ?? "Sem categoria",
+      Descrição: t.description ?? "",
+      "Valor (R$)": t.amount,
+    }));
+
+    // Sheet 2: Recorrências
+    const recRows = recurrences.map((r) => ({
+      Descrição: r.description ?? "",
+      Tipo: r.type === "INCOME" ? "Receita" : "Despesa",
+      Categoria: catMap.get(r.categoryId) ?? "Sem categoria",
+      Frequência: FREQUENCY_LABELS[r.frequency],
+      "Valor (R$)": r.amount,
+      Ativo: r.active ? "Sim" : "Não",
+    }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(txRows), "Transações");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(recRows), "Recorrências");
+
+    const label = selectedMonth !== null
+      ? `${MONTH_NAMES[selectedMonth]}_${selectedYear}`
+      : `${selectedYear}`;
+    XLSX.writeFile(wb, `relatorio_${label}.xlsx`);
+  }
+
+  if (isLoading) return <RelatorioSkeleton />;
+
+  return (
+    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#1a3799]/10">
+            <BarChart2 className="h-5 w-5 text-[#1a3799]" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">Relatório</h2>
+            <p className="text-sm text-gray-500">
+              Acompanhe seu desempenho financeiro
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 print:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={exportExcel}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            Excel
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => window.print()}
+          >
+            <Download className="w-4 h-4" />
+            PDF
+          </Button>
+        </div>
+      </div>
+
+      {/* Year selector */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-muted-foreground">Ano:</span>
+        <div className="flex gap-1.5 bg-muted/50 rounded-lg p-1 border border-border">
+          {AVAILABLE_YEARS.map((year) => (
+            <button
+              key={year}
+              type="button"
+              onClick={() => { setSelectedYear(year); setSelectedMonth(null); }}
+              className={`px-3 py-1 text-sm rounded-md transition-colors font-medium ${
+                selectedYear === year
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Month selector */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-sm font-medium text-muted-foreground">Mês:</span>
+        <div className="flex gap-1 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setSelectedMonth(null)}
+            className={`px-3 py-1 text-sm rounded-md transition-colors font-medium border ${
+              selectedMonth === null
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-border bg-muted/50 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Todos
+          </button>
+          {visibleMonths.map((mIdx) => (
+            <button
+              key={mIdx}
+              type="button"
+              onClick={() => setSelectedMonth(mIdx)}
+              className={`px-3 py-1 text-sm rounded-md transition-colors font-medium border ${
+                selectedMonth === mIdx
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border bg-muted/50 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {MONTH_NAMES[mIdx]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Summary notice */}
+      <p className="text-xs text-muted-foreground -mt-2">
+        Exibindo transações disponíveis no sistema para {selectedYear}. Os dados
+        refletem o histórico carregado da API.
+      </p>
+
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card className="border-border shadow-sm">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                Receitas
+              </p>
+              <p className="text-xl font-bold text-emerald-500">
+                R$ {fmt(totalIncome)}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border shadow-sm">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+              <TrendingDown className="w-5 h-5 text-red-500" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                Despesas
+              </p>
+              <p className="text-xl font-bold text-red-500">
+                R$ {fmt(totalExpense)}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border shadow-sm">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div
+              className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                balance >= 0 ? "bg-primary/10" : "bg-red-500/10"
+              }`}
+            >
+              <Wallet
+                className={`w-5 h-5 ${
+                  balance >= 0 ? "text-primary" : "text-red-500"
+                }`}
+              />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                Saldo
+              </p>
+              <p
+                className={`text-xl font-bold ${
+                  balance >= 0 ? "text-primary" : "text-red-500"
+                }`}
+              >
+                {balance < 0 ? "−" : ""}R$ {fmt(Math.abs(balance))}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Transactions: chart left + list right */}
+      <Card className="border-border shadow-sm">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-foreground">
+                Transações de {selectedYear}
+              </h3>
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {filteredTransactions.length} transaç{filteredTransactions.length === 1 ? "ão" : "ões"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* LEFT: chart */}
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                Evolução Mensal
+              </p>
+              {chartData.every((d) => d.income === 0 && d.expense === 0) ? (
+                <div className="text-center py-10 text-muted-foreground">
+                  <BarChart2 className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                  <p className="text-sm">Sem dados para exibir</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={chartData} barCategoryGap="30%" barGap={4}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`}
+                      width={48}
+                    />
+                    <Tooltip content={<ChartTooltip />} />
+                    <Legend
+                      formatter={(value) =>
+                        value === "income" ? "Receitas" : "Despesas"
+                      }
+                      wrapperStyle={{ fontSize: 11 }}
+                    />
+                    <Bar
+                      dataKey="income"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                      name="income"
+                      opacity={
+                        selectedMonth !== null
+                          ? chartData.map((d) =>
+                              d.monthIndex === selectedMonth ? 1 : 0.35
+                            )
+                          : 1
+                      }
+                    />
+                    <Bar
+                      dataKey="expense"
+                      fill="#ef4444"
+                      radius={[4, 4, 0, 0]}
+                      name="expense"
+                      opacity={
+                        selectedMonth !== null
+                          ? chartData.map((d) =>
+                              d.monthIndex === selectedMonth ? 1 : 0.35
+                            )
+                          : 1
+                      }
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            {/* RIGHT: list */}
+            <div className="max-h-[320px] overflow-y-auto pr-1 space-y-3">
+              {filteredTransactions.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <BarChart2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                  <p className="font-medium">Nenhuma transação encontrada</p>
+                  <p className="text-sm mt-1 opacity-70">
+                    Selecione outro período ou registre movimentações.
+                  </p>
+                </div>
+              ) : (
+                presentMonths.map((monthIndex) => {
+                  const txs = transactionsByMonth.get(monthIndex) ?? [];
+                  return (
+                    <MonthGroup
+                      key={monthIndex}
+                      monthIndex={monthIndex}
+                      transactions={txs}
+                      catMap={catMap}
+                    />
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recurrences section — always visible */}
+      <Card className="border-border shadow-sm">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-foreground">
+                Transações Recorrentes
+              </h3>
+            </div>
+            {recurrences.length > 0 && (
+              <span className="text-sm text-muted-foreground">
+                {recurrences.length} recorrênci
+                {recurrences.length === 1 ? "a" : "as"}
+              </span>
+            )}
+          </div>
+          {recurrences.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <RefreshCw className="w-10 h-10 mx-auto mb-2 opacity-20" />
+              <p className="text-sm font-medium">Nenhuma recorrência ativa</p>
+              <p className="text-xs mt-1 opacity-70">
+                Adicione transações recorrentes para acompanhá-las aqui
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* LEFT: chart */}
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                  Valor por Recorrência
+                </p>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart
+                    data={recurrences.map((r) => ({
+                      name: (r.description ?? "Sem desc.").slice(0, 12),
+                      value: r.amount,
+                    }))}
+                    barCategoryGap="35%"
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => `R$${(v / 1000).toFixed(1)}k`}
+                      width={52}
+                    />
+                    <Tooltip
+                      formatter={(value: number) => [
+                        `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+                        "Valor",
+                      ]}
+                      contentStyle={{
+                        fontSize: 12,
+                        borderRadius: 8,
+                        border: "1px solid hsl(var(--border))",
+                      }}
+                    />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+                      {recurrences.map((r) => (
+                        <Cell
+                          key={r.id}
+                          fill={r.type === "INCOME" ? "#10b981" : "#ef4444"}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* RIGHT: list */}
+              <div className="max-h-[280px] overflow-y-auto pr-1 space-y-2">
+                {recurrences.map((recurrence) => (
+                  <RecurrenceCard
+                    key={recurrence.id}
+                    recurrence={recurrence}
+                    catMap={catMap}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

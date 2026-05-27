@@ -12,6 +12,7 @@ import {
   Menu,
   Bell,
   HelpCircle,
+  BarChart2,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -44,6 +45,12 @@ const integrationItems: MenuItem[] = [
   { title: "Suporte", url: "/dashboard/suporte", icon: HelpCircle },
   { title: "Configurações", url: "/dashboard/configuracoes", icon: Settings },
 ];
+
+const reportItem: MenuItem = {
+  title: "Relatório",
+  url: "/dashboard/relatorio",
+  icon: BarChart2,
+};
 
 function NavItem({ item, end = false, onClick }: { item: MenuItem; end?: boolean; onClick?: () => void }) {
   const location = useLocation();
@@ -167,6 +174,9 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
               onClick={onClose}
             />
           ))}
+          {user?.role === "user" && (
+            <NavItem key={reportItem.url} item={reportItem} onClick={onClose} />
+          )}
         </div>
 
         <div className="pt-4">

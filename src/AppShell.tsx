@@ -39,6 +39,7 @@ const CardsPage = lazy(() => import(/* webpackChunkName: "pages-cards" */ "./pag
 const WhatsAppPage = lazy(() => import(/* webpackChunkName: "pages-whatsapp" */ "./pages/WhatsApp"));
 const SettingsPage = lazy(() => import(/* webpackChunkName: "pages-settings" */ "./pages/Settings"));
 const RecorrenciasPage = lazy(() => import(/* webpackChunkName: "pages-recorrencias" */ "./pages/Recorrencias"));
+const RelatorioPage = lazy(() => import(/* webpackChunkName: "pages-relatorio" */ "./pages/Relatorio"));
 
 const PageLoading = () => (
   <div className="flex items-center justify-center py-12">
@@ -169,6 +170,7 @@ function AppRoutes() {
           <Route path="configuracoes" element={<SettingsPage />} />
           <Route path="notificacoes" element={<NotificationsPage />} />
           <Route path="suporte" element={<SupportPage />} />
+          <Route path="relatorio" element={<RelatorioPage />} />
         </Route>
 
         <Route
