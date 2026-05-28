@@ -9,6 +9,7 @@ import {
   Receipt,
   Building,
   BarChart2,
+  Tag,
   LucideIcon,
   Menu,
 } from "lucide-react";
@@ -34,6 +35,7 @@ const mainMenuItems: MenuItem[] = [
   { title: "Assinaturas", url: "/admin/assinaturas", icon: Receipt },
   { title: "Planos", url: "/admin/planos", icon: CreditCard },
   { title: "Relatórios", url: "/admin/relatorios", icon: BarChart2 },
+  { title: "Categorias", url: "/admin/categorias", icon: Tag },
 ];
 
 const systemMenuItems: MenuItem[] = [

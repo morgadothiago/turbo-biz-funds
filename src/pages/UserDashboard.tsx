@@ -7,6 +7,7 @@ import {
   TransactionList,
   GoalsProgress,
   MonthComparisonChart,
+  RecurrenceChart,
 } from "@/features/dashboard/components";
 import { useDashboardData } from "@/features/dashboard/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -90,8 +91,12 @@ const UserDashboard = memo(() => {
         </div>
       </div>
 
-      {/* Month comparison */}
-      <MonthComparisonChart />
+      {/* Recurrences by category */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <RecurrenceChart />
+        <MonthComparisonChart />
+      </div>
+
 
       {/* Transactions + Goals */}
       <div className="grid gap-4 lg:grid-cols-2">

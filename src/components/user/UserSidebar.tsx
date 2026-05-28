@@ -152,7 +152,7 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#1a3799] px-4 py-5 gap-0 rounded-3xl">
+    <div className="flex flex-col h-full bg-[#1a3799] px-4 py-5 gap-0 rounded-r-3xl">
       {/* Logo */}
       <div className="mb-5">
         <SidebarLogo />
@@ -215,7 +215,7 @@ export function MobileSidebarTrigger() {
           <Menu className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-72 border-r-0 bg-[#1a3799]">
+      <SheetContent side="left" className="p-0 w-72 border-r-0 bg-transparent shadow-none [&>button]:text-white [&>button]:opacity-100 [&>button>svg]:text-white">
         <SidebarInner onClose={() => setOpen(false)} />
       </SheetContent>
     </Sheet>

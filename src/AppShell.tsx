@@ -31,6 +31,7 @@ const AdminDashboard = lazy(() => import(/* webpackChunkName: "dashboard-admin" 
 const AdminClients = lazy(() => import(/* webpackChunkName: "pages-admin-clients" */ "./pages/admin/AdminUsers"));
   const AdminPlans = lazy(() => import(/* webpackChunkName: "pages-admin-plans" */ "./pages/admin/AdminPlans"));
 const AdminSubscriptions = lazy(() => import(/* webpackChunkName: "pages-admin-subscriptions" */ "./pages/admin/AdminSubscriptions"));
+const AdminCategoriesPage = lazy(() => import(/* webpackChunkName: "pages-admin-categories" */ "./pages/admin/AdminCategories"));
 
 const TransactionsPage = lazy(() => import(/* webpackChunkName: "pages-transactions" */ "./pages/Transactions"));
 const CategoriesPage = lazy(() => import(/* webpackChunkName: "pages-categories" */ "./pages/Categories"));
@@ -191,6 +192,7 @@ function AppRoutes() {
           <Route path="relatorios" element={<AdminReportsPage />} />
           <Route path="notificacoes" element={<AdminNotificationsPage />} />
           <Route path="suporte" element={<AdminSupportPage />} />
+          <Route path="categorias" element={<AdminCategoriesPage />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
