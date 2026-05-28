@@ -6,6 +6,7 @@ import {
   CategoryChart,
   TransactionList,
   GoalsProgress,
+  MonthComparisonChart,
 } from "@/features/dashboard/components";
 import { useDashboardData } from "@/features/dashboard/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -73,7 +74,7 @@ const UserDashboard = memo(() => {
       </div>
 
       {/* Stat cards */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         {dashboardData.stats.map((stat) => (
           <StatCard key={stat.id} stat={stat} />
         ))}
@@ -88,6 +89,9 @@ const UserDashboard = memo(() => {
           <CategoryChart data={dashboardData.categoryExpenses} />
         </div>
       </div>
+
+      {/* Month comparison */}
+      <MonthComparisonChart />
 
       {/* Transactions + Goals */}
       <div className="grid gap-4 lg:grid-cols-2">

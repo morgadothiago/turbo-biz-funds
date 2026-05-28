@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api, apiEndpoints } from "@/lib/api/client";
-import { Wallet, TrendingUp, TrendingDown, PieChart } from "lucide-react";
+import { Wallet, TrendingUp, TrendingDown } from "lucide-react";
 import type { DashboardData, DashboardStat, ExpenseByDay, CategoryExpense, Goal } from "../types";
 import type { Transaction } from "@/shared/types";
 import { fmtBRL } from "@/lib/format";
@@ -80,16 +80,6 @@ async function fetchDashboard(): Promise<DashboardData> {
       color: "text-destructive",
       bgColor: "bg-destructive/10",
     },
-    {
-      id: "categories",
-      title: "Categorias",
-      value: String(categories.length),
-      change: "",
-      trend: "up",
-      icon: PieChart,
-      color: "text-accent",
-      bgColor: "bg-accent/10",
-    },
   ];
 
   const dayMap = new Map<string, number>();
@@ -120,15 +110,16 @@ async function fetchDashboard(): Promise<DashboardData> {
     type: t.type === "INCOME" ? "income" : "expense",
   }));
 
-  const goals: Goal[] = apiGoals.slice(0, 4).map((g) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const goals: Goal[] = apiGoals.slice(0, 4).map((g: any) => ({
     id: g.id,
-    name: g.name,
-    current: g.current,
-    target: g.target,
-    deadline: g.deadline,
+    name: g.name ?? g.title ?? "",
+    current: Number(g.current ?? g.current_value ?? 0),
+    target: Number(g.target ?? g.target_value ?? 0),
+    deadline: g.deadline ?? g.target_date ?? "",
     color: g.color ?? "#10b981",
     icon: g.icon ?? "🎯",
-    category: g.category ?? "Geral",
+    category: g.category ?? g.goal_category ?? "Geral",
   }));
 
   return {

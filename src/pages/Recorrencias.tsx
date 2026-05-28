@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { logActivity } from "@/features/dashboard/hooks/use-user-notifications";
 import {
   useActiveRecurrences,
   useCreateRecurrence,
@@ -121,6 +122,12 @@ const RecorrenciasPage = memo(() => {
     createRecurrence.mutate(payload, {
       onSuccess: () => {
         toast.success("Recorrência criada!");
+        logActivity({
+          severity: "success",
+          title: "Recorrência criada",
+          body: `${payload.description ?? "Nova recorrência"} — ${fmtBRL(payload.amount)} (${FREQUENCY_LABELS[payload.frequency] ?? payload.frequency})`,
+          action: { label: "Ver recorrências", href: "/dashboard/recorrencias" },
+        });
         setIsDialogOpen(false);
         setIsInstallment(false);
         setInstallments(2);
@@ -178,7 +185,16 @@ const RecorrenciasPage = memo(() => {
         endDate: editForm.endDate ? new Date(editForm.endDate).toISOString() : undefined,
       },
       {
-        onSuccess: () => { toast.success("Recorrência atualizada!"); setEditingId(null); },
+        onSuccess: () => {
+          toast.success("Recorrência atualizada!");
+          logActivity({
+            severity: "info",
+            title: "Recorrência editada",
+            body: `${editForm.description.trim() || "Recorrência"} foi atualizada`,
+            action: { label: "Ver recorrências", href: "/dashboard/recorrencias" },
+          });
+          setEditingId(null);
+        },
         onError: () => toast.error("Erro ao atualizar recorrência"),
       }
     );

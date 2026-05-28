@@ -215,7 +215,7 @@ export function MobileSidebarTrigger() {
           <Menu className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-72 border-r-0">
+      <SheetContent side="left" className="p-0 w-72 border-r-0 bg-[#1a3799]">
         <SidebarInner onClose={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
