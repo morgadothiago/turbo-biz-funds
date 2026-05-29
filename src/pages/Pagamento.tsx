@@ -390,12 +390,12 @@ const Pagamento = () => {
   const isAnnualPlan = plan.includes("annual") || plan.includes("anual") || planInfo.period === "/ano";
   const installmentOptions = isAnnualPlan ? INSTALLMENTS_ANNUAL : INSTALLMENTS_MONTHLY;
 
+  const [method, setMethod] = useState<PaymentMethod>("cartao");
+
   // Plano anual: PIX = R$99,90 (à vista), Cartão = R$154,80 (12x de R$12,90)
   const effectivePrice = isAnnualPlan
     ? method === "pix" ? 99.9 : 154.8
     : planInfo.price;
-
-  const [method, setMethod] = useState<PaymentMethod>("cartao");
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
