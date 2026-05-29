@@ -35,7 +35,7 @@ const Navbar = memo(() => {
   );
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/[0.07]">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0B1F3A]/95 backdrop-blur-md border-b border-white/[0.07]">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16">
 
@@ -71,8 +71,8 @@ const Navbar = memo(() => {
               onClick={() => trackClick("login")}
               className="
                 inline-flex items-center px-5 py-2 rounded-lg
-                border border-cyan-400/70 text-white text-sm font-bold uppercase tracking-wide
-                hover:border-cyan-300 hover:bg-cyan-400/10
+                border border-[#1B4DBF]/70 text-white text-sm font-bold uppercase tracking-wide
+                hover:border-[#2a5dd4] hover:bg-[#1B4DBF]/10
                 transition-all duration-150
               "
             >
@@ -85,10 +85,10 @@ const Navbar = memo(() => {
               onClick={() => trackClick("sign_up")}
               className="
                 inline-flex items-center px-5 py-2 rounded-lg
-                bg-[#0047FF] hover:bg-[#1a5fff]
+                bg-[#1B4DBF] hover:bg-[#2a5dd4]
                 text-white text-sm font-bold uppercase tracking-wide
-                shadow-[0_0_18px_rgba(0,71,255,0.35)]
-                hover:shadow-[0_0_28px_rgba(0,71,255,0.55)]
+                shadow-[0_0_18px_rgba(27,77,191,0.35)]
+                hover:shadow-[0_0_28px_rgba(27,77,191,0.55)]
                 transition-all duration-150
               "
             >
@@ -109,7 +109,7 @@ const Navbar = memo(() => {
 
             <SheetContent
               side="right"
-              className="w-[300px] sm:w-[360px] bg-[#020617] border-white/10 flex flex-col"
+              className="w-[300px] sm:w-[360px] bg-[#0B1F3A] border-white/10 flex flex-col"
             >
               <div className="flex flex-col gap-6 pt-6 flex-1">
                 <Link to="/" onClick={closeMenu} className="flex items-center gap-1">
@@ -130,7 +130,7 @@ const Navbar = memo(() => {
                     onClick={() => { closeMenu(); trackClick("login_mobile"); }}
                     className="
                       flex items-center justify-center w-full px-5 py-2.5 rounded-lg
-                      border border-cyan-400/70 text-white text-sm font-bold uppercase
+                      border border-[#1B4DBF]/70 text-white text-sm font-bold uppercase
                       hover:bg-cyan-400/10 transition-all
                     "
                   >
@@ -141,7 +141,7 @@ const Navbar = memo(() => {
                     onClick={() => { closeMenu(); trackClick("sign_up_mobile"); }}
                     className="
                       flex items-center justify-center w-full px-5 py-2.5 rounded-lg
-                      bg-[#0047FF] hover:bg-[#1a5fff]
+                      bg-[#1B4DBF] hover:bg-[#2a5dd4]
                       text-white text-sm font-bold uppercase
                       transition-all
                     "

@@ -58,7 +58,7 @@ const Footer = memo(() => {
   );
 
   return (
-    <footer className="relative bg-[#06091c]/80 backdrop-blur-xl border-t border-white/10 text-white pt-12 pb-6 overflow-hidden">
+    <footer className="relative bg-[#0B1F3A]/80 backdrop-blur-xl border-t border-white/10 text-white pt-12 pb-6 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
           <div className="col-span-2">

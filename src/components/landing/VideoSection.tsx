@@ -17,10 +17,10 @@ const VideoSection = memo(() => {
   };
 
   return (
-    <section className="py-0 bg-[#06091c]">
+    <section className="py-0 bg-[#0B1F3A]">
       <div className="max-w-3xl mx-auto px-4 animate-fade-in-up">
         {/* Banner superior azul */}
-        <div className="flex items-center justify-between bg-[#0047FF] px-6 py-3 rounded-t-2xl">
+        <div className="flex items-center justify-between bg-[#1B4DBF] px-6 py-3 rounded-t-2xl">
           <span className="text-white font-bold uppercase tracking-widest text-sm md:text-base">
             CONHEÇA O DOUTOR CASH
           </span>
@@ -33,7 +33,7 @@ const VideoSection = memo(() => {
 
         {/* Player */}
         <div
-          className="relative w-full rounded-b-2xl overflow-hidden border border-[#0047FF]/50 bg-black"
+          className="relative w-full rounded-b-2xl overflow-hidden border border-[#1B4DBF]/50 bg-black"
           style={{ aspectRatio: "16/9" }}
         >
           {active ? (
@@ -59,7 +59,7 @@ const VideoSection = memo(() => {
               />
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-200" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-20 h-20 rounded-full bg-[#0047FF]/90 backdrop-blur-sm flex items-center justify-center border-2 border-white/50 group-hover:scale-110 transition-transform duration-200">
+                <div className="w-20 h-20 rounded-full bg-[#1B4DBF]/90 backdrop-blur-sm flex items-center justify-center border-2 border-white/50 group-hover:scale-110 transition-transform duration-200">
                   <Play className="w-8 h-8 text-white fill-white translate-x-0.5" />
                 </div>
               </div>

@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Mail, Lock, User, Phone, ArrowRight, Check, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowRight, Check, Loader2, Zap, Eye, EyeOff, MessageCircle, BarChart3, CreditCard, Repeat2, Brain, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePlansList } from "@/features/payments/hooks/use-plan-info";
 const logoWeb = "/logoweb.png";
 
 const registerSchema = z
@@ -33,6 +31,7 @@ const registerSchema = z
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
+type Billing = "monthly" | "annual";
 
 interface FormErrors {
   name?: string;
@@ -42,40 +41,107 @@ interface FormErrors {
   confirmPassword?: string;
 }
 
-/**
- * Página de cadastro com wizard em 2 passos e design minimalista.
- */
+const CRITERIA = [
+  { id: "len",     label: "Mínimo 8 caracteres",       badge: "8+", test: (p: string) => p.length >= 8 },
+  { id: "upper",   label: "Letra maiúscula (A-Z)",      badge: "A",  test: (p: string) => /[A-Z]/.test(p) },
+  { id: "lower",   label: "Letra minúscula (a-z)",      badge: "a",  test: (p: string) => /[a-z]/.test(p) },
+  { id: "number",  label: "Número (0-9)",               badge: "1",  test: (p: string) => /[0-9]/.test(p) },
+  { id: "special", label: "Caractere especial (!@#$%)", badge: "@",  test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+];
+
+const STRENGTH_LABELS = ["", "Fraca", "Razoável", "Boa", "Forte", "Muito forte"];
+const STRENGTH_COLORS = ["", "#ef4444", "#f97316", "#eab308", "#22c55e", "#16a34a"];
+
+function PasswordStrength({ password }: { password: string }) {
+  const passed = CRITERIA.filter((c) => c.test(password));
+  const score = passed.length;
+  const label = STRENGTH_LABELS[score] ?? "";
+  const color = STRENGTH_COLORS[score] ?? "#e5e7eb";
+
+  return (
+    <div className="mt-2 space-y-2">
+      {/* Barra de progresso */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 flex gap-1">
+          {CRITERIA.map((_, i) => (
+            <div
+              key={i}
+              className="h-1 flex-1 rounded-full transition-all duration-300"
+              style={{ background: i < score ? color : "rgba(255,255,255,0.1)" }}
+            />
+          ))}
+        </div>
+        {label && (
+          <span className="text-xs font-semibold whitespace-nowrap" style={{ color }}>
+            {label}
+          </span>
+        )}
+      </div>
+
+      {/* Critérios */}
+      <div className="space-y-1">
+        {CRITERIA.map((c) => {
+          const ok = c.test(password);
+          return (
+            <div key={c.id} className="flex items-center gap-2">
+              <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold border transition-colors ${
+                ok ? "bg-green-500/20 border-green-500/50 text-green-400" : "bg-white/5 border-white/20 text-white/30"
+              }`}>
+                {c.badge}
+              </span>
+              <span className={`text-xs transition-colors ${ok ? "text-green-400" : "text-white/40"}`}>
+                {c.label}
+              </span>
+              {ok && <Check className="w-3 h-3 text-green-400 ml-auto" />}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const PRO_FEATURES = [
+  "Assistente financeiro com IA 24h",
+  "Registro por WhatsApp (áudio, foto, texto)",
+  "Categorização automática inteligente",
+  "Relatórios detalhados mensais",
+  "Controle de recorrências",
+  "Suporte prioritário",
+];
+
 const Cadastro = () => {
   const [step, setStep] = useState(1);
+  const location = useLocation();
+  const initialBilling: Billing = (location.state as { billing?: Billing })?.billing ?? "annual";
+  const [billing, setBilling] = useState<Billing>(initialBilling);
   const [formData, setFormData] = useState<RegisterFormData & { plan: string }>({
     name: "",
     phone: "",
     email: "",
     password: "",
     confirmPassword: "",
-    plan: "pro",
+    plan: initialBilling === "annual" ? "pro-annual" : "pro-monthly",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const { register, logout, isAuthenticated } = useAuth();
-  const { plans, isLoading: isPlansLoading } = usePlansList();
 
-  // Usuário já logado visitando /cadastro → redireciona (só no mount)
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/dashboard", { replace: true });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const selectedPlan = plans.find((p) => p.id === formData.plan);
-  const isPaid = (() => {
-    if (!selectedPlan) return false;
-    const raw = selectedPlan.price;
-    if (typeof raw === "number") return raw > 0;
-    const n = parseFloat(String(raw).replace(/[^\d.,]/g, "").replace(",", "."));
-    return !isNaN(n) && n > 0;
-  })();
+  const handleBillingChange = (b: Billing) => {
+    setBilling(b);
+    setFormData((prev) => ({ ...prev, plan: b === "annual" ? "pro-annual" : "pro-monthly" }));
+  };
+
+  const isPaid = true;
 
   const validateStep1 = (): boolean => {
     const result = registerSchema.safeParse({
@@ -115,11 +181,12 @@ const Cadastro = () => {
         sessionStorage.setItem("postRegisterRedirect", `/pagamento?plan=${formData.plan}`);
       }
 
+      const apiPlanId = formData.plan === "pro-annual" || formData.plan === "pro-monthly" ? "pro" : formData.plan;
       await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        plan: formData.plan,
+        plan: apiPlanId,
         phone: formData.phone,
       });
 
@@ -150,11 +217,65 @@ const Cadastro = () => {
     }
   };
 
-  const BG = "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)";
+  const BG = "radial-gradient(ellipse 120% 60% at 50% -10%, #1B4DBF 0%, #0B1F3A 50%, #060d1a 100%)";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 py-8" style={{ background: BG }}>
-      <div className="w-full max-w-lg">
+    <div className="min-h-screen flex items-center justify-center p-4 py-8 relative overflow-hidden" style={{ background: BG }}>
+
+      {/* Animated orbs */}
+      <style>{`
+        @keyframes orb-pulse {
+          0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.18; }
+          33%       { transform: scale(1.18) translate(20px, -30px); opacity: 0.28; }
+          66%       { transform: scale(0.88) translate(-15px, 20px); opacity: 0.14; }
+        }
+        @keyframes orb-pulse-b {
+          0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.14; }
+          40%       { transform: scale(1.22) translate(-25px, 15px); opacity: 0.24; }
+          70%       { transform: scale(0.85) translate(20px, -20px); opacity: 0.10; }
+        }
+        @keyframes orb-pulse-c {
+          0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.10; }
+          50%       { transform: scale(1.3) translate(10px, 25px); opacity: 0.20; }
+        }
+      `}</style>
+      {/* Orb: WhatsApp — green */}
+      <div className="absolute top-[10%] left-[8%] w-24 h-24 rounded-full pointer-events-none hidden md:flex items-center justify-center"
+        style={{ background: "radial-gradient(circle, rgba(37,211,102,0.2) 0%, rgba(37,211,102,0.04) 70%)", border: "1px solid rgba(37,211,102,0.35)", animation: "orb-pulse 9s ease-in-out infinite", boxShadow: "0 0 30px rgba(37,211,102,0.18)" }}>
+        <MessageCircle className="w-10 h-10" style={{ color: "#25D366" }} />
+      </div>
+
+      {/* Orb: Gráficos — cyan */}
+      <div className="absolute bottom-[18%] right-[7%] w-28 h-28 rounded-full pointer-events-none hidden md:flex items-center justify-center"
+        style={{ background: "radial-gradient(circle, rgba(56,189,248,0.2) 0%, rgba(56,189,248,0.04) 70%)", border: "1px solid rgba(56,189,248,0.35)", animation: "orb-pulse-b 12s ease-in-out infinite 1.5s", boxShadow: "0 0 30px rgba(56,189,248,0.18)" }}>
+        <BarChart3 className="w-12 h-12" style={{ color: "#38BDF8" }} />
+      </div>
+
+      {/* Orb: IA — purple */}
+      <div className="absolute top-[52%] left-[4%] w-20 h-20 rounded-full pointer-events-none hidden md:flex items-center justify-center"
+        style={{ background: "radial-gradient(circle, rgba(167,139,250,0.2) 0%, rgba(167,139,250,0.04) 70%)", border: "1px solid rgba(167,139,250,0.35)", animation: "orb-pulse-c 7s ease-in-out infinite 3s", boxShadow: "0 0 24px rgba(167,139,250,0.18)" }}>
+        <Brain className="w-8 h-8" style={{ color: "#A78BFA" }} />
+      </div>
+
+      {/* Orb: Cartão — yellow */}
+      <div className="absolute top-[18%] right-[10%] w-20 h-20 rounded-full pointer-events-none hidden md:flex items-center justify-center"
+        style={{ background: "radial-gradient(circle, rgba(251,191,36,0.2) 0%, rgba(251,191,36,0.04) 70%)", border: "1px solid rgba(251,191,36,0.35)", animation: "orb-pulse-b 10s ease-in-out infinite 0.8s", boxShadow: "0 0 24px rgba(251,191,36,0.18)" }}>
+        <CreditCard className="w-8 h-8" style={{ color: "#FBBF24" }} />
+      </div>
+
+      {/* Orb: Recorrências — orange */}
+      <div className="absolute bottom-[8%] left-[15%] w-16 h-16 rounded-full pointer-events-none hidden md:flex items-center justify-center"
+        style={{ background: "radial-gradient(circle, rgba(251,146,60,0.2) 0%, rgba(251,146,60,0.04) 70%)", border: "1px solid rgba(251,146,60,0.35)", animation: "orb-pulse-c 8s ease-in-out infinite 2s", boxShadow: "0 0 20px rgba(251,146,60,0.18)" }}>
+        <Repeat2 className="w-7 h-7" style={{ color: "#FB923C" }} />
+      </div>
+
+      {/* Orb: Carteira — emerald */}
+      <div className="absolute top-[38%] right-[4%] w-16 h-16 rounded-full pointer-events-none hidden md:flex items-center justify-center"
+        style={{ background: "radial-gradient(circle, rgba(74,222,128,0.2) 0%, rgba(74,222,128,0.04) 70%)", border: "1px solid rgba(74,222,128,0.35)", animation: "orb-pulse 11s ease-in-out infinite 4s", boxShadow: "0 0 20px rgba(74,222,128,0.18)" }}>
+        <Wallet className="w-7 h-7" style={{ color: "#4ADE80" }} />
+      </div>
+
+      <div className="w-full max-w-lg relative z-10">
         <div className="text-center mb-6">
           <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
             <img src={logoWeb} alt="doutorcash" className="h-12 w-auto transition-transform group-hover:scale-105" />
@@ -169,11 +290,11 @@ const Cadastro = () => {
 
         <div className="mb-6">
           <div className="flex items-center justify-center gap-2">
-            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-all ${step >= 1 ? "bg-[#1a3799] text-white" : "bg-white/20 text-white/50"}`}>
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-all ${step >= 1 ? "bg-[#1B4DBF] text-white" : "bg-white/20 text-white/50"}`}>
               {step > 1 ? <Check className="w-4 h-4" /> : "1"}
             </div>
-            <div className={`w-16 h-0.5 rounded-full transition-colors ${step >= 2 ? "bg-[#1a3799]" : "bg-white/20"}`} />
-            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-all ${step >= 2 ? "bg-[#1a3799] text-white" : "bg-white/20 text-white/50"}`}>
+            <div className={`w-16 h-0.5 rounded-full transition-colors ${step >= 2 ? "bg-[#1B4DBF]" : "bg-white/20"}`} />
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-all ${step >= 2 ? "bg-[#1B4DBF] text-white" : "bg-white/20 text-white/50"}`}>
               2
             </div>
           </div>
@@ -183,16 +304,19 @@ const Cadastro = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-6">
+        <div className="rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(27,77,191,0.25),0_32px_64px_rgba(0,0,0,0.4)]" style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)", border: "1px solid rgba(27,77,191,0.35)", backdropFilter: "blur(20px)" }}>
+          {/* Top accent bar */}
+          <div className="h-[3px] w-full" style={{ background: "linear-gradient(90deg, transparent, #1B4DBF, transparent)" }} />
+          <div className="p-7">
           <form onSubmit={handleSubmit}>
             {step === 1 ? (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
+                  <Label htmlFor="name" className="text-sm font-medium text-white/80">
                     Nome completo
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors peer-focus:text-primary" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/55" />
                     <Input
                       id="name"
                       type="text"
@@ -202,10 +326,10 @@ const Cadastro = () => {
                         setFormData({ ...formData, name: e.target.value });
                         if (errors.name) setErrors({ ...errors, name: undefined });
                       }}
-                      className={`pl-11 h-11 ${
+                      className={`auth-input pl-11 h-11 ${
                         errors.name
                           ? "border-destructive focus:border-destructive"
-                          : "focus:border-primary focus:ring-primary/20"
+                          : "bg-[#0c1938] border-[#1B4DBF]/40 text-white placeholder:text-white/40 focus:border-[#1B4DBF] focus:bg-[#0e1d42] focus:ring-[#1B4DBF]/20"
                       }`}
                       disabled={isLoading}
                     />
@@ -219,11 +343,11 @@ const Cadastro = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm font-medium">
+                  <Label htmlFor="phone" className="text-sm font-medium text-white/80">
                     Telefone / WhatsApp
                   </Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/55" />
                     <Input
                       id="phone"
                       type="tel"
@@ -237,10 +361,10 @@ const Cadastro = () => {
                         setFormData({ ...formData, phone: masked });
                         if (errors.phone) setErrors({ ...errors, phone: undefined });
                       }}
-                      className={`pl-11 h-11 ${
+                      className={`auth-input pl-11 h-11 ${
                         errors.phone
                           ? "border-destructive focus:border-destructive"
-                          : "focus:border-primary focus:ring-primary/20"
+                          : "bg-[#0c1938] border-[#1B4DBF]/40 text-white placeholder:text-white/40 focus:border-[#1B4DBF] focus:bg-[#0e1d42] focus:ring-[#1B4DBF]/20"
                       }`}
                       disabled={isLoading}
                     />
@@ -254,11 +378,11 @@ const Cadastro = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">
+                  <Label htmlFor="email" className="text-sm font-medium text-white/80">
                     Email
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors peer-focus:text-primary" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/55" />
                     <Input
                       id="email"
                       type="email"
@@ -268,10 +392,10 @@ const Cadastro = () => {
                         setFormData({ ...formData, email: e.target.value });
                         if (errors.email) setErrors({ ...errors, email: undefined });
                       }}
-                      className={`pl-11 h-11 ${
+                      className={`auth-input pl-11 h-11 ${
                         errors.email
                           ? "border-destructive focus:border-destructive"
-                          : "focus:border-primary focus:ring-primary/20"
+                          : "bg-[#0c1938] border-[#1B4DBF]/40 text-white placeholder:text-white/40 focus:border-[#1B4DBF] focus:bg-[#0e1d42] focus:ring-[#1B4DBF]/20"
                       }`}
                       disabled={isLoading}
                     />
@@ -285,49 +409,54 @@ const Cadastro = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium">
+                  <Label htmlFor="password" className="text-sm font-medium text-white/80">
                     Senha
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors peer-focus:text-primary" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/55" />
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={(e) => {
                         setFormData({ ...formData, password: e.target.value });
                         if (errors.password) setErrors({ ...errors, password: undefined });
                       }}
-                      className={`pl-11 h-11 ${
+                      className={`auth-input pl-11 pr-11 h-11 ${
                         errors.password
                           ? "border-destructive focus:border-destructive"
-                          : "focus:border-primary focus:ring-primary/20"
+                          : "bg-[#0c1938] border-[#1B4DBF]/40 text-white placeholder:text-white/40 focus:border-[#1B4DBF] focus:bg-[#0e1d42] focus:ring-[#1B4DBF]/20"
                       }`}
                       disabled={isLoading}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/55 hover:text-white transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                  {errors.password ? (
+                  {errors.password && (
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-destructive" />
                       {errors.password}
                     </p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      Mínimo 8 caracteres, 1 letra maiúscula e 1 número
-                    </p>
                   )}
+                  <PasswordStrength password={formData.password} />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-white/80">
                     Confirmar senha
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors peer-focus:text-primary" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/55" />
                     <Input
                       id="confirmPassword"
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={(e) => {
@@ -335,13 +464,21 @@ const Cadastro = () => {
                         if (errors.confirmPassword)
                           setErrors({ ...errors, confirmPassword: undefined });
                       }}
-                      className={`pl-11 h-11 ${
+                      className={`auth-input pl-11 pr-11 h-11 ${
                         errors.confirmPassword
                           ? "border-destructive focus:border-destructive"
-                          : "focus:border-primary focus:ring-primary/20"
+                          : "bg-[#0c1938] border-[#1B4DBF]/40 text-white placeholder:text-white/40 focus:border-[#1B4DBF] focus:bg-[#0e1d42] focus:ring-[#1B4DBF]/20"
                       }`}
                       disabled={isLoading}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/55 hover:text-white transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                   {errors.confirmPassword && (
                     <p className="text-xs text-destructive flex items-center gap-1">
@@ -351,158 +488,123 @@ const Cadastro = () => {
                   )}
                 </div>
 
-                <Button
+                <button
                   type="button"
-                  variant="hero"
-                  size="lg"
-                  className="w-full h-11 mt-2"
                   onClick={handleNextStep}
                   disabled={isLoading}
+                  className="w-full h-11 mt-2 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-50"
+                  style={{ background: `linear-gradient(135deg, #1B4DBF, #0B1F3A)`, boxShadow: "0 0 20px rgba(27,77,191,0.4)" }}
                 >
                   Continuar
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
             ) : (
               <div className="space-y-4">
-                {isPlansLoading ? (
-                  <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Carregando planos...</span>
-                  </div>
-                ) : null}
-                <RadioGroup
-                  value={formData.plan}
-                  onValueChange={(value) => setFormData({ ...formData, plan: value })}
-                  className="space-y-3"
-                >
-                  {plans.map((plan) => (
-                    <div
-                      key={plan.id}
-                      className={`relative rounded-xl border-2 p-4 transition-all cursor-pointer ${
-                        formData.plan === plan.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border/60 hover:border-primary/30"
+                {/* Toggle Mensal / Anual */}
+                <div className="flex justify-center mb-2">
+                  <div className="inline-flex items-center rounded-xl bg-muted p-1 border border-border/60">
+                    <button
+                      type="button"
+                      onClick={() => handleBillingChange("monthly")}
+                      className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                        billing === "monthly"
+                          ? "bg-white text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <RadioGroupItem
-                        value={plan.id}
-                        id={plan.id}
-                        className="absolute right-4 top-1/2 -translate-y-1/2"
-                      />
-                      <div className="pr-8">
-                        <div className="flex items-center gap-2 mb-1">
-                          {formData.plan === plan.id && (
-                            <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0">
-                              <Check className="w-3 h-3 text-primary-foreground" />
-                            </div>
-                          )}
-                          <span className="font-semibold text-foreground">
-                            {plan.name}
-                          </span>
-                          {plan.popular && (
-                            <span className="px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-                              Popular
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-baseline gap-1 mb-1">
-                          <span className="text-2xl font-bold text-foreground">
-                            {plan.price}
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            {plan.period}
-                          </span>
-                        </div>
-                        <div className="text-sm text-muted-foreground mb-2">
-                          {plan.description}
-                        </div>
-                        <ul className="text-xs text-muted-foreground space-y-1">
-                          {plan.features.slice(0, 3).map((feature, i) => (
-                            <li key={i} className="flex items-center gap-1.5">
-                              <Check className="w-3.5 h-3.5 text-primary" />
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  ))}
-                </RadioGroup>
+                      Mensal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleBillingChange("annual")}
+                      className={`relative px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                        billing === "annual"
+                          ? "bg-white text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Anual
+                      {billing === "monthly" && (
+                        <span className="absolute -top-2 -right-1.5 px-1 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full leading-none">
+                          -35%
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
 
-                <Button
-                  type="submit"
-                  variant="hero"
-                  size="lg"
-                  className="w-full h-11"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Criando conta...
-                    </>
+                {/* Card do plano */}
+                <div className="rounded-xl border-2 border-primary bg-primary/5 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0">
+                        <Zap className="w-3 h-3 text-primary-foreground" />
+                      </div>
+                      <span className="font-semibold text-foreground">Plano Pro</span>
+                    </div>
+                    <span className="px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded-full">
+                      {billing === "annual" ? "Melhor Valor" : "Mensal"}
+                    </span>
+                  </div>
+
+                  {billing === "monthly" ? (
+                    <div className="flex items-baseline gap-1 mb-1">
+                      <span className="text-2xl font-bold text-foreground">R$99,90</span>
+                      <span className="text-sm text-muted-foreground">/mês</span>
+                    </div>
                   ) : (
                     <>
-                      {isPaid ? "Criar conta e ir para pagamento" : "Criar conta grátis"}
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <div className="flex items-baseline gap-1 mb-0.5">
+                        <span className="text-2xl font-bold text-foreground">R$154,80</span>
+                        <span className="text-sm text-muted-foreground">/ano</span>
+                      </div>
+                      <p className="text-xs text-primary font-medium mb-1">
+                        ou 12x de R$12,90 sem juros
+                      </p>
                     </>
                   )}
-                </Button>
+
+                  <ul className="text-xs text-white/50 space-y-1 mt-2">
+                    {PRO_FEATURES.slice(0, 4).map((feature, i) => (
+                      <li key={i} className="flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-[#1B4DBF] shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-11 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #1B4DBF, #0B1F3A)", boxShadow: "0 0 20px rgba(27,77,191,0.4)" }}
+                >
+                  {isLoading ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" />Criando conta...</>
+                  ) : (
+                    <>Criar conta e ir para pagamento<ArrowRight className="w-4 h-4" /></>
+                  )}
+                </button>
               </div>
             )}
           </form>
-
-          {step === 1 && (
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border/60" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-3 text-gray-400">
-                    ou continue com
-                  </span>
-                </div>
-              </div>
-
-              <Button variant="outline" size="lg" className="w-full mt-4 h-11" disabled={isLoading}>
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
-                </svg>
-                Google
-              </Button>
-            </div>
-          )}
+          </div>
         </div>
 
         <p className="text-center text-white/60 mt-6">
           Já tem uma conta?{" "}
-          <Link to="/login" className="text-cyan-400 font-medium hover:text-cyan-300 transition-colors">
+          <Link to="/login" className="text-[#E5E7EB] font-medium hover:text-white transition-colors">
             Entrar
           </Link>
         </p>
 
         <p className="text-center text-xs text-white/40 mt-4">
           Ao criar uma conta, você concorda com nossos{" "}
-          <a href="#" className="text-cyan-400 hover:underline">Termos de Uso</a>
+          <a href="#" className="text-[#E5E7EB] hover:underline">Termos de Uso</a>
           {" "}e{" "}
-          <a href="#" className="text-cyan-400 hover:underline">Política de Privacidade</a>
+          <a href="#" className="text-[#E5E7EB] hover:underline">Política de Privacidade</a>
         </p>
       </div>
     </div>

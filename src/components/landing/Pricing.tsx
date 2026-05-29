@@ -1,212 +1,245 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Check, Star, Zap, Shield, Loader2 } from "lucide-react";
-import { useI18n } from "@/lib/i18n-provider";
+import { Check, MessageCircle, Shield, Crown, BadgePercent, TrendingUp, BadgeCheck, QrCode } from "lucide-react";
 import { analytics } from "@/lib/analytics";
-import { usePublicPlans } from "@/features/plans/hooks/use-public-plans";
 
-interface PlanProps {
-  name: string;
-  description: string;
-  price: string;
-  priceDecimal: string;
-  period: string;
-  features: string[];
-  cta: string;
-  highlighted?: boolean;
-  badge?: string;
-  savings?: string;
-}
+// Brand colors: #1B4DBF (primary blue), #0B1F3A (dark navy), #E5E7EB (light gray)
+const BRAND = {
+  primary: "#1B4DBF",
+  dark: "#0B1F3A",
+  light: "#E5E7EB",
+};
 
-const PlanCard = memo(({ plan }: { plan: PlanProps }) => {
-  return (
-    <div
-      className={`relative rounded-2xl p-8 border transition-all duration-300 ${
-        plan.highlighted
-          ? "bg-[#1a3799] border-blue-400/40 shadow-xl shadow-blue-900/30 scale-105 z-10"
-          : "bg-white/10 backdrop-blur-sm border-white/10 hover:bg-white/15 hover:shadow-lg"
-      }`}
-    >
-      {plan.badge && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-[#1a3799] text-white rounded-full text-sm font-medium shadow-lg border border-blue-400/30">
-            <Zap className="w-4 h-4" />
-            {plan.badge}
-          </div>
-        </div>
-      )}
+type Billing = "monthly" | "annual";
 
-      {plan.savings && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-          <div className="flex items-center gap-1.5 px-4 py-1.5 bg-cyan-500 text-white rounded-full text-sm font-medium shadow-lg">
-            {plan.savings}
-          </div>
-        </div>
-      )}
-
-      <div className="text-center mb-8 pt-2">
-        <h3 className="text-xl font-semibold text-white mb-2">
-          {plan.name}
-        </h3>
-        <p className="text-sm text-white/60 mb-4">
-          {plan.description}
-        </p>
-        <div className="flex items-baseline justify-center gap-0.5">
-          <span className="text-lg text-white/60">R$</span>
-          <span className="text-5xl font-bold text-white">
-            {plan.price}
-          </span>
-          <span className="text-2xl font-bold text-white">,{plan.priceDecimal}</span>
-          <span className="text-white/60 ml-1">{plan.period}</span>
-        </div>
-      </div>
-
-      <ul className="space-y-3 mb-8">
-        {plan.features.map((feature, featureIndex) => (
-          <li key={featureIndex} className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-cyan-400/20 text-cyan-400">
-              <Check className="w-3 h-3" />
-            </div>
-            <span className="text-sm text-white/70">
-              {feature}
-            </span>
-          </li>
-        ))}
-      </ul>
-
-      <Button
-        variant={plan.highlighted ? "hero" : "default"}
-        size="lg"
-        className="w-full"
-        asChild
-      >
-        <Link to="/cadastro" onClick={() => analytics.click(`pricing_${plan.name.toLowerCase()}`, "pricing")}>
-          {plan.highlighted && <Zap className="w-4 h-4 mr-2" />}
-          {plan.cta}
-        </Link>
-      </Button>
-    </div>
-  );
-});
-
-PlanCard.displayName = "PlanCard";
+const TRUST = [
+  { icon: Shield, label: "Compra segura" },
+  { icon: Check, label: "7 dias de garantia" },
+  { icon: MessageCircle, label: "Suporte humano" },
+] as const;
 
 const Pricing = memo(() => {
-  const { t } = useI18n();
-  const { data: plans, isLoading } = usePublicPlans();
-
-  // Fallback para dados hardcoded se API não retornar nada
-  const defaultPlans: PlanProps[] = [
-    {
-      name: t("landing", "planMonthly"),
-      description: t("landing", "planMonthlyDescription"),
-      price: "29",
-      priceDecimal: "90",
-      period: "/mês",
-      features: t("landing", "planFeatures2") as unknown as string[],
-      cta: t("landing", "planCTA2"),
-      highlighted: false,
-    },
-    {
-      name: t("landing", "planQuarterly"),
-      description: t("landing", "planQuarterlyDescription"),
-      price: "79",
-      priceDecimal: "90",
-      period: "/semestre",
-      features: t("landing", "planFeatures3") as unknown as string[],
-      cta: t("landing", "planCTA3"),
-      highlighted: true,
-      badge: "Mais Popular",
-    },
-    {
-      name: t("landing", "planAnnual"),
-      description: t("landing", "planAnnualDescription"),
-      price: "159",
-      priceDecimal: "90",
-      period: "/ano",
-      features: t("landing", "planFeatures3") as unknown as string[],
-      cta: t("landing", "planCTA3"),
-      highlighted: false,
-      badge: "Melhor Valor",
-    },
-  ];
-
-  // Converte dados da API para formato esperado pelo componente
-  const PLANS = plans && plans.length > 0
-    ? plans.map((plan) => {
-        const priceStr = plan.price.toFixed(2).replace(".", ",");
-        const [price, priceDecimal] = priceStr.split(",");
-        
-        const periodMap: Record<string, string> = {
-          "MONTHLY": "/mês",
-          "YEARLY": "/ano",
-          "mês": "/mês",
-          "ano": "/ano",
-        };
-        
-        return {
-          name: plan.name,
-          description: plan.description,
-          price,
-          priceDecimal,
-          period: periodMap[plan.billingPeriod?.toUpperCase()] || `/${plan.billingPeriod}`,
-          features: plan.features,
-          cta: t("landing", "planCTA2"),
-          highlighted: plan.popular ?? false,
-          badge: plan.popular ? "Mais Popular" : undefined,
-        } as PlanProps;
-      })
-    : defaultPlans;
-
-  const TRUST_BADGES = [
-    { icon: Shield, text: t("landing", "trustSecurePayment") },
-    { icon: Check, text: t("landing", "trustCancelAnyTime") },
-    { icon: Star, text: t("landing", "trustHumanSupport") },
-  ] as const;
+  const [billing, setBilling] = useState<Billing>("annual");
+  const isAnnual = billing === "annual";
 
   return (
     <section id="planos" className="py-24 bg-transparent">
       <div className="container mx-auto px-4">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-400 text-sm font-medium mb-4">
-            {t("landing", "pricingBadge")}
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            {t("landing", "pricingTitle")}
+        {/* Header */}
+        <div className="max-w-3xl mx-auto text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Simples assim. Um plano, tudo incluído.
           </h2>
-          <p className="text-lg text-white/60">
-            {t("landing", "pricingSubtitle")}
-          </p>
+          <p className="text-lg text-white/60">Sem taxas escondidas. Cancele quando quiser.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {isLoading ? (
-            <div className="col-span-3 flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+        {/* Toggle */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex items-center rounded-2xl p-1 border border-white/10" style={{ background: "rgba(255,255,255,0.08)" }}>
+            <button
+              type="button"
+              onClick={() => setBilling("monthly")}
+              className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                billing === "monthly" ? "bg-white shadow-md" : "text-white/50 hover:text-white"
+              }`}
+              style={billing === "monthly" ? { color: BRAND.dark } : {}}
+            >
+              Mensal
+            </button>
+            <button
+              type="button"
+              onClick={() => setBilling("annual")}
+              className={`relative px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                billing === "annual" ? "bg-white shadow-md" : "text-white/50 hover:text-white"
+              }`}
+              style={billing === "annual" ? { color: BRAND.dark } : {}}
+            >
+              Anual
+              {billing === "monthly" && (
+                <span
+                  className="absolute -top-2 -right-1 px-1 py-0.5 text-white text-[9px] font-bold rounded-full leading-none"
+                  style={{ background: BRAND.primary }}
+                >
+                  -49%
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Card */}
+        <div className="max-w-sm mx-auto">
+          <div
+            className="relative rounded-3xl shadow-2xl p-8"
+            style={{
+              background: BRAND.dark,
+              border: `1px solid ${BRAND.primary}50`,
+              boxShadow: `0 25px 60px ${BRAND.dark}80`,
+            }}
+          >
+            {isAnnual ? (
+              <>
+                {/* Badges — Anual */}
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-full border-2"
+                    style={{ borderColor: `${BRAND.primary}60`, background: `${BRAND.primary}20` }}
+                  >
+                    <Crown className="w-3.5 h-3.5 text-white" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wide">Plano Anual</span>
+                  </div>
+                  <div
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-full border-2"
+                    style={{ borderColor: `${BRAND.primary}80`, background: `${BRAND.primary}30` }}
+                  >
+                    <BadgePercent className="w-3.5 h-3.5" style={{ color: BRAND.light }} />
+                    <span className="text-xs font-bold uppercase tracking-wide" style={{ color: BRAND.light }}>49% OFF</span>
+                  </div>
+                </div>
+
+                {/* Título */}
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <p className="text-center text-[15px] font-bold text-white">
+                    Acesso completo ao{" "}
+                    <span style={{ color: BRAND.light }}>Dr. Cash</span>
+                  </p>
+                  <BadgeCheck className="w-5 h-5 shrink-0" style={{ color: BRAND.light }} />
+                </div>
+
+                {/* Preço tachado */}
+                <p className="text-center text-sm text-white/40 line-through mb-1">
+                  De R$197,00 por
+                </p>
+
+                {/* Preço PIX principal */}
+                <div className="flex items-baseline justify-center gap-0.5 mb-4">
+                  <span className="text-3xl font-bold text-white">R$</span>
+                  <span className="text-8xl font-black text-white leading-none tracking-tighter">99</span>
+                  <span className="text-4xl font-black text-white">,90</span>
+                </div>
+
+                {/* PIX pill */}
+                <div className="flex justify-center mb-4">
+                  <div
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-full"
+                    style={{
+                      background: BRAND.primary,
+                      boxShadow: `0 0 20px ${BRAND.primary}60`,
+                    }}
+                  >
+                    <QrCode className="w-4 h-4 text-white" />
+                    <span className="text-sm font-bold text-white">à vista no PIX</span>
+                  </div>
+                </div>
+
+                {/* Divider OU */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-white/15" />
+                  <span className="text-xs font-semibold text-white/40 uppercase">ou</span>
+                  <div className="flex-1 h-px bg-white/15" />
+                </div>
+
+                {/* Cartão parcelado */}
+                <p className="text-center text-xl font-bold text-white/80 mb-1">
+                  12x de <span className="text-white">R$ 12,90</span>
+                </p>
+                <p className="text-center text-xs text-white/40 mb-3">
+                  Valor total: R$ 154,80 no cartão
+                </p>
+
+                {/* Economia badge */}
+                <div className="flex justify-center mb-6">
+                  <div
+                    className="flex items-center gap-2 px-5 py-1.5 rounded-full border-2"
+                    style={{ borderColor: `${BRAND.primary}50`, background: `${BRAND.primary}15` }}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5 text-white/70" />
+                    <span className="text-sm font-semibold text-white/80">Economia de 49%</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Badges — Mensal */}
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-full border-2"
+                    style={{ borderColor: `${BRAND.primary}60`, background: `${BRAND.primary}20` }}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-white" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wide">Plano Mensal</span>
+                  </div>
+                </div>
+
+                {/* Título */}
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <p className="text-center text-[15px] font-bold text-white">
+                    Acesso completo ao{" "}
+                    <span style={{ color: BRAND.light }}>Dr. Cash</span>
+                  </p>
+                  <BadgeCheck className="w-5 h-5 shrink-0" style={{ color: BRAND.light }} />
+                </div>
+
+                {/* Preço mensal */}
+                <div className="flex items-baseline justify-center gap-0.5 mb-4">
+                  <span className="text-3xl font-bold text-white">R$</span>
+                  <span className="text-8xl font-black text-white leading-none tracking-tighter">99</span>
+                  <span className="text-4xl font-black text-white">,90</span>
+                </div>
+                <p className="text-center text-sm text-white/50 mb-4">/mês · cobrado mensalmente</p>
+
+                {/* Nudge para anual */}
+                <div className="flex justify-center mb-6">
+                  <div
+                    className="flex items-center gap-2 px-5 py-1.5 rounded-full border"
+                    style={{ borderColor: `${BRAND.primary}50`, background: `${BRAND.primary}20` }}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" style={{ color: BRAND.light }} />
+                    <span className="text-sm font-semibold" style={{ color: BRAND.light }}>
+                      Mude para Anual e economize 49%
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* CTA */}
+            <Link
+              to="/cadastro"
+              state={{ billing }}
+              onClick={() => analytics.click(`pricing_pro_${billing}`, "pricing")}
+              className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl text-white font-bold text-lg transition-all duration-200 active:scale-[0.98]"
+              style={{
+                background: `linear-gradient(135deg, ${BRAND.primary}, #0f3a9e)`,
+                boxShadow: `0 0 28px ${BRAND.primary}60`,
+                border: `1px solid ${BRAND.primary}60`,
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 40px ${BRAND.primary}90`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 28px ${BRAND.primary}60`;
+              }}
+            >
+              Começar agora →
+            </Link>
+
+            {/* Trust row */}
+            <div className="flex items-center justify-center gap-5 mt-5">
+              {TRUST.map(({ icon: Icon, label }, i) => (
+                <div key={i} className="flex items-center gap-1.5 text-xs text-white/40">
+                  <Icon className="w-3.5 h-3.5" />
+                  {label}
+                </div>
+              ))}
             </div>
-          ) : (
-            PLANS.map((plan) => (
-              <PlanCard key={plan.name} plan={plan} />
-            ))
-          )}
-        </div>
-
-        <div className="mt-16 max-w-2xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-sm text-white/60">
-            {TRUST_BADGES.map((badge, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <badge.icon className="w-5 h-5 text-cyan-400" />
-                <span>{badge.text}</span>
-              </div>
-            ))}
           </div>
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-white/50 max-w-lg mx-auto">
-            <span className="font-medium text-white">{t("landing", "pricingWhyNoFree")}</span>
-            {" "}Acreditamos que quem investe no próprio controle financeiro leva a sério.
+          <p className="text-sm text-white/40 max-w-lg mx-auto">
+            <span className="font-medium text-white/60">Por que não tem plano grátis?</span>{" "}
+            Acreditamos que quem investe no próprio controle financeiro leva a sério.
             Isso nos permite oferecer suporte de qualidade e manter o produto sem anúncios.
           </p>
         </div>
@@ -216,5 +249,4 @@ const Pricing = memo(() => {
 });
 
 Pricing.displayName = "Pricing";
-
 export default Pricing;

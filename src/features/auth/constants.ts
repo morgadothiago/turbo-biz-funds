@@ -1,4 +1,4 @@
-export const AUTH_BG = "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)";
+export const AUTH_BG = "radial-gradient(ellipse 120% 60% at 50% -10%, #1B4DBF 0%, #0B1F3A 50%, #060d1a 100%)";
 export const AUTH_LOGO = "/logoweb.png";
 
 // Chave usada no sessionStorage para rastrear tentativas de login

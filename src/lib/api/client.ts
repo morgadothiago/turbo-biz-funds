@@ -150,6 +150,11 @@ export const apiEndpoints = {
     update: (id: string) => `/v1/cards/${id}`,
     delete: (id: string) => `/v1/cards/${id}`,
   },
+  notifications: {
+    list: "/v1/notifications",
+    markRead: (id: string) => `/v1/notifications/${id}/read`,
+    markAllRead: "/v1/notifications/read-all",
+  },
   plans: {
     list: "/v1/plans",
     get: (id: string) => `/v1/plans/${id}`,

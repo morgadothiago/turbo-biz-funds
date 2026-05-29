@@ -115,7 +115,7 @@ const FAQ = memo(() => {
     <section id="faq" className="py-24 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-400 text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-[#E5E7EB] text-sm font-medium mb-4">
             {t("landing", "faqBadge")}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
@@ -134,7 +134,7 @@ const FAQ = memo(() => {
                 value={`item-${index}`}
                 className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/10 px-6"
               >
-                <AccordionTrigger className="hover:text-cyan-400 text-white py-5">
+                <AccordionTrigger className="hover:text-[#E5E7EB] text-white py-5">
                   <span>{faq.question}</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-white/60 pb-5">
@@ -152,7 +152,7 @@ const FAQ = memo(() => {
               href="https://wa.me/5511999999999"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-cyan-400 font-medium hover:text-cyan-300 transition-colors"
+              className="text-[#E5E7EB] font-medium hover:text-white transition-colors"
             >
               {t("landing", "faqContactWhatsApp")}
             </a>

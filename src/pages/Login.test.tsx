@@ -26,7 +26,7 @@ describe("Login Page with Zod Validation", () => {
     
     expect(screen.getByText(/bem-vindo de volta/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/senha/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/senha/i, { selector: 'input' })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /entrar/i })).toBeInTheDocument();
     expect(screen.getByText(/criar conta grátis/i)).toBeInTheDocument();
   });
@@ -43,7 +43,7 @@ describe("Login Page with Zod Validation", () => {
   it("should update password input on change", () => {
     renderWithProviders(<Login />);
     
-    const passwordInput = screen.getByLabelText(/senha/i);
+    const passwordInput = screen.getByLabelText(/senha/i, { selector: 'input' });
     fireEvent.change(passwordInput, { target: { value: "password123" } });
     
     expect(passwordInput).toHaveValue("password123");

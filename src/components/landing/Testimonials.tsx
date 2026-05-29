@@ -190,7 +190,7 @@ const Testimonials = memo(() => {
     <section id="depoimentos" className="py-24 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-400 text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-[#E5E7EB] text-sm font-medium mb-4">
             {t("landing", "testimonialsBadge")}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">

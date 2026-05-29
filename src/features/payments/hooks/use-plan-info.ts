@@ -5,6 +5,15 @@ import type { AxiosError } from "axios";
 
 export type { PlanInfo };
 
+const PRO_FEATURES = [
+  "Assistente financeiro com IA 24h",
+  "Registro por WhatsApp (áudio, foto, texto)",
+  "Categorização automática inteligente",
+  "Relatórios detalhados mensais",
+  "Controle de recorrências e assinaturas",
+  "Suporte prioritário",
+];
+
 const PLAN_DEFAULTS: Record<string, PlanInfo> = {
   free: {
     id: "free",
@@ -17,16 +26,26 @@ const PLAN_DEFAULTS: Record<string, PlanInfo> = {
   pro: {
     id: "pro",
     name: "Pro",
-    price: "R$ 97",
+    price: 99.9,
     period: "/mês",
-    description: "3 contas, IA + WhatsApp",
-    features: [
-      "Tudo do Gratuito",
-      "Categorização por IA",
-      "Registro por WhatsApp",
-      "Relatórios avançados",
-      "Suporte prioritário",
-    ],
+    description: "Acesso completo mensal",
+    features: PRO_FEATURES,
+  },
+  "pro-monthly": {
+    id: "pro-monthly",
+    name: "Pro Mensal",
+    price: 99.9,
+    period: "/mês",
+    description: "Acesso completo mensal",
+    features: PRO_FEATURES,
+  },
+  "pro-annual": {
+    id: "pro-annual",
+    name: "Pro Anual",
+    price: 154.8,
+    period: "/ano",
+    description: "Acesso completo anual — 12x de R$12,90 sem juros",
+    features: PRO_FEATURES,
   },
   business: {
     id: "business",

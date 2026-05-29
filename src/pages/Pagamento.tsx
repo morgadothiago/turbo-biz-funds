@@ -21,27 +21,28 @@ import { toast } from "sonner";
 import { fmtBRL } from "@/lib/format";
 
 const logoWeb = "/logoweb.png";
-const INSTALLMENTS = [1, 2, 3, 6, 12];
+const INSTALLMENTS_ANNUAL = [1, 2, 3, 6, 12];
+const INSTALLMENTS_MONTHLY = [1];
 
-const BG = "linear-gradient(to bottom, #030712, #020617 50%, #010409)";
+const BG = "linear-gradient(to bottom, #0B1F3A, #0B1F3A 50%, #0B1F3A)";
 
 const CTA_BTN =
   "w-full h-12 inline-flex items-center justify-center gap-2 px-6 " +
-  "bg-gradient-to-r from-[#0047FF] to-[#0A1940] " +
+  "bg-gradient-to-r from-[#1B4DBF] to-[#0B1F3A] " +
   "hover:from-[#1a5fff] hover:to-[#0d2a50] " +
   "active:scale-[0.98] " +
   "text-white font-bold text-sm rounded-xl " +
   "border border-blue-500/20 " +
-  "shadow-[0_0_24px_rgba(0,71,255,0.35)] " +
-  "hover:shadow-[0_0_38px_rgba(0,71,255,0.55)] " +
+  "shadow-[0_0_24px_rgba(27,77,191,0.35)] " +
+  "hover:shadow-[0_0_38px_rgba(27,77,191,0.55)] " +
   "transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
 
 const CARD =
-  "rounded-2xl border border-white/[0.08] bg-[#06091c]/80 backdrop-blur-sm p-6 shadow-xl";
+  "rounded-2xl border border-white/[0.08] bg-[#0B1F3A]/80 backdrop-blur-sm p-6 shadow-xl";
 
 const INPUT_CLS =
-  "h-11 bg-[#0a0f1f] border-white/10 text-white placeholder:text-white/30 " +
-  "focus:border-[#0047FF] focus:ring-[#0047FF]/20 focus:ring-2";
+  "h-11 bg-[#0B1F3A] border-white/10 text-white placeholder:text-white/30 " +
+  "focus:border-[#1B4DBF] focus:ring-[#1B4DBF]/20 focus:ring-2";
 
 const LABEL_CLS = "text-sm font-medium text-white/70";
 
@@ -91,6 +92,7 @@ function CardForm({
   isLoading,
   onSubmit,
   planInfo,
+  installmentOptions,
 }: {
   isLoading: boolean;
   onSubmit: (card: {
@@ -102,6 +104,7 @@ function CardForm({
     installments: number;
   }) => void;
   planInfo: PlanDisplay;
+  installmentOptions: number[];
 }) {
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
@@ -123,7 +126,8 @@ function CardForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    const [expiryMonth, expiryYear] = expiry.split("/");
+    const [expiryMonth, rawYear] = expiry.split("/");
+    const expiryYear = rawYear.length === 2 ? `20${rawYear}` : rawYear;
     onSubmit({ number: cardNumber.replace(/\s/g, ""), holderName: cardName, expiryMonth, expiryYear, cvv, installments });
     setCardNumber("");
     setCvv("");
@@ -216,28 +220,30 @@ function CardForm({
         </div>
       </div>
 
-      {/* Parcelamento */}
-      <div className="space-y-1.5">
-        <Label className={LABEL_CLS}>Parcelamento</Label>
-        <div className="relative">
-          <select
-            value={installments}
-            onChange={(e) => setInstallments(Number(e.target.value))}
-            disabled={isLoading}
-            className="w-full h-11 appearance-none rounded-xl border border-white/10 bg-[#0a0f1f] px-3 pr-9 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#0047FF]/40 focus:border-[#0047FF] disabled:opacity-50 transition-colors"
-          >
-            {INSTALLMENTS.map((n) => (
-              <option key={n} value={n} className="bg-[#0a0f1f]">{installmentLabel(n)}</option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+      {/* Parcelamento — só exibe para planos anuais */}
+      {installmentOptions.length > 1 && (
+        <div className="space-y-1.5">
+          <Label className={LABEL_CLS}>Parcelamento</Label>
+          <div className="relative">
+            <select
+              value={installments}
+              onChange={(e) => setInstallments(Number(e.target.value))}
+              disabled={isLoading}
+              className="w-full h-11 appearance-none rounded-xl border border-white/10 bg-[#0B1F3A] px-3 pr-9 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#1B4DBF]/40 focus:border-[#1B4DBF] disabled:opacity-50 transition-colors"
+            >
+              {installmentOptions.map((n) => (
+                <option key={n} value={n} className="bg-[#0B1F3A]">{installmentLabel(n)}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+          </div>
+          {installments > 1 && (
+            <p className="text-xs text-[#94A3B8]">
+              Total de {toDisplay(planInfo.price)} em {installments}x sem juros
+            </p>
+          )}
         </div>
-        {installments > 1 && (
-          <p className="text-xs text-[#94A3B8]">
-            Total de {toDisplay(planInfo.price)} em {installments}x sem juros
-          </p>
-        )}
-      </div>
+      )}
 
       <button type="submit" className={CTA_BTN} disabled={isLoading}>
         {isLoading ? (
@@ -284,7 +290,7 @@ function PixForm({
 
   return (
     <div className="space-y-5">
-      <div className={`flex items-center justify-center gap-2 text-sm font-medium rounded-xl px-4 py-2.5 ${expired ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-[#0047FF]/10 text-blue-300 border border-[#0047FF]/20"}`}>
+      <div className={`flex items-center justify-center gap-2 text-sm font-medium rounded-xl px-4 py-2.5 ${expired ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-[#1B4DBF]/10 text-blue-300 border border-[#1B4DBF]/20"}`}>
         <Clock className="w-4 h-4 shrink-0" />
         {expired ? "QR Code expirado" : `QR Code válido por ${mm}:${ss}`}
       </div>
@@ -329,7 +335,7 @@ function PixForm({
               type="button"
               onClick={handleCopy}
               disabled={expired}
-              className="h-11 w-11 shrink-0 rounded-xl border border-white/10 bg-[#0a0f1f] flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors disabled:opacity-40"
+              className="h-11 w-11 shrink-0 rounded-xl border border-white/10 bg-[#0B1F3A] flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors disabled:opacity-40"
             >
               {copied ? <CheckCheck className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -368,6 +374,9 @@ const Pagamento = () => {
   const location = useLocation();
   const plan = (location.state as { plan?: string })?.plan ?? new URLSearchParams(location.search).get("plan") ?? "pro";
 
+  // Mapeia IDs de UI para IDs que a API reconhece
+  const apiPlanId = plan === "pro-annual" || plan === "pro-monthly" ? "pro" : plan;
+
   const { planInfo: apiPlanInfo, isLoading: isPlanLoading } = usePlanInfo(plan);
 
   const planInfo: PlanDisplay = apiPlanInfo ?? {
@@ -377,6 +386,14 @@ const Pagamento = () => {
     description: "",
     features: [],
   };
+
+  const isAnnualPlan = plan.includes("annual") || plan.includes("anual") || planInfo.period === "/ano";
+  const installmentOptions = isAnnualPlan ? INSTALLMENTS_ANNUAL : INSTALLMENTS_MONTHLY;
+
+  // Plano anual: PIX = R$99,90 (à vista), Cartão = R$154,80 (12x de R$12,90)
+  const effectivePrice = isAnnualPlan
+    ? method === "pix" ? 99.9 : 154.8
+    : planInfo.price;
 
   const [method, setMethod] = useState<PaymentMethod>("cartao");
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
@@ -389,7 +406,7 @@ const Pagamento = () => {
     setIntent(null);
     setIsCreatingIntent(true);
     api
-      .post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan, method: "pix" })
+      .post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan: apiPlanId, method: "pix" })
       .then((res) => setIntent(res.data))
       .catch(() => toast.error("Erro ao gerar QR Code Pix. Tente novamente."))
       .finally(() => setIsCreatingIntent(false));
@@ -405,7 +422,7 @@ const Pagamento = () => {
   }) => {
     setIsConfirming(true);
     try {
-      const intentRes = await api.post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan, method: "cartao" });
+      const intentRes = await api.post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan: apiPlanId, method: "cartao" });
       const paymentId = intentRes.data.paymentId;
       await api.post(apiEndpoints.payments.confirm(paymentId), { card });
       navigate("/pagamento-sucesso", { state: { plan, method } });
@@ -441,7 +458,7 @@ const Pagamento = () => {
   const METHOD_BTN = (active: boolean) =>
     `flex items-center justify-center gap-2 rounded-xl border-2 py-3 px-4 text-sm font-medium transition-all duration-200 ${
       active
-        ? "border-[#0047FF] bg-[#0047FF]/10 text-blue-300 shadow-[0_0_16px_rgba(0,71,255,0.2)]"
+        ? "border-[#1B4DBF] bg-[#1B4DBF]/10 text-blue-300 shadow-[0_0_16px_rgba(27,77,191,0.2)]"
         : "border-white/10 text-white/40 hover:border-white/20 hover:text-white/60"
     }`;
 
@@ -468,12 +485,12 @@ const Pagamento = () => {
               <div key={s} className="flex items-center">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold transition-all ${
                   s < 3
-                    ? "bg-[#0047FF] text-white shadow-[0_0_12px_rgba(0,71,255,0.5)]"
-                    : "bg-white text-[#0047FF]"
+                    ? "bg-[#1B4DBF] text-white shadow-[0_0_12px_rgba(27,77,191,0.5)]"
+                    : "bg-white text-[#1B4DBF]"
                 }`}>
                   {s < 3 ? <Check className="w-4 h-4" /> : "3"}
                 </div>
-                {s < 3 && <div className="w-16 h-0.5 rounded-full bg-[#0047FF]/60" />}
+                {s < 3 && <div className="w-16 h-0.5 rounded-full bg-[#1B4DBF]/60" />}
               </div>
             ))}
           </div>
@@ -496,17 +513,22 @@ const Pagamento = () => {
                   <Loader2 className="w-6 h-6 animate-spin text-white/30" />
                 </div>
               ) : (
-                <div className="bg-[#0047FF]/10 border border-[#0047FF]/20 rounded-xl p-4 mb-4">
+                <div className="bg-[#1B4DBF]/10 border border-[#1B4DBF]/20 rounded-xl p-4 mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-white">Plano {planInfo.name}</span>
-                    <span className="px-2 py-0.5 bg-[#0047FF] text-white text-xs font-medium rounded-full">
+                    <span className="px-2 py-0.5 bg-[#1B4DBF] text-white text-xs font-medium rounded-full">
                       Selecionado
                     </span>
                   </div>
                   <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-3xl font-bold text-green-400">{toDisplay(planInfo.price)}</span>
+                    <span className="text-3xl font-bold text-green-400">{toDisplay(effectivePrice)}</span>
                     <span className="text-sm text-[#94A3B8]">{planInfo.period}</span>
                   </div>
+                  {isAnnualPlan && (
+                    <p className="text-xs text-[#E5E7EB]/80 mb-1">
+                      {method === "pix" ? "À vista no PIX" : "12x de R$12,90 sem juros no cartão"}
+                    </p>
+                  )}
                   <p className="text-xs text-[#94A3B8] mb-3">{planInfo.description}</p>
                   <ul className="space-y-1.5">
                     {planInfo.features.map((f) => (
@@ -521,11 +543,11 @@ const Pagamento = () => {
               <div className="border-t border-white/[0.07] pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-[#94A3B8]">Subtotal</span>
-                  <span className="text-white">{toDisplay(planInfo.price)}</span>
+                  <span className="text-white">{toDisplay(effectivePrice)}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold">
                   <span className="text-white">Total hoje</span>
-                  <span className="text-green-400 text-base">{toDisplay(planInfo.price)}</span>
+                  <span className="text-green-400 text-base">{toDisplay(effectivePrice)}</span>
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 p-3 bg-green-500/5 border border-green-500/10 rounded-xl text-xs text-green-400/80">
@@ -546,7 +568,7 @@ const Pagamento = () => {
                   Cartão de Crédito
                 </button>
                 <button type="button" onClick={() => setMethod("pix")} className={METHOD_BTN(method === "pix")}>
-                  <svg className="w-4 h-4" viewBox="0 0 512 512" fill="currentColor">
+                  <svg className="w-4 h-4" viewBox="-10 -50 540 562" fill="currentColor">
                     <path d="M242.4 292.5C247.8 287.1 254.4 284.1 260 284.1C265.7 284.1 272.3 287.1 277.7 292.5L416 430.8C436.8 451.5 469.2 451.5 490 430.8C510.8 410.1 510.8 377.7 490 356.9L351.6 218.5C346.2 213.1 343.2 206.5 343.2 200.9C343.2 195.3 346.2 188.7 351.6 183.2L490 44.9C510.8 24.1 510.8-8.3 490-29.1C469.2-49.9 436.8-49.9 416-29.1L277.7 109.2C272.3 114.6 265.7 117.6 260 117.6C254.4 117.6 247.8 114.6 242.4 109.2L104 -29.1C83.2-49.9 50.8-49.9 30-29.1C9.2-8.3 9.2 24.1 30 44.9L168.4 183.2C173.8 188.6 176.8 195.2 176.8 200.9C176.8 206.5 173.8 213.1 168.4 218.5L30 356.9C9.2 377.7 9.2 410.1 30 430.8C50.8 451.5 83.2 451.5 104 430.8L242.4 292.5z" />
                   </svg>
                   Pix
@@ -554,7 +576,7 @@ const Pagamento = () => {
               </div>
 
               {method === "cartao" ? (
-                <CardForm isLoading={isConfirming} onSubmit={handleCardSubmit} planInfo={planInfo} />
+                <CardForm isLoading={isConfirming} onSubmit={handleCardSubmit} planInfo={{ ...planInfo, price: effectivePrice }} installmentOptions={installmentOptions} />
               ) : (
                 <PixForm intent={isCreatingIntent ? null : intent} isCheckingStatus={isCheckingStatus} onCheckStatus={handlePixStatusCheck} />
               )}

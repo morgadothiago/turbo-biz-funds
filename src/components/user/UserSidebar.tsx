@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Receipt,
-  PieChart,
   Target,
   Settings,
   LogOut,
@@ -33,7 +32,6 @@ interface MenuItem {
 const mainMenuItems: MenuItem[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Transações", url: "/dashboard/transacoes", icon: Receipt },
-  { title: "Categorias", url: "/dashboard/categorias", icon: PieChart },
   { title: "Metas", url: "/dashboard/metas", icon: Target },
   { title: "Recorrências", url: "/dashboard/recorrencias", icon: RefreshCw },
   { title: "Cartões", url: "/dashboard/cartoes", icon: CreditCard },

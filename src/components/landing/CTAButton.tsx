@@ -18,19 +18,19 @@ interface CTAButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "
 
 const BASE =
   "inline-flex items-center gap-3 px-7 py-3 " +
-  "bg-gradient-to-r from-[#0047FF] to-[#0A1940]/90 " +
-  "hover:from-[#1a5fff] hover:to-[#0d2a50] " +
+  "bg-gradient-to-r from-[#1B4DBF] to-[#0B1F3A] " +
+  "hover:from-[#2a5dd4] hover:to-[#0f2d50] " +
   "active:scale-[0.97] " +
   "text-white font-bold text-sm uppercase tracking-wide " +
-  "rounded-lg border border-blue-500/20 " +
-  "shadow-[0_0_24px_rgba(0,71,255,0.45)] " +
-  "hover:shadow-[0_0_38px_rgba(0,71,255,0.65)] " +
+  "rounded-lg border border-[#1B4DBF]/30 " +
+  "shadow-[0_0_24px_rgba(27,77,191,0.45)] " +
+  "hover:shadow-[0_0_38px_rgba(27,77,191,0.65)] " +
   "transition-all duration-200 cursor-pointer select-none";
 
 const SimpleArrow = () => <ArrowRight className="w-4 h-4 flex-shrink-0" />;
 
 const CircleArrow = () => (
-  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#001a6b] flex-shrink-0">
+  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0B1F3A] flex-shrink-0">
     <ArrowRight className="w-3.5 h-3.5" />
   </span>
 );

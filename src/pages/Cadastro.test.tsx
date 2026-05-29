@@ -110,11 +110,6 @@ describe("Cadastro Page", () => {
     expect(screen.getByRole("link", { name: /privacidade/i })).toBeInTheDocument();
   });
 
-  it("should render Google login button", () => {
-    renderWithProviders(<Cadastro />);
-    
-    expect(screen.getByRole("button", { name: /google/i })).toBeInTheDocument();
-  });
 
   it("should render progress indicator", () => {
     renderWithProviders(<Cadastro />);

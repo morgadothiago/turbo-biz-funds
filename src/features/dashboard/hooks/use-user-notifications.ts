@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, apiEndpoints } from "@/lib/api/client";
 import type { Recurrence } from "@/shared/types";
@@ -11,14 +12,21 @@ export type NotificationSeverity = "info" | "warning" | "error" | "success";
 
 export interface UserNotification {
   id: string;
+  type?: string;
   severity: NotificationSeverity;
   title: string;
   body: string;
   action?: { label: string; href: string };
+  readAt?: string | null;
   createdAt: string;
 }
 
-// ─── Activity log (stored in localStorage) ──────────────────────────────────
+interface NotificationsResponse {
+  data: UserNotification[];
+  unreadCount: number;
+}
+
+// ─── Activity log (localStorage — used in client-side fallback) ───────────────
 
 export interface ActivityEntry {
   id: string;
@@ -37,7 +45,6 @@ function getActivityLog(): ActivityEntry[] {
   }
 }
 
-/** Call this from any mutation onSuccess to log user activity */
 export function logActivity(entry: Omit<ActivityEntry, "id" | "createdAt">) {
   const log = getActivityLog();
   const newEntry: ActivityEntry = {
@@ -45,12 +52,24 @@ export function logActivity(entry: Omit<ActivityEntry, "id" | "createdAt">) {
     id: `activity-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     createdAt: new Date().toISOString(),
   };
-  // Keep last 20 activity entries
-  const trimmed = [newEntry, ...log].slice(0, 20);
-  localStorage.setItem(ACTIVITY_STORAGE_KEY, JSON.stringify(trimmed));
+  localStorage.setItem(ACTIVITY_STORAGE_KEY, JSON.stringify([newEntry, ...log].slice(0, 20)));
 }
 
-// ─── Subscription notifications ──────────────────────────────────────────────
+// ─── localStorage read state (client-side fallback) ──────────────────────────
+
+function getReadIds(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(READ_STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveReadIds(ids: string[]) {
+  localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(ids));
+}
+
+// ─── Subscription notifications (client-side fallback) ───────────────────────
 
 interface SubscriptionResponse {
   status?: string;
@@ -84,8 +103,7 @@ function buildSubscriptionNotifications(
 
   if (status && ["atrasada", "overdue", "past_due", "defaulting"].includes(status)) {
     notifications.push({
-      id: "payment_overdue",
-      severity: "error",
+      id: "payment_overdue", severity: "error",
       title: "Mensalidade em atraso",
       body: "Regularize seu pagamento para continuar com acesso total ao DoutorCash.",
       action: { label: "Regularizar agora", href: "/pagamento" },
@@ -95,8 +113,7 @@ function buildSubscriptionNotifications(
 
   if (status && ["pending", "pendente", "inactive", "inativo"].includes(status)) {
     notifications.push({
-      id: "payment_pending",
-      severity: "warning",
+      id: "payment_pending", severity: "warning",
       title: "Pagamento pendente de mensalidade",
       body: "Seu pagamento está aguardando confirmação.",
       action: { label: "Verificar pagamento", href: "/pagamento" },
@@ -111,8 +128,7 @@ function buildSubscriptionNotifications(
       : null;
     if (daysLeft !== null && daysLeft <= 7 && daysLeft >= 0) {
       notifications.push({
-        id: "trial_ending",
-        severity: "warning",
+        id: "trial_ending", severity: "warning",
         title: `Trial termina em ${daysLeft} dia${daysLeft !== 1 ? "s" : ""}`,
         body: "Faça upgrade agora para não perder acesso ao DoutorCash.",
         action: { label: "Fazer upgrade", href: "/pagamento" },
@@ -120,8 +136,7 @@ function buildSubscriptionNotifications(
       });
     } else {
       notifications.push({
-        id: "trial_active",
-        severity: "info",
+        id: "trial_active", severity: "info",
         title: "Você está no período de avaliação",
         body: "Aproveite todos os recursos Premium gratuitamente. Assine para continuar.",
         action: { label: "Ver planos", href: "/pagamento" },
@@ -130,17 +145,11 @@ function buildSubscriptionNotifications(
     }
   }
 
-  if (
-    nextBillingRaw &&
-    !["atrasada", "overdue", "past_due", "pending", "pendente"].includes(status ?? "")
-  ) {
-    const daysUntilBilling = Math.ceil(
-      (new Date(nextBillingRaw).getTime() - Date.now()) / 86_400_000
-    );
+  if (nextBillingRaw && !["atrasada", "overdue", "past_due", "pending", "pendente"].includes(status ?? "")) {
+    const daysUntilBilling = Math.ceil((new Date(nextBillingRaw).getTime() - Date.now()) / 86_400_000);
     if (daysUntilBilling >= 0 && daysUntilBilling <= 3) {
       notifications.push({
-        id: "billing_soon",
-        severity: "info",
+        id: "billing_soon", severity: "info",
         title: `Cobrança em ${daysUntilBilling} dia${daysUntilBilling !== 1 ? "s" : ""}`,
         body: `Sua mensalidade será cobrada ${daysUntilBilling === 0 ? "hoje" : `em ${daysUntilBilling} dia(s)`}.`,
         createdAt: now,
@@ -151,8 +160,7 @@ function buildSubscriptionNotifications(
   const hasUrgent = notifications.some((n) => n.severity === "error" || n.severity === "warning");
   if (plan === "free" && !hasUrgent && subscription === null) {
     notifications.push({
-      id: "free_plan_upgrade",
-      severity: "info",
+      id: "free_plan_upgrade", severity: "info",
       title: "Você está no plano Gratuito",
       body: "Faça upgrade para Pro e desbloqueie transações ilimitadas, metas avançadas e muito mais.",
       action: { label: "Ver planos", href: "/pagamento" },
@@ -163,9 +171,8 @@ function buildSubscriptionNotifications(
   return notifications;
 }
 
-// ─── Recurrence notifications ─────────────────────────────────────────────────
+// ─── Recurrence notifications (client-side fallback) ─────────────────────────
 
-/** Compute next occurrence >= today for a recurrence (local-timezone safe) */
 function computeNextDue(rec: Recurrence): Date | null {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -188,18 +195,10 @@ function computeNextDue(rec: Recurrence): Date | null {
   let iters = 0;
   while (cursor < today && iters < 2000) {
     switch (rec.frequency) {
-      case "daily":
-        cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 1);
-        break;
-      case "weekly":
-        cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 7);
-        break;
-      case "monthly":
-        cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, cursor.getDate());
-        break;
-      case "yearly":
-        cursor = new Date(cursor.getFullYear() + 1, cursor.getMonth(), cursor.getDate());
-        break;
+      case "daily":   cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 1); break;
+      case "weekly":  cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 7); break;
+      case "monthly": cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, cursor.getDate()); break;
+      case "yearly":  cursor = new Date(cursor.getFullYear() + 1, cursor.getMonth(), cursor.getDate()); break;
     }
     iters++;
   }
@@ -229,8 +228,7 @@ function buildRecurrenceNotifications(recurrences: Recurrence[]): UserNotificati
       if (daysUntil < 0) {
         const daysLate = -daysUntil;
         notifications.push({
-          id: `rec-overdue-${rec.id}`,
-          severity: "error",
+          id: `rec-overdue-${rec.id}`, severity: "error",
           title: `Pagamento atrasado: ${name}`,
           body: `Venceu há ${daysLate} dia${daysLate !== 1 ? "s" : ""} (${dateStr}). Valor: ${valor}`,
           action: { label: "Ver recorrência", href },
@@ -238,8 +236,7 @@ function buildRecurrenceNotifications(recurrences: Recurrence[]): UserNotificati
         });
       } else if (daysUntil === 0) {
         notifications.push({
-          id: `rec-today-${rec.id}`,
-          severity: "warning",
+          id: `rec-today-${rec.id}`, severity: "warning",
           title: `Último dia para pagar: ${name}`,
           body: `${name} vence hoje (${dateStr}). Valor: ${valor}`,
           action: { label: "Ver recorrência", href },
@@ -247,8 +244,7 @@ function buildRecurrenceNotifications(recurrences: Recurrence[]): UserNotificati
         });
       } else if (daysUntil <= 3) {
         notifications.push({
-          id: `rec-soon-${rec.id}-${daysUntil}`,
-          severity: "info",
+          id: `rec-soon-${rec.id}-${daysUntil}`, severity: "info",
           title: `Vence em ${daysUntil} dia${daysUntil !== 1 ? "s" : ""}: ${name}`,
           body: `${name} vence em ${dateStr}. Valor: ${valor}`,
           action: { label: "Ver recorrência", href },
@@ -260,90 +256,137 @@ function buildRecurrenceNotifications(recurrences: Recurrence[]): UserNotificati
   return notifications;
 }
 
+// ─── Client-side fallback fetch ───────────────────────────────────────────────
+
+async function fetchClientSideNotifications(plan: string): Promise<UserNotification[]> {
+  const [sub, recRes] = await Promise.all([
+    fetchSubscription(),
+    api
+      .get<{ data: Recurrence[] }>(apiEndpoints.recurrences.active)
+      .catch(() => ({ data: [] as Recurrence[] })),
+  ]);
+
+  const recurrences: Recurrence[] = Array.isArray(recRes)
+    ? (recRes as unknown as Recurrence[])
+    : recRes.data ?? [];
+
+  const subNotifs = buildSubscriptionNotifications(plan, sub);
+  const recNotifs = buildRecurrenceNotifications(recurrences);
+  const activityNotifs: UserNotification[] = getActivityLog().map((a) => ({ ...a }));
+
+  return [
+    ...recNotifs.filter((n) => n.severity === "error"),
+    ...recNotifs.filter((n) => n.severity === "warning"),
+    ...subNotifs.filter((n) => n.severity === "error"),
+    ...subNotifs.filter((n) => n.severity === "warning"),
+    ...activityNotifs,
+    ...subNotifs.filter((n) => n.severity === "info" || n.severity === "success"),
+    ...recNotifs.filter((n) => n.severity === "info" || n.severity === "success"),
+  ];
+}
+
 // ─── Main hook ────────────────────────────────────────────────────────────────
-
-function getReadIds(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(READ_STORAGE_KEY) ?? "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveReadIds(ids: string[]) {
-  localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(ids));
-}
 
 export function useUserNotifications() {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<UserNotification[]>([]);
-  const [readIds, setReadIds] = useState<string[]>(getReadIds);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  // ── Server-side path ──────────────────────────────────────────────────────
+  const serverQuery = useQuery<NotificationsResponse>({
+    queryKey: ["notifications", "server"],
+    queryFn: () => api.get<NotificationsResponse>(apiEndpoints.notifications.list),
+    enabled: !!user,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    retry: false,
+  });
+
+  const isServerMode = serverQuery.isSuccess;
+  const isServerError = serverQuery.isError;
+
+  // ── Client-side fallback path ─────────────────────────────────────────────
+  const [clientNotifications, setClientNotifications] = useState<UserNotification[]>([]);
+  const [clientReadIds, setClientReadIds] = useState<string[]>(getReadIds);
+  const [isClientLoading, setIsClientLoading] = useState(false);
 
   useEffect(() => {
-    if (!user) { setIsLoading(false); return; }
+    if (!isServerError || !user) return;
 
     let cancelled = false;
-    setIsLoading(true);
+    setIsClientLoading(true);
 
-    Promise.all([
-      fetchSubscription(),
-      api
-        .get<{ data: Recurrence[] }>(
-          `${apiEndpoints.recurrences.list}?active=true`
-        )
-        .catch(() => ({ data: [] as Recurrence[] })),
-    ]).then(([sub, recRes]) => {
-      if (cancelled) return;
-
-      const recurrences: Recurrence[] = Array.isArray(recRes)
-        ? (recRes as unknown as Recurrence[])
-        : recRes.data ?? [];
-
-      const subNotifs = buildSubscriptionNotifications(user.plan ?? "free", sub);
-      const recNotifs = buildRecurrenceNotifications(recurrences);
-      const activityNotifs: UserNotification[] = getActivityLog().map((a) => ({
-        id: a.id,
-        severity: a.severity,
-        title: a.title,
-        body: a.body,
-        action: a.action,
-        createdAt: a.createdAt,
-      }));
-
-      // Merge: overdue/today first, then sub alerts, then activity, then due-soon
-      const ordered = [
-        ...recNotifs.filter((n) => n.severity === "error"),
-        ...recNotifs.filter((n) => n.severity === "warning"),
-        ...subNotifs.filter((n) => n.severity === "error"),
-        ...subNotifs.filter((n) => n.severity === "warning"),
-        ...activityNotifs,
-        ...subNotifs.filter((n) => n.severity === "info" || n.severity === "success"),
-        ...recNotifs.filter((n) => n.severity === "info" || n.severity === "success"),
-      ];
-
-      setNotifications(ordered);
-      setIsLoading(false);
-    });
+    fetchClientSideNotifications(user.plan ?? "free")
+      .then((notifs) => {
+        if (!cancelled) {
+          setClientNotifications(notifs);
+          setIsClientLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setIsClientLoading(false);
+      });
 
     return () => { cancelled = true; };
-  }, [user]);
+  }, [isServerError, user]);
 
-  const markRead = useCallback((id: string) => {
-    setReadIds((prev) => {
-      const next = prev.includes(id) ? prev : [...prev, id];
-      saveReadIds(next);
-      return next;
-    });
-  }, []);
+  // ── Derived state ─────────────────────────────────────────────────────────
+  const notifications: UserNotification[] = isServerMode
+    ? (serverQuery.data?.data ?? [])
+    : clientNotifications;
 
-  const markAllRead = useCallback(() => {
-    const ids = notifications.map((n) => n.id);
-    setReadIds(ids);
-    saveReadIds(ids);
-  }, [notifications]);
+  const readIds: string[] = isServerMode
+    ? notifications.filter((n) => n.readAt != null).map((n) => n.id)
+    : clientReadIds;
 
-  const unreadCount = notifications.filter((n) => !readIds.includes(n.id)).length;
+  const unreadCount = isServerMode
+    ? (serverQuery.data?.unreadCount ?? 0)
+    : notifications.filter((n) => !clientReadIds.includes(n.id)).length;
+
+  const isLoading = serverQuery.isPending || isClientLoading;
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+  const markRead = useCallback(async (id: string) => {
+    if (isServerMode) {
+      // Optimistic update
+      queryClient.setQueryData<NotificationsResponse>(["notifications", "server"], (prev) => {
+        if (!prev) return prev;
+        const readAt = new Date().toISOString();
+        const data = prev.data.map((n) => n.id === id ? { ...n, readAt } : n);
+        return { data, unreadCount: Math.max(0, prev.unreadCount - 1) };
+      });
+      try {
+        await api.patch(apiEndpoints.notifications.markRead(id), {});
+      } catch {
+        queryClient.invalidateQueries({ queryKey: ["notifications", "server"] });
+      }
+    } else {
+      setClientReadIds((prev) => {
+        const next = prev.includes(id) ? prev : [...prev, id];
+        saveReadIds(next);
+        return next;
+      });
+    }
+  }, [isServerMode, queryClient]);
+
+  const markAllRead = useCallback(async () => {
+    if (isServerMode) {
+      // Optimistic update
+      queryClient.setQueryData<NotificationsResponse>(["notifications", "server"], (prev) => {
+        if (!prev) return prev;
+        const readAt = new Date().toISOString();
+        return { data: prev.data.map((n) => ({ ...n, readAt })), unreadCount: 0 };
+      });
+      try {
+        await api.post(apiEndpoints.notifications.markAllRead);
+      } catch {
+        queryClient.invalidateQueries({ queryKey: ["notifications", "server"] });
+      }
+    } else {
+      const ids = clientNotifications.map((n) => n.id);
+      setClientReadIds(ids);
+      saveReadIds(ids);
+    }
+  }, [isServerMode, clientNotifications, queryClient]);
 
   return { notifications, readIds, unreadCount, isLoading, markRead, markAllRead };
 }

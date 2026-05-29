@@ -79,11 +79,11 @@ const DashboardCard = memo(() => (
         <span className="text-sm font-bold text-red-500">R$ 1.850</span>
       </div>
       <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden mt-1">
-        <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style={{ width: "65%" }} />
+        <div className="h-full bg-gradient-to-r from-[#1B4DBF] to-[#2a5dd4] rounded-full" style={{ width: "65%" }} />
       </div>
       <div className="flex gap-1 mt-1">
         <div className="h-1.5 flex-1 bg-green-400 rounded-full" />
-        <div className="h-1.5 flex-1 bg-blue-400 rounded-full" />
+        <div className="h-1.5 flex-1 bg-[#1B4DBF] rounded-full" />
         <div className="h-1.5 flex-1 bg-yellow-400 rounded-full" />
         <div className="h-1.5 flex-1 bg-purple-400 rounded-full" />
       </div>
@@ -100,7 +100,7 @@ DashboardCard.displayName = "DashboardCard";
 
 const HowItWorks = memo(() => {
   return (
-    <section id="como-funciona" className="py-16 md:py-24 bg-[#06091c]">
+    <section id="como-funciona" className="py-16 md:py-24 bg-[#0B1F3A]">
       <div className="container mx-auto px-4">
         {/* Section header — animate-fade-in-up quando carrega (lazy, já está no viewport) */}
         <div className="max-w-3xl mx-auto text-center mb-12 animate-fade-in-up">
@@ -120,7 +120,7 @@ const HowItWorks = memo(() => {
           className="max-w-5xl mx-auto animate-fade-in-up"
           style={{ animationDelay: "0.1s" }}
         >
-          <div className="border-2 border-blue-500/40 border-dashed rounded-3xl p-6 md:p-8">
+          <div className="border-2 border-[#1B4DBF]/40 border-dashed rounded-3xl p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <RegistroCard />
               <FormatosCard />
@@ -135,7 +135,7 @@ const HowItWorks = memo(() => {
           style={{ animationDelay: "0.2s" }}
         >
           <Button
-            className="bg-[#1a3799] hover:bg-[#2b3fcb] text-white font-bold text-base px-8 py-4 rounded-full h-auto shadow-lg shadow-blue-900/40 transition-all duration-200"
+            className="bg-[#1B4DBF] hover:bg-[#2a5dd4] text-white font-bold text-base px-8 py-4 rounded-full h-auto shadow-lg shadow-[#1B4DBF]/40 transition-all duration-200"
             asChild
           >
             <Link to="/cadastro">
