@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api, apiEndpoints } from "@/lib/api/client";
-import type { ApiCategory, ApiListResponse, ApiItemResponse } from "@/shared/types";
+import type { ApiCategory, ApiListResponse } from "@/shared/types";
 
 export type { ApiCategory };
 
@@ -18,39 +18,4 @@ export function useCategories() {
     error: query.error,
     refetch: query.refetch,
   };
-}
-
-export function useCreateCategory() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: { name: string }) =>
-      api.post<ApiItemResponse<ApiCategory>>(apiEndpoints.categories.create, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-    },
-  });
-}
-
-export function useUpdateCategory() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) =>
-      api.patch<ApiItemResponse<ApiCategory>>(apiEndpoints.categories.update(id), { name }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-    },
-  });
-}
-
-export function useDeleteCategory() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) =>
-      api.delete<ApiItemResponse<{ removed: boolean }>>(apiEndpoints.categories.delete(id)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["summary-categories"] });
-    },
-  });
 }

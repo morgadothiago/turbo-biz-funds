@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/components/ui/theme-provider";
 import { useNavigate } from "react-router-dom";
-import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 
 const PLAN_CONFIG = {
   free: { label: "Gratuito", color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300", icon: null },
@@ -46,8 +45,6 @@ const SettingsPage = memo(() => {
 
   // modals
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showUpgrade, setShowUpgrade] = useState(false);
-
   const plan = user?.plan ?? "free";
   const planConfig = PLAN_CONFIG[plan];
 
@@ -111,8 +108,6 @@ const SettingsPage = memo(() => {
 
   return (
     <div className="p-6 lg:p-8 max-w-2xl mx-auto space-y-5">
-      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} resource="goals" limit={1} />
-
       <div>
         <h1 className="text-xl font-semibold text-foreground tracking-tight">Configurações</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Gerencie sua conta e preferências</p>
@@ -146,12 +141,6 @@ const SettingsPage = memo(() => {
               {planConfig.icon}
               {planConfig.label}
             </span>
-            {plan === "free" && (
-              <Button size="sm" variant="outline" className="ml-auto h-7 text-xs gap-1" onClick={() => setShowUpgrade(true)}>
-                <Zap className="w-3 h-3" />
-                Fazer upgrade
-              </Button>
-            )}
           </div>
 
           {editingProfile ? (
@@ -276,7 +265,7 @@ const SettingsPage = memo(() => {
             </div>
           </div>
           <div className="space-y-1">
-            <NotifRow icon={<Smartphone className="w-4 h-4 text-primary" />} label="WhatsApp" desc="Resumos e alertas via WhatsApp" locked={plan === "free"} onLockedClick={() => setShowUpgrade(true)} />
+            <NotifRow icon={<Smartphone className="w-4 h-4 text-primary" />} label="WhatsApp" desc="Resumos e alertas via WhatsApp" />
             <Separator />
             <NotifRow icon={<CreditCard className="w-4 h-4 text-primary" />} label="Vencimentos" desc="Alertas de contas a pagar" />
           </div>
@@ -417,32 +406,21 @@ function PasswordInput({ label, value, onChange, error, hint }: {
   );
 }
 
-function NotifRow({ icon, label, desc, locked, onLockedClick }: {
+function NotifRow({ icon, label, desc }: {
   icon: React.ReactNode;
   label: string;
   desc: string;
-  locked?: boolean;
-  onLockedClick?: () => void;
 }) {
   return (
     <div className="flex items-center justify-between py-2">
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">{icon}</div>
         <div>
-          <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-            {label}
-            {locked && <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">Pro</Badge>}
-          </p>
+          <p className="text-sm font-medium text-foreground">{label}</p>
           <p className="text-xs text-muted-foreground">{desc}</p>
         </div>
       </div>
-      {locked ? (
-        <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" onClick={onLockedClick}>
-          Ativar
-        </Button>
-      ) : (
-        <Switch defaultChecked className="data-[state=checked]:bg-primary" />
-      )}
+      <Switch defaultChecked className="data-[state=checked]:bg-primary" />
     </div>
   );
 }

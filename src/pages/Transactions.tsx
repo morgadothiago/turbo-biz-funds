@@ -1,7 +1,5 @@
 import { memo, useState } from "react";
-import { Receipt, Plus, Search, ArrowUpRight, ArrowDownRight, Loader2, Trash2, TrendingUp, TrendingDown, Wallet, Lock } from "lucide-react";
-import { usePlanGuard } from "@/hooks/use-plan-guard";
-import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
+import { Receipt, Plus, Search, ArrowUpRight, ArrowDownRight, Loader2, Trash2, TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,11 +36,6 @@ interface ApiCategory {
 type Period = "weekly" | "15d" | "30d";
 type TypeFilter = "ALL" | "INCOME" | "EXPENSE";
 
-const SUGGESTED_CATEGORIES = [
-  "Alimentação", "Transporte", "Moradia", "Saúde", "Educação",
-  "Lazer", "Vestuário", "Salário", "Freelance", "Investimentos", "Outros",
-];
-
 const PERIOD_OPTIONS: { value: Period; label: string }[] = [
   { value: "weekly", label: "7 dias" },
   { value: "15d", label: "15 dias" },
@@ -66,9 +59,6 @@ const TransactionsPage = memo(() => {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [showNewCategory, setShowNewCategory] = useState(false);
   const [form, setForm] = useState({
     categoryId: "",
     type: "EXPENSE" as "INCOME" | "EXPENSE",
@@ -92,25 +82,12 @@ const TransactionsPage = memo(() => {
 
   const transactions = transactionsRes?.data ?? [];
   const categories = categoriesRes?.data ?? [];
-  const planGuard = usePlanGuard("transactions", transactions.length);
   const catMap = new Map(categories.map((c) => [c.id, c.name]));
 
   const totalIncome = transactions.filter((t) => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
   const totalExpense = transactions.filter((t) => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
-  const createCategoryMutation = useMutation({
-    mutationFn: (name: string) =>
-      api.post<{ data: ApiCategory }>(apiEndpoints.categories.create, { name }),
-    onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
-      setForm((f) => ({ ...f, categoryId: res.data.id }));
-      setNewCategoryName("");
-      setShowNewCategory(false);
-      toast.success(`Categoria "${res.data.name}" criada!`);
-    },
-    onError: () => toast.error("Erro ao criar categoria"),
-  });
 
   const createMutation = useMutation({
     mutationFn: (data: {
@@ -161,11 +138,6 @@ const TransactionsPage = memo(() => {
     });
   };
 
-  const handleCreateCategory = () => {
-    const name = newCategoryName.trim();
-    if (!name) return;
-    createCategoryMutation.mutate(name);
-  };
 
   const filtered = transactions.filter((t) => {
     if (typeFilter !== "ALL" && t.type !== typeFilter) return false;
@@ -184,20 +156,12 @@ const TransactionsPage = memo(() => {
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
-      <UpgradeModal
-        open={isUpgradeOpen}
-        onOpenChange={setIsUpgradeOpen}
-        resource="transactions"
-        limit={planGuard.limit}
-      />
       <PageHeader
         title="Transações"
         subtitle="Gerencie todas as suas movimentações"
         action={{
-          label: planGuard.limitReached ? "Fazer upgrade" : "Nova Transação",
-          icon: planGuard.limitReached ? <Lock className="w-3.5 h-3.5" /> : undefined,
-          variant: planGuard.limitReached ? "outline" : "default",
-          onClick: () => planGuard.limitReached ? setIsUpgradeOpen(true) : setIsDialogOpen(true),
+          label: "Nova Transação",
+          onClick: () => setIsDialogOpen(true),
         }}
       />
 
@@ -411,81 +375,31 @@ const TransactionsPage = memo(() => {
 
             <div className="space-y-2">
               <Label>Categoria</Label>
-              {!showNewCategory ? (
-                <>
-                  {isCategoriesLoading ? (
-                    <div className="flex items-center gap-2 text-muted-foreground text-sm py-2">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      Carregando categorias...
-                    </div>
-                  ) : categories.length === 0 ? (
-                    <div className="space-y-1.5">
-                      <p className="text-xs text-muted-foreground">Sugestões — clique para criar:</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {SUGGESTED_CATEGORIES.map((name) => (
-                          <button
-                            key={name}
-                            type="button"
-                            onClick={() => createCategoryMutation.mutate(name)}
-                            disabled={createCategoryMutation.isPending}
-                            className="px-2.5 py-1 text-xs rounded-full border border-border bg-muted/50 hover:bg-primary/10 hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
-                          >
-                            {createCategoryMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin inline" /> : name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-                      {categories.map((c) => (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => setForm({ ...form, categoryId: c.id })}
-                          className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                            form.categoryId === c.id
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-border bg-muted/50 hover:border-primary/60 hover:bg-primary/5"
-                          }`}
-                        >
-                          {c.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setShowNewCategory(true)}
-                    className="text-xs text-primary hover:underline"
-                  >
-                    + Nova categoria
-                  </button>
-                </>
+              {isCategoriesLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground text-sm py-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  Carregando categorias...
+                </div>
+              ) : categories.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-2">
+                  Nenhuma categoria disponível. Aguarde o administrador cadastrar.
+                </p>
               ) : (
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Nome da categoria"
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleCreateCategory()}
-                    autoFocus
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleCreateCategory}
-                    disabled={createCategoryMutation.isPending || !newCategoryName.trim()}
-                  >
-                    {createCategoryMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Criar"}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => { setShowNewCategory(false); setNewCategoryName(""); }}
-                  >
-                    Cancelar
-                  </Button>
+                <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                  {categories.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setForm({ ...form, categoryId: c.id })}
+                      className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                        form.categoryId === c.id
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-muted/50 hover:border-primary/60 hover:bg-primary/5"
+                      }`}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

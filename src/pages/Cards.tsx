@@ -1,7 +1,5 @@
 import { memo, useState } from "react";
-import { CreditCard, Plus, Loader2, Trash2, Lock } from "lucide-react";
-import { usePlanGuard } from "@/hooks/use-plan-guard";
-import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
+import { CreditCard, Plus, Loader2, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,9 +31,6 @@ const CardsPage = memo(() => {
   const deleteCard = useDeleteCard();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
-  const planGuard = usePlanGuard("cards", cards.length);
-
   const [form, setForm] = useState({
     name: "",
     number: "",
@@ -87,20 +82,12 @@ const CardsPage = memo(() => {
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto">
-      <UpgradeModal
-        open={isUpgradeOpen}
-        onOpenChange={setIsUpgradeOpen}
-        resource="cards"
-        limit={planGuard.limit}
-      />
       <PageHeader
         title="Cartões de Crédito"
         subtitle="Gerencie seus cartões e limites"
         action={{
-          label: planGuard.limitReached ? "Fazer upgrade" : "Adicionar Cartão",
-          icon: planGuard.limitReached ? <Lock className="w-3.5 h-3.5" /> : undefined,
-          variant: planGuard.limitReached ? "outline" : "default",
-          onClick: () => planGuard.limitReached ? setIsUpgradeOpen(true) : setIsDialogOpen(true),
+          label: "Adicionar Cartão",
+          onClick: () => setIsDialogOpen(true),
         }}
       />
 
@@ -109,7 +96,7 @@ const CardsPage = memo(() => {
           <CreditCard className="h-12 w-12 text-muted-foreground/40 mb-4" />
           <h3 className="text-lg font-semibold mb-2">Nenhum cartão cadastrado</h3>
           <p className="text-muted-foreground mb-4">Adicione seu primeiro cartão de crédito</p>
-          <Button onClick={() => planGuard.limitReached ? setIsUpgradeOpen(true) : setIsDialogOpen(true)}>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Adicionar Cartão
           </Button>

@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
-import { PlanLimitListener } from "@/components/upgrade/PlanLimitListener";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -34,7 +33,6 @@ const AdminSubscriptions = lazy(() => import(/* webpackChunkName: "pages-admin-s
 const AdminCategoriesPage = lazy(() => import(/* webpackChunkName: "pages-admin-categories" */ "./pages/admin/AdminCategories"));
 
 const TransactionsPage = lazy(() => import(/* webpackChunkName: "pages-transactions" */ "./pages/Transactions"));
-const CategoriesPage = lazy(() => import(/* webpackChunkName: "pages-categories" */ "./pages/Categories"));
 const GoalsPage = lazy(() => import(/* webpackChunkName: "pages-goals" */ "./pages/Goals"));
 const CardsPage = lazy(() => import(/* webpackChunkName: "pages-cards" */ "./pages/Cards"));
 const WhatsAppPage = lazy(() => import(/* webpackChunkName: "pages-whatsapp" */ "./pages/WhatsApp"));
@@ -164,7 +162,6 @@ function AppRoutes() {
         >
           <Route index element={<UserDashboard />} />
           <Route path="transacoes" element={<TransactionsPage />} />
-          <Route path="categorias" element={<CategoriesPage />} />
           <Route path="metas" element={<GoalsPage />} />
           <Route path="cartoes" element={<CardsPage />} />
           <Route path="recorrencias" element={<RecorrenciasPage />} />
@@ -206,7 +203,6 @@ const AppShell = () => (
     <AuthProvider>
       <TooltipProvider>
         <OfflineBanner />
-        <PlanLimitListener />
         <Toaster />
         <Sonner />
         <AppRoutes />

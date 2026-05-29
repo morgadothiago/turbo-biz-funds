@@ -48,10 +48,6 @@ function createApiClient(): AxiosInstance {
         window.dispatchEvent(new CustomEvent("auth:session-expired"));
       }
 
-      if (status === 402) {
-        window.dispatchEvent(new CustomEvent("plan:limit-exceeded", { detail: error.response?.data }));
-      }
-
       const apiError: ApiError = { message, status: status ?? 0, code };
       return Promise.reject(apiError);
     }

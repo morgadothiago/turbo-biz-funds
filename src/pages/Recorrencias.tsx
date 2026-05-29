@@ -1,8 +1,6 @@
 import { memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RefreshCw, Plus, Repeat, TrendingUp, TrendingDown, Trash2, Loader2, Zap, Lock, CreditCard, Pencil } from "lucide-react";
-import { usePlanGuard } from "@/hooks/use-plan-guard";
-import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
+import { RefreshCw, Plus, Repeat, TrendingUp, TrendingDown, Trash2, Loader2, Zap, CreditCard, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +59,6 @@ const RecorrenciasPage = memo(() => {
   const generateRecurrences = useGenerateRecurrences();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [isInstallment, setIsInstallment] = useState(false);
   const [installments, setInstallments] = useState(2);
   const [acrescimo, setAcrescimo] = useState(0);
@@ -76,8 +73,6 @@ const RecorrenciasPage = memo(() => {
     startDate: string;
     endDate: string;
   }>({ amount: "", description: "", categoryId: "", frequency: "monthly", startDate: "", endDate: "" });
-  const planGuard = usePlanGuard("recurrences", recurrences.length);
-
   const calcEndDate = (startDate: string, numInstallments: number): string => {
     if (!startDate) return "";
     const d = new Date(startDate);
@@ -205,20 +200,12 @@ const RecorrenciasPage = memo(() => {
 
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto">
-      <UpgradeModal
-        open={isUpgradeOpen}
-        onOpenChange={setIsUpgradeOpen}
-        resource="recurrences"
-        limit={planGuard.limit}
-      />
       <PageHeader
         title="Recorrências"
         subtitle="Gerencie receitas e despesas fixas"
         action={{
-          label: planGuard.limitReached ? "Fazer upgrade" : "Nova Recorrência",
-          icon: planGuard.limitReached ? <Lock className="w-3.5 h-3.5" /> : undefined,
-          variant: planGuard.limitReached ? "outline" : "default",
-          onClick: () => planGuard.limitReached ? setIsUpgradeOpen(true) : setIsDialogOpen(true),
+          label: "Nova Recorrência",
+          onClick: () => setIsDialogOpen(true),
         }}
       />
 
@@ -294,7 +281,7 @@ const RecorrenciasPage = memo(() => {
           <p className="text-muted-foreground mb-4">
             Cadastre contas fixas como aluguel, salário ou assinaturas
           </p>
-          <Button onClick={() => planGuard.limitReached ? setIsUpgradeOpen(true) : setIsDialogOpen(true)}>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nova Recorrência
           </Button>
