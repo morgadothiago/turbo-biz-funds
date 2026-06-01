@@ -141,7 +141,7 @@ const Cadastro = () => {
     setFormData((prev) => ({ ...prev, plan: b === "annual" ? "pro-annual" : "pro-monthly" }));
   };
 
-  const isPaid = true;
+  const isPaid = formData.plan !== "free";
 
   const validateStep1 = (): boolean => {
     const result = registerSchema.safeParse({
@@ -179,6 +179,7 @@ const Cadastro = () => {
     try {
       if (isPaid) {
         sessionStorage.setItem("postRegisterRedirect", `/pagamento?plan=${formData.plan}`);
+        sessionStorage.setItem("pendingPaymentPlan", formData.plan);
       }
 
       const apiPlanId = formData.plan === "pro-annual" || formData.plan === "pro-monthly" ? "pro" : formData.plan;
@@ -199,14 +200,17 @@ const Cadastro = () => {
         // Plano grátis: limpa sessão e vai para login
         await logout();
         sessionStorage.removeItem("postRegisterRedirect");
+        sessionStorage.removeItem("pendingPaymentPlan");
         toast.success("Conta criada com sucesso! Faça login para continuar.");
         navigate("/login", { replace: true });
       }
     } catch (err: unknown) {
       sessionStorage.removeItem("postRegisterRedirect");
+      sessionStorage.removeItem("pendingPaymentPlan");
       const apiError = err as { message?: string; status?: number };
       if (apiError?.status === 409) {
-        setErrors({ email: "Este email já está cadastrado" });
+        toast.error("Este email já está cadastrado. Redirecionando para o login...", { duration: 3000 });
+        setTimeout(() => navigate("/login", { replace: true }), 2000);
       } else if (apiError?.status === 422) {
         toast.error(apiError.message ?? "Dados inválidos. Verifique o formulário.");
       } else {

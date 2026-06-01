@@ -90,6 +90,22 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function DashboardRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) return <AuthLoadingFallback />;
+  if (!isAuthenticated && storage.getToken()) return <AuthLoadingFallback />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  // Bloqueia acesso ao dashboard enquanto pagamento pendente
+  const pendingPlan = sessionStorage.getItem("pendingPaymentPlan");
+  if (pendingPlan) {
+    return <Navigate to={`/pagamento?plan=${pendingPlan}`} replace />;
+  }
+
+  return <>{children}</>;
+}
+
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, isLoading } = useAuth();
 
@@ -151,13 +167,15 @@ function AppRoutes() {
         <Route path="/pagamento-sucesso" element={
           <PrivateRoute><PagamentoSucesso /></PrivateRoute>
         } />
+        {/* Rota de teste — remover antes de produção */}
+        <Route path="/pagamento-sucesso-test" element={<PagamentoSucesso />} />
 
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
-            <PrivateRoute>
+            <DashboardRoute>
               <UserLayout />
-            </PrivateRoute>
+            </DashboardRoute>
           }
         >
           <Route index element={<UserDashboard />} />

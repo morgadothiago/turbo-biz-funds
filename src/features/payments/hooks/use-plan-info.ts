@@ -63,12 +63,19 @@ const PLAN_DEFAULTS: Record<string, PlanInfo> = {
   },
 };
 
+function normalizeApiPlanId(planId: string): string {
+  if (planId === "pro-monthly" || planId === "pro-annual") return "pro";
+  if (planId === "business-annual") return "business";
+  return planId;
+}
+
 async function fetchPlanInfo(planId: string): Promise<PlanInfo> {
+  const apiPlanId = normalizeApiPlanId(planId);
   try {
-    const res = await api.get<ApiItemResponse<PlanInfo>>(apiEndpoints.plans.get(planId));
+    const res = await api.get<ApiItemResponse<PlanInfo>>(apiEndpoints.plans.get(apiPlanId));
     return normalizePlan(res.data);
   } catch {
-    return PLAN_DEFAULTS[planId] ?? { id: planId, name: planId, price: "—", period: "/mês", description: "", features: [] };
+    return PLAN_DEFAULTS[planId] ?? PLAN_DEFAULTS[apiPlanId] ?? { id: planId, name: planId, price: "—", period: "/mês", description: "", features: [] };
   }
 }
 

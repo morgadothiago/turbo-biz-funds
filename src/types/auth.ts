@@ -26,4 +26,5 @@ export interface AuthContextType {
   logout: () => void;
   updateProfile: (data: { name?: string; phone?: string }) => Promise<void>;
   changePassword: (data: { currentPassword: string; newPassword: string }) => Promise<void>;
+  refreshUser: () => void;
 }

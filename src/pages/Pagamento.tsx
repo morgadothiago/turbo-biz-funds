@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,77 @@ const LABEL_CLS = "text-sm font-medium text-white/70";
 
 function formatCardNumber(value: string) {
   return value.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
+}
+
+type CardBrand = "visa" | "mastercard" | "amex" | "elo" | "hipercard" | "discover" | null;
+
+function detectCardBrand(number: string): CardBrand {
+  const n = number.replace(/\D/g, "");
+  if (!n) return null;
+  if (/^4/.test(n)) return "visa";
+  if (/^(5[1-5]|2(2[2-9][1-9]|[3-6]\d{2}|7[01]\d|720))/.test(n)) return "mastercard";
+  if (/^3[47]/.test(n)) return "amex";
+  if (/^(4011|4312|4389|4514|4576|5041|5066|5090|6277|6362|6363|650[0-9]|6516|6550)/.test(n)) return "elo";
+  if (/^(606282|637095|637568|637599|637609|637612)/.test(n)) return "hipercard";
+  if (/^(6011|622|64[4-9]|65)/.test(n)) return "discover";
+  return null;
+}
+
+const BRAND_COLORS: Record<NonNullable<CardBrand>, string> = {
+  visa:       "#1A1F71",
+  mastercard: "#EB001B",
+  amex:       "#007BC1",
+  elo:        "#FFD700",
+  hipercard:  "#C8102E",
+  discover:   "#FF6600",
+};
+
+function CardBrandIcon({ brand }: { brand: CardBrand }) {
+  if (!brand) return null;
+
+  const icons: Record<NonNullable<CardBrand>, React.ReactNode> = {
+    visa: (
+      <svg viewBox="0 0 750 471" className="w-8 h-5" aria-label="Visa">
+        <rect width="750" height="471" rx="40" fill="#1A1F71" />
+        <text x="375" y="330" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="230" fill="white" letterSpacing="-10">VISA</text>
+      </svg>
+    ),
+    mastercard: (
+      <svg viewBox="0 0 38 24" className="w-8 h-5" aria-label="Mastercard">
+        <rect width="38" height="24" rx="4" fill="#252525" />
+        <circle cx="14" cy="12" r="7" fill="#EB001B" />
+        <circle cx="24" cy="12" r="7" fill="#F79E1B" />
+        <path d="M19 6.8a7 7 0 0 1 0 10.4A7 7 0 0 1 19 6.8z" fill="#FF5F00" />
+      </svg>
+    ),
+    amex: (
+      <svg viewBox="0 0 750 471" className="w-8 h-5" aria-label="American Express">
+        <rect width="750" height="471" rx="40" fill="#007BC1" />
+        <text x="375" y="330" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="200" fill="white">AMEX</text>
+      </svg>
+    ),
+    elo: (
+      <svg viewBox="0 0 750 471" className="w-8 h-5" aria-label="Elo">
+        <rect width="750" height="471" rx="40" fill="#000" />
+        <text x="375" y="330" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="260" fill="#FFD700">ELO</text>
+      </svg>
+    ),
+    hipercard: (
+      <svg viewBox="0 0 750 471" className="w-8 h-5" aria-label="Hipercard">
+        <rect width="750" height="471" rx="40" fill="#C8102E" />
+        <text x="375" y="310" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="160" fill="white">HIPER</text>
+      </svg>
+    ),
+    discover: (
+      <svg viewBox="0 0 750 471" className="w-8 h-5" aria-label="Discover">
+        <rect width="750" height="471" rx="40" fill="#fff" />
+        <circle cx="480" cy="236" r="160" fill="#FF6600" />
+        <text x="240" y="290" textAnchor="middle" fontFamily="Arial" fontWeight="bold" fontSize="130" fill="#231F20">DISC</text>
+      </svg>
+    ),
+  };
+
+  return <>{icons[brand]}</>;
 }
 
 function formatExpiry(value: string) {
@@ -112,6 +184,7 @@ function CardForm({
   const [cvv, setCvv] = useState("");
   const [installments, setInstallments] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [brand, setBrand] = useState<CardBrand>(null);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -156,7 +229,9 @@ function CardForm({
       <div className="space-y-1.5">
         <Label htmlFor="cardNumber" className={LABEL_CLS}>Número do cartão</Label>
         <div className="relative">
-          <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            {brand ? <CardBrandIcon brand={brand} /> : <CreditCard className="w-5 h-5 text-white/30" />}
+          </div>
           <Input
             id="cardNumber"
             type="text"
@@ -164,7 +239,12 @@ function CardForm({
             autoComplete="cc-number"
             placeholder="0000 0000 0000 0000"
             value={cardNumber}
-            onChange={(e) => { setCardNumber(formatCardNumber(e.target.value)); if (errors.cardNumber) setErrors({ ...errors, cardNumber: "" }); }}
+            onChange={(e) => {
+              const formatted = formatCardNumber(e.target.value);
+              setCardNumber(formatted);
+              setBrand(detectCardBrand(formatted));
+              if (errors.cardNumber) setErrors({ ...errors, cardNumber: "" });
+            }}
             className={`pl-11 font-mono tracking-widest ${INPUT_CLS} ${errors.cardNumber ? "border-red-500/60" : ""}`}
             disabled={isLoading}
           />
@@ -400,17 +480,64 @@ const Pagamento = () => {
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+  const [pixApproved, setPixApproved] = useState(false);
 
   useEffect(() => {
     if (method !== "pix") return;
     setIntent(null);
+    setPixApproved(false);
     setIsCreatingIntent(true);
     api
       .post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan: apiPlanId, method: "pix" })
-      .then((res) => setIntent(res.data))
+      .then((res) => {
+        const raw = (res as any).data ?? res as any;
+        console.log("[Pagamento] PIX intent raw response:", raw);
+
+        // Normaliza resposta — API pode retornar campos PIX flat ou aninhados em `pix`
+        const normalized: PaymentIntent = {
+          paymentId: raw.paymentId ?? raw.id ?? "",
+          method: "pix",
+          status: raw.status ?? "pending",
+          amount: raw.amount ?? 0,
+          currency: raw.currency ?? "BRL",
+          expiresAt: raw.expiresAt ?? raw.expiration,
+          pix: raw.pix ?? {
+            qrCodeBase64: raw.qrCodeBase64 ?? raw.imageBase64 ?? raw.qrCode ?? raw.encodedImage ?? null,
+            qrCodeText:   raw.qrCodeText   ?? raw.pixCode     ?? raw.payload  ?? raw.qrcode        ?? null,
+            expiresInSeconds: raw.expiresInSeconds ?? raw.pix?.expiresInSeconds ??
+              (raw.expiresAt ? Math.max(0, Math.floor((new Date(raw.expiresAt).getTime() - Date.now()) / 1000)) : 15 * 60),
+          },
+        };
+
+        console.log("[Pagamento] PIX intent normalizado:", normalized);
+        setIntent(normalized);
+      })
       .catch(() => toast.error("Erro ao gerar QR Code Pix. Tente novamente."))
       .finally(() => setIsCreatingIntent(false));
   }, [method, plan]);
+
+  // Auto-polling PIX a cada 5s enquanto pendente
+  useEffect(() => {
+    if (method !== "pix" || !intent || pixApproved) return;
+    const timer = setInterval(async () => {
+      try {
+        const res = await api.get<{ data: { status: string } }>(apiEndpoints.payments.status(intent.paymentId));
+        const status = (res as any).data?.status ?? (res as any).status;
+        if (status === "approved") {
+          setPixApproved(true);
+          clearInterval(timer);
+          sessionStorage.removeItem("pendingPaymentPlan");
+          sessionStorage.removeItem("postRegisterRedirect");
+          navigate("/pagamento-sucesso", { state: { plan, method } });
+        } else if (status === "expired" || status === "cancelled" || status === "declined") {
+          clearInterval(timer);
+        }
+      } catch {
+        // ignora erros de polling silenciosamente
+      }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [method, intent, pixApproved, navigate, plan]);
 
   const handleCardSubmit = async (card: {
     number: string;
@@ -423,8 +550,33 @@ const Pagamento = () => {
     setIsConfirming(true);
     try {
       const intentRes = await api.post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan: apiPlanId, method: "cartao" });
-      const paymentId = intentRes.data.paymentId;
-      await api.post(apiEndpoints.payments.confirm(paymentId), { card });
+      const paymentId = ((intentRes as any).data ?? intentRes as any).paymentId as string | undefined;
+
+      if (!paymentId) {
+        toast.error("Erro ao iniciar pagamento: ID não retornado. Tente novamente.");
+        return;
+      }
+
+      // Strip installments — not in API spec, causes 422
+      const { installments: _, ...cardPayload } = card;
+
+      const confirmRes = await api.post<{ data: { paymentId: string; status: string } }>(
+        apiEndpoints.payments.confirm(paymentId),
+        { card: cardPayload }
+      );
+      const confirmStatus = ((confirmRes as any).data ?? confirmRes as any).status as string | undefined;
+
+      if (confirmStatus === "declined") {
+        toast.error("Cartão recusado pela operadora.");
+        return;
+      }
+      if (confirmStatus === "pending") {
+        toast.info("Pagamento em processamento. Você receberá uma confirmação em breve.");
+        return;
+      }
+      // approved ou status desconhecido — segue para sucesso
+      sessionStorage.removeItem("pendingPaymentPlan");
+      sessionStorage.removeItem("postRegisterRedirect");
       navigate("/pagamento-sucesso", { state: { plan, method } });
     } catch (err: unknown) {
       const e = err as { message?: string; status?: number; code?: string };
@@ -444,10 +596,21 @@ const Pagamento = () => {
     setIsCheckingStatus(true);
     try {
       const res = await api.get<{ data: { status: string } }>(apiEndpoints.payments.status(intent.paymentId));
-      const status = res.data.status;
-      if (status === "approved") navigate("/pagamento-sucesso", { state: { plan, method } });
-      else if (status === "expired") toast.error("QR Code expirado. Gere um novo.");
-      else toast.info("Pagamento ainda não identificado. Aguarde e tente novamente.");
+      const status = ((res as any).data?.status ?? (res as any).status) as string;
+      if (status === "approved") {
+        setPixApproved(true);
+        sessionStorage.removeItem("pendingPaymentPlan");
+        sessionStorage.removeItem("postRegisterRedirect");
+        navigate("/pagamento-sucesso", { state: { plan, method } });
+      } else if (status === "expired") {
+        toast.error("QR Code expirado. Volte e tente novamente.");
+      } else if (status === "declined") {
+        toast.error("Pagamento recusado. Tente com outro método.");
+      } else if (status === "cancelled") {
+        toast.error("Pagamento cancelado.");
+      } else {
+        toast.info("Pagamento ainda não identificado. Aguarde e tente novamente.");
+      }
     } catch {
       toast.error("Erro ao verificar pagamento. Tente novamente.");
     } finally {

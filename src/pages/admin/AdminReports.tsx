@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { BarChart2, Download, TrendingUp, Users, PieChart, Activity, ArrowUpRight, ArrowDownRight, Loader2, FileText, Table } from "lucide-react";
+import { BarChart2, Download, TrendingUp, Users, PieChart, Activity, ArrowUpRight, ArrowDownRight, Loader2, FileText, Table, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -259,6 +259,7 @@ const ChurnTable = ({ data }: { data: { period: string; cancelledCount: number; 
 export default function AdminReports() {
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("monthly");
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
   const { data, isLoading, isError, error } = useAdminReports(selectedPeriod);
 
   // Formatação de valores
@@ -313,6 +314,41 @@ export default function AdminReports() {
 
   return (
     <div className="flex-1 p-4 md:p-6 space-y-6">
+      {/* Mock data warning banner */}
+      {data?.failedEndpoints && data.failedEndpoints.length > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                {data.failedEndpoints.length} endpoint{data.failedEndpoints.length > 1 ? "s" : ""} indisponível{data.failedEndpoints.length > 1 ? "is" : ""} — exibindo dados de demonstração
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                Falhou: {data.failedEndpoints.join(", ")}
+              </p>
+              {Object.keys(data.apiErrors).length > 0 && (
+                <button
+                  onClick={() => setShowErrorDetails(v => !v)}
+                  className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400 mt-1 hover:underline"
+                >
+                  {showErrorDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  {showErrorDetails ? "Ocultar detalhes" : "Ver detalhes do erro"}
+                </button>
+              )}
+              {showErrorDetails && (
+                <div className="mt-2 space-y-1">
+                  {Object.entries(data.apiErrors).map(([endpoint, msg]) => (
+                    <p key={endpoint} className="text-xs font-mono text-amber-800 dark:text-amber-300">
+                      <span className="font-semibold">{endpoint}:</span> {msg}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

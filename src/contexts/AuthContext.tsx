@@ -126,6 +126,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api.patch("/v1/users/me/password", data);
   }, []);
 
+  const refreshUser = useCallback(() => {
+    const token = storage.getToken();
+    if (!token) return;
+    const claims = decodeJwt(token);
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = userFromClaims(claims, prev.email);
+      storage.setUser(updated);
+      return updated;
+    });
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await api.post(apiEndpoints.auth.logout);
@@ -138,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, updateProfile, changePassword }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, updateProfile, changePassword, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

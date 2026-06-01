@@ -83,6 +83,8 @@ export interface AdminReportsData {
   planDistribution: PlanDistributionData[];
   churnData: ChurnDataPoint[];
   cashflow: CashflowEntry[];
+  failedEndpoints: string[];
+  apiErrors: Record<string, string>;
 }
 
 // ============================================
@@ -183,148 +185,122 @@ const MOCK_CASHFLOW: CashflowEntry[] = [
 // ============================================
 
 async function fetchStats(period: PeriodType): Promise<AdminReportsStats> {
-  try {
-    const data = await api.get<any>(`${apiEndpoints.admin.stats}?period=${period}`);
-    const s = data?.data ?? data ?? {};
-    
-    return {
-      totalRevenue: s.totalRevenue ?? s.mrr ?? 0,
-      revenueChange: s.revenueGrowth ?? s.mrrChange ?? "+0%",
-      revenueTrend: getTrendFromChange(s.revenueGrowth ?? s.mrrChange ?? "0%"),
-      newUsers: s.newUsers ?? s.totalClients ?? 0,
-      usersChange: s.usersGrowth ?? s.clientsChange ?? "+0%",
-      usersTrend: getTrendFromChange(s.usersGrowth ?? s.clientsChange ?? "0%"),
-      conversionRate: parseFloat(s.conversionRate ?? "0"),
-      conversionChange: s.conversionGrowth ?? "+0%",
-      conversionTrend: getTrendFromChange(s.conversionGrowth ?? "0%"),
-    };
-  } catch (error) {
-    console.warn("[useAdminReports] Stats fallback to mock", error);
-    return MOCK_STATS;
-  }
+  const data = await api.get<any>(`${apiEndpoints.admin.stats}?period=${period}`);
+  const s = data?.data ?? data ?? {};
+  return {
+    totalRevenue: s.totalRevenue ?? s.mrr ?? 0,
+    revenueChange: s.revenueGrowth ?? s.mrrChange ?? "+0%",
+    revenueTrend: getTrendFromChange(s.revenueGrowth ?? s.mrrChange ?? "0%"),
+    newUsers: s.newUsers ?? s.totalClients ?? 0,
+    usersChange: s.usersGrowth ?? s.clientsChange ?? "+0%",
+    usersTrend: getTrendFromChange(s.usersGrowth ?? s.clientsChange ?? "0%"),
+    conversionRate: parseFloat(s.conversionRate ?? "0"),
+    conversionChange: s.conversionGrowth ?? "+0%",
+    conversionTrend: getTrendFromChange(s.conversionGrowth ?? "0%"),
+  };
 }
 
 async function fetchRevenueData(period: PeriodType): Promise<RevenueDataPoint[]> {
-  try {
-    const year = new Date().getFullYear();
-    const data = await api.get<any>(`${apiEndpoints.admin.revenue}?period=${period}&year=${year}`);
-    const raw = data?.data ?? data ?? [];
-    return raw.map((r: any) => ({
-      month: r.month ?? r.period ?? "",
-      revenue: r.revenue ?? 0,
-      expenses: r.expenses ?? 0,
-      netRevenue: r.netRevenue ?? r.revenue - (r.expenses ?? 0),
-      mrr: r.mrr ?? r.revenue ?? 0,
-      newSubscriptions: r.newSubscriptions ?? r.newMRR ?? 0,
-      cancellations: r.cancellations ?? 0,
-      churnRate: r.churnRate ?? 0,
-    }));
-  } catch (error) {
-    console.warn("[useAdminReports] RevenueData fallback to mock", error);
-    return MOCK_REVENUE_DATA;
-  }
+  const year = new Date().getFullYear();
+  const data = await api.get<any>(`${apiEndpoints.admin.revenue}?period=${period}&year=${year}`);
+  const raw = data?.data ?? data ?? [];
+  return raw.map((r: any) => ({
+    month: r.month ?? r.period ?? "",
+    revenue: r.revenue ?? 0,
+    expenses: r.expenses ?? 0,
+    netRevenue: r.netRevenue ?? r.revenue - (r.expenses ?? 0),
+    mrr: r.mrr ?? r.revenue ?? 0,
+    newSubscriptions: r.newSubscriptions ?? r.newMRR ?? 0,
+    cancellations: r.cancellations ?? 0,
+    churnRate: r.churnRate ?? 0,
+  }));
 }
 
 async function fetchRevenueChart(period: PeriodType): Promise<RevenueChartData> {
-  try {
-    const year = new Date().getFullYear();
-    const data = await api.get<any>(`${apiEndpoints.admin.revenue}/chart?period=${period}&year=${year}`);
-    return {
-      labels: data?.labels ?? MOCK_REVENUE_CHART.labels,
-      datasets: {
-        revenue: data?.datasets?.revenue ?? MOCK_REVENUE_CHART.datasets.revenue,
-        expenses: data?.datasets?.expenses ?? MOCK_REVENUE_CHART.datasets.expenses,
-        netRevenue: data?.datasets?.netRevenue ?? MOCK_REVENUE_CHART.datasets.netRevenue,
-      },
-    };
-  } catch (error) {
-    console.warn("[useAdminReports] RevenueChart fallback to mock", error);
-    return MOCK_REVENUE_CHART;
-  }
+  const year = new Date().getFullYear();
+  const data = await api.get<any>(`${apiEndpoints.admin.revenue}/chart?period=${period}&year=${year}`);
+  return {
+    labels: data?.labels ?? MOCK_REVENUE_CHART.labels,
+    datasets: {
+      revenue: data?.datasets?.revenue ?? MOCK_REVENUE_CHART.datasets.revenue,
+      expenses: data?.datasets?.expenses ?? MOCK_REVENUE_CHART.datasets.expenses,
+      netRevenue: data?.datasets?.netRevenue ?? MOCK_REVENUE_CHART.datasets.netRevenue,
+    },
+  };
 }
 
 async function fetchUserGrowth(period: PeriodType): Promise<UserGrowthDataPoint[]> {
-  try {
-    const year = new Date().getFullYear();
-    const data = await api.get<any>(`${apiEndpoints.admin.users}/growth?period=${period}&year=${year}`);
-    const raw = data?.data ?? data ?? [];
-    return raw.map((r: any) => ({
-      period: r.period ?? r.month ?? "",
-      totalUsers: r.totalUsers ?? 0,
-      newUsers: r.newUsers ?? 0,
-      activeUsers: r.activeUsers ?? 0,
-      inactiveUsers: r.inactiveUsers ?? 0,
-      blockedUsers: r.blockedUsers ?? 0,
-    }));
-  } catch (error) {
-    console.warn("[useAdminReports] UserGrowth fallback to mock", error);
-    return MOCK_USER_GROWTH;
-  }
+  const year = new Date().getFullYear();
+  const data = await api.get<any>(`${apiEndpoints.admin.users}/growth?period=${period}&year=${year}`);
+  const raw = data?.data ?? data ?? [];
+  return raw.map((r: any) => ({
+    period: r.period ?? r.month ?? "",
+    totalUsers: r.totalUsers ?? 0,
+    newUsers: r.newUsers ?? 0,
+    activeUsers: r.activeUsers ?? 0,
+    inactiveUsers: r.inactiveUsers ?? 0,
+    blockedUsers: r.blockedUsers ?? 0,
+  }));
 }
 
 async function fetchPlanDistribution(period: PeriodType): Promise<PlanDistributionData[]> {
-  try {
-    const data = await api.get<any>(`${apiEndpoints.admin.plans}/distribution?period=${period}`);
-    const raw = data?.plans ?? data ?? [];
-    return raw.map((p: any) => ({
-      planId: p.planId ?? p.id ?? "",
-      planName: p.planName ?? p.name ?? "",
-      subscribers: p.subscribers ?? 0,
-      revenue: p.revenue ?? 0,
-      percentage: p.percentage ?? 0,
-    }));
-  } catch (error) {
-    console.warn("[useAdminReports] PlanDistribution fallback to mock", error);
-    return MOCK_PLAN_DISTRIBUTION;
-  }
+  const data = await api.get<any>(`${apiEndpoints.admin.plans}/distribution?period=${period}`);
+  const raw = data?.plans ?? data ?? [];
+  return raw.map((p: any) => ({
+    planId: p.planId ?? p.id ?? "",
+    planName: p.planName ?? p.name ?? "",
+    subscribers: p.subscribers ?? 0,
+    revenue: p.revenue ?? 0,
+    percentage: p.percentage ?? 0,
+  }));
 }
 
 async function fetchChurnData(period: PeriodType): Promise<ChurnDataPoint[]> {
-  try {
-    const year = new Date().getFullYear();
-    const data = await api.get<any>(`${apiEndpoints.admin.churn}?period=${period}&year=${year}`);
-    const raw = data?.churnByPeriod ?? data ?? [];
-    return raw.map((c: any) => ({
-      period: c.period ?? "",
-      cancelledCount: c.cancelledCount ?? 0,
-      cancelledRevenue: c.cancelledRevenue ?? 0,
-      churnRate: c.churnRate ?? 0,
-      reason: c.reason ?? "",
-    }));
-  } catch (error) {
-    console.warn("[useAdminReports] ChurnData fallback to mock", error);
-    return MOCK_CHURN_DATA;
-  }
+  const year = new Date().getFullYear();
+  const data = await api.get<any>(`${apiEndpoints.admin.churn}?period=${period}&year=${year}`);
+  const raw = data?.churnByPeriod ?? data ?? [];
+  return raw.map((c: any) => ({
+    period: c.period ?? "",
+    cancelledCount: c.cancelledCount ?? 0,
+    cancelledRevenue: c.cancelledRevenue ?? 0,
+    churnRate: c.churnRate ?? 0,
+    reason: c.reason ?? "",
+  }));
 }
 
 async function fetchCashflow(): Promise<CashflowEntry[]> {
-  try {
-    const year = new Date().getFullYear();
-    const data = await api.get<any>(`${apiEndpoints.admin.cashflow}?year=${year}`);
-    const raw = data?.entries ?? data ?? [];
-    return raw.map((e: any) => ({
-      id: e.id ?? "",
-      date: e.date ?? "",
-      type: e.type ?? "revenue",
-      category: e.category ?? "",
-      description: e.description ?? "",
-      amount: e.amount ?? 0,
-      balance: e.balance ?? 0,
-      subscriptionId: e.subscriptionId ?? null,
-      userId: e.userId ?? null,
-    }));
-  } catch (error) {
-    console.warn("[useAdminReports] Cashflow fallback to mock", error);
-    return MOCK_CASHFLOW;
-  }
+  const year = new Date().getFullYear();
+  const data = await api.get<any>(`${apiEndpoints.admin.cashflow}?year=${year}`);
+  const raw = data?.entries ?? data ?? [];
+  return raw.map((e: any) => ({
+    id: e.id ?? "",
+    date: e.date ?? "",
+    type: e.type ?? "revenue",
+    category: e.category ?? "",
+    description: e.description ?? "",
+    amount: e.amount ?? 0,
+    balance: e.balance ?? 0,
+    subscriptionId: e.subscriptionId ?? null,
+    userId: e.userId ?? null,
+  }));
 }
 
 // ============================================
 // COMBINED FETCHER
 // ============================================
 
+const ENDPOINT_LABELS: Record<number, string> = {
+  0: "Stats",
+  1: "Receita",
+  2: "Gráfico de Receita",
+  3: "Crescimento de Usuários",
+  4: "Distribuição de Planos",
+  5: "Churn",
+  6: "Cashflow",
+};
+
 async function fetchAdminReports(period: PeriodType): Promise<AdminReportsData> {
-  const [stats, revenueData, revenueChart, userGrowth, planDistribution, churnData, cashflow] = await Promise.allSettled([
+  const results = await Promise.allSettled([
     fetchStats(period),
     fetchRevenueData(period),
     fetchRevenueChart(period),
@@ -334,6 +310,20 @@ async function fetchAdminReports(period: PeriodType): Promise<AdminReportsData> 
     fetchCashflow(),
   ]);
 
+  const [stats, revenueData, revenueChart, userGrowth, planDistribution, churnData, cashflow] = results;
+
+  const failedEndpoints: string[] = [];
+  const apiErrors: Record<string, string> = {};
+
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      const label = ENDPOINT_LABELS[index];
+      failedEndpoints.push(label);
+      const err = result.reason;
+      apiErrors[label] = err?.response?.data?.message ?? err?.message ?? String(err);
+    }
+  });
+
   return {
     stats: extractData<AdminReportsStats>(stats) ?? MOCK_STATS,
     revenueData: extractData<RevenueDataPoint[]>(revenueData) ?? MOCK_REVENUE_DATA,
@@ -342,6 +332,8 @@ async function fetchAdminReports(period: PeriodType): Promise<AdminReportsData> 
     planDistribution: extractData<PlanDistributionData[]>(planDistribution) ?? MOCK_PLAN_DISTRIBUTION,
     churnData: extractData<ChurnDataPoint[]>(churnData) ?? MOCK_CHURN_DATA,
     cashflow: extractData<CashflowEntry[]>(cashflow) ?? MOCK_CASHFLOW,
+    failedEndpoints,
+    apiErrors,
   };
 }
 

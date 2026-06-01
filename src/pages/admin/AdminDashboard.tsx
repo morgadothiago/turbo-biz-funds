@@ -6,6 +6,7 @@ import {
   CreditCard,
   TrendingUp,
   AlertCircle,
+  AlertTriangle,
   Loader2,
   Users,
   Activity,
@@ -427,13 +428,27 @@ function AdminDashboard() {
     return <AdminDashboardError message={msg} />;
   }
 
-  const { stats, revenueData, planDistribution, recentClients, recentActivity } = data;
+  const { stats, revenueData, planDistribution, recentClients, recentActivity, partialErrors } = data;
   const totalPages = Math.ceil(recentClients.length / clientsPerPage);
   const start = (currentPage - 1) * clientsPerPage;
   const paginatedClients = recentClients.slice(start, start + clientsPerPage);
+  const failedCount = Object.keys(partialErrors ?? {}).length;
 
   return (
     <div className="p-5 lg:p-7 space-y-5">
+        {/* Partial error banner */}
+        {failedCount > 0 && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3 flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <div className="text-sm text-amber-800 dark:text-amber-300">
+              <span className="font-medium">{failedCount} endpoint{failedCount > 1 ? "s" : ""} com falha:</span>{" "}
+              {Object.entries(partialErrors).map(([ep, msg]) => (
+                <span key={ep} className="mr-3"><span className="font-semibold">{ep}</span> — {msg}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Greeting */}
         <div>
           <h2 className="text-2xl font-bold text-foreground tracking-tight">

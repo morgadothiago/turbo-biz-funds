@@ -51,6 +51,7 @@ export interface AdminDashboardData {
   planDistribution: AdminPlanDistribution[];
   recentClients: AdminRecentClient[];
   recentActivity: AdminActivityItem[];
+  partialErrors: Record<string, string>;
 }
 
 interface ApiAdminStats {
@@ -171,8 +172,14 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
       time: "Recentemente",
     }));
 
-    console.log("[useAdminDashboard] recentClients length:", recentClients.length);
-    console.log("[useAdminDashboard] recentActivity:", recentActivity);
+    const partialErrors: Record<string, string> = {};
+    const endpointLabels = ["Stats", "Planos", "Usuários", "Assinaturas"];
+    [statsRes, plansRes, usersRes, subscriptionsRes].forEach((result, i) => {
+      if (result.status === "rejected") {
+        const err = result.reason;
+        partialErrors[endpointLabels[i]] = err?.response?.data?.message ?? err?.message ?? String(err);
+      }
+    });
 
     return {
       stats,
@@ -180,6 +187,7 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
       planDistribution,
       recentClients,
       recentActivity,
+      partialErrors,
     };
   } catch (error) {
     console.error("Erro no fetchAdminDashboard:", error);
