@@ -9,37 +9,59 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { storage } from "@/lib/storage";
 
-const Login = lazy(() => import(/* webpackChunkName: "auth-login" */ "./pages/Login"));
-const Cadastro = lazy(() => import(/* webpackChunkName: "auth-cadastro" */ "./pages/Cadastro"));
-const ForgotPassword = lazy(() => import(/* webpackChunkName: "auth-forgot" */ "./pages/ForgotPassword"));
-const ResetPassword = lazy(() => import(/* webpackChunkName: "auth-reset" */ "./pages/ResetPassword"));
-const Pagamento = lazy(() => import(/* webpackChunkName: "auth-pagamento" */ "./pages/Pagamento"));
-const PagamentoSucesso = lazy(() => import(/* webpackChunkName: "auth-pagamento-sucesso" */ "./pages/PagamentoSucesso"));
-const NotFound = lazy(() => import(/* webpackChunkName: "pages-notfound" */ "./pages/NotFound"));
-const UserDashboard = lazy(() => import(/* webpackChunkName: "dashboard-user" */ "./pages/UserDashboard"));
-const NotificationsPage = lazy(() => import(/* webpackChunkName: "pages-notifications" */ "./pages/Notifications"));
-const SupportPage = lazy(() => import(/* webpackChunkName: "pages-support" */ "./pages/Support"));
-const AdminNotificationsPage = lazy(() => import(/* webpackChunkName: "admin-notifications" */ "./pages/admin/AdminNotifications"));
-const AdminSettingsPage = lazy(() => import(/* webpackChunkName: "admin-settings" */ "./pages/admin/AdminSettings"));
-const AdminReportsPage = lazy(() => import(/* webpackChunkName: "admin-reports" */ "./pages/admin/AdminReports"));
-const AdminSupportPage = lazy(() => import(/* webpackChunkName: "admin-support" */ "./pages/admin/AdminSupport"));
+// Detecta chunk stale (hash mudou após deploy) e força reload para pegar versão nova
+function lazyWithRetry<T extends React.ComponentType<unknown>>(
+  factory: () => Promise<{ default: T }>
+): React.LazyExoticComponent<T> {
+  return lazy(() =>
+    factory().catch((err: unknown) => {
+      const isChunkError =
+        err instanceof Error &&
+        (err.message.includes("Failed to fetch dynamically imported module") ||
+          err.message.includes("Importing a module script failed") ||
+          err.message.includes("error loading dynamically imported module"));
+      if (isChunkError && !sessionStorage.getItem("chunk_reload")) {
+        sessionStorage.setItem("chunk_reload", "1");
+        window.location.reload();
+        return new Promise(() => {});
+      }
+      sessionStorage.removeItem("chunk_reload");
+      throw err;
+    })
+  );
+}
 
-const UserLayout = lazy(() => import(/* webpackChunkName: "layout-user" */ "./layouts/UserLayout"));
-const AdminLayout = lazy(() => import(/* webpackChunkName: "layout-admin" */ "./layouts/AdminLayout"));
-const AdminDashboard = lazy(() => import(/* webpackChunkName: "dashboard-admin" */ "./pages/admin/AdminDashboard"));
-const AdminClients = lazy(() => import(/* webpackChunkName: "pages-admin-clients" */ "./pages/admin/AdminUsers"));
-  const AdminPlans = lazy(() => import(/* webpackChunkName: "pages-admin-plans" */ "./pages/admin/AdminPlans"));
-const AdminSubscriptions = lazy(() => import(/* webpackChunkName: "pages-admin-subscriptions" */ "./pages/admin/AdminSubscriptions"));
-const AdminCategoriesPage = lazy(() => import(/* webpackChunkName: "pages-admin-categories" */ "./pages/admin/AdminCategories"));
+const Login = lazyWithRetry(() => import("./pages/Login"));
+const Cadastro = lazyWithRetry(() => import("./pages/Cadastro"));
+const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
+const Pagamento = lazyWithRetry(() => import("./pages/Pagamento"));
+const PagamentoSucesso = lazyWithRetry(() => import("./pages/PagamentoSucesso"));
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
+const UserDashboard = lazyWithRetry(() => import("./pages/UserDashboard"));
+const NotificationsPage = lazyWithRetry(() => import("./pages/Notifications"));
+const SupportPage = lazyWithRetry(() => import("./pages/Support"));
+const AdminNotificationsPage = lazyWithRetry(() => import("./pages/admin/AdminNotifications"));
+const AdminSettingsPage = lazyWithRetry(() => import("./pages/admin/AdminSettings"));
+const AdminReportsPage = lazyWithRetry(() => import("./pages/admin/AdminReports"));
+const AdminSupportPage = lazyWithRetry(() => import("./pages/admin/AdminSupport"));
 
-const TransactionsPage = lazy(() => import(/* webpackChunkName: "pages-transactions" */ "./pages/Transactions"));
-const GoalsPage = lazy(() => import(/* webpackChunkName: "pages-goals" */ "./pages/Goals"));
-const CardsPage = lazy(() => import(/* webpackChunkName: "pages-cards" */ "./pages/Cards"));
-const WhatsAppPage = lazy(() => import(/* webpackChunkName: "pages-whatsapp" */ "./pages/WhatsApp"));
-const SettingsPage = lazy(() => import(/* webpackChunkName: "pages-settings" */ "./pages/Settings"));
-const RecorrenciasPage = lazy(() => import(/* webpackChunkName: "pages-recorrencias" */ "./pages/Recorrencias"));
-const RecorrenciaDetalhePage = lazy(() => import(/* webpackChunkName: "pages-recorrencia-detalhe" */ "./pages/RecorrenciaDetalhe"));
-const RelatorioPage = lazy(() => import(/* webpackChunkName: "pages-relatorio" */ "./pages/Relatorio"));
+const UserLayout = lazyWithRetry(() => import("./layouts/UserLayout"));
+const AdminLayout = lazyWithRetry(() => import("./layouts/AdminLayout"));
+const AdminDashboard = lazyWithRetry(() => import("./pages/admin/AdminDashboard"));
+const AdminClients = lazyWithRetry(() => import("./pages/admin/AdminUsers"));
+const AdminPlans = lazyWithRetry(() => import("./pages/admin/AdminPlans"));
+const AdminSubscriptions = lazyWithRetry(() => import("./pages/admin/AdminSubscriptions"));
+const AdminCategoriesPage = lazyWithRetry(() => import("./pages/admin/AdminCategories"));
+
+const TransactionsPage = lazyWithRetry(() => import("./pages/Transactions"));
+const GoalsPage = lazyWithRetry(() => import("./pages/Goals"));
+const CardsPage = lazyWithRetry(() => import("./pages/Cards"));
+const WhatsAppPage = lazyWithRetry(() => import("./pages/WhatsApp"));
+const SettingsPage = lazyWithRetry(() => import("./pages/Settings"));
+const RecorrenciasPage = lazyWithRetry(() => import("./pages/Recorrencias"));
+const RecorrenciaDetalhePage = lazyWithRetry(() => import("./pages/RecorrenciaDetalhe"));
+const RelatorioPage = lazyWithRetry(() => import("./pages/Relatorio"));
 
 const PageLoading = () => (
   <div className="flex items-center justify-center py-12">
