@@ -167,8 +167,6 @@ function AppRoutes() {
         <Route path="/pagamento-sucesso" element={
           <PrivateRoute><PagamentoSucesso /></PrivateRoute>
         } />
-        {/* Rota de teste — remover antes de produção */}
-        <Route path="/pagamento-sucesso-test" element={<PagamentoSucesso />} />
 
         <Route
           path="/dashboard"

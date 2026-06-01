@@ -560,21 +560,8 @@ const Pagamento = () => {
       // Strip installments — not in API spec, causes 422
       const { installments: _, ...cardPayload } = card;
 
-      const confirmRes = await api.post<{ data: { paymentId: string; status: string } }>(
-        apiEndpoints.payments.confirm(paymentId),
-        { card: cardPayload }
-      );
-      const confirmStatus = ((confirmRes as any).data ?? confirmRes as any).status as string | undefined;
-
-      if (confirmStatus === "declined") {
-        toast.error("Cartão recusado pela operadora.");
-        return;
-      }
-      if (confirmStatus === "pending") {
-        toast.info("Pagamento em processamento. Você receberá uma confirmação em breve.");
-        return;
-      }
-      // approved ou status desconhecido — segue para sucesso
+      // 2xx = pagamento aceito pelo backend → tela de sucesso
+      await api.post(apiEndpoints.payments.confirm(paymentId), { card: cardPayload });
       sessionStorage.removeItem("pendingPaymentPlan");
       sessionStorage.removeItem("postRegisterRedirect");
       navigate("/pagamento-sucesso", { state: { plan, method } });
