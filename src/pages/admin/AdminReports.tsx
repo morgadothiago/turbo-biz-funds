@@ -226,7 +226,8 @@ const ChurnChart = ({ data }: { data: { period: string; cancelledCount: number; 
 // ============================================
 
 const ChurnTable = ({ data }: { data: { period: string; cancelledCount: number; cancelledRevenue: number; churnRate: number; reason: string }[] }) => (
-  <div className="space-y-4">
+  <div className="overflow-x-auto">
+    <div className="min-w-[480px] space-y-4">
     <div className="grid grid-cols-5 gap-4 text-sm font-medium text-muted-foreground border-b pb-2">
       <div>Período</div>
       <div>Cancelamentos</div>
@@ -249,6 +250,7 @@ const ChurnTable = ({ data }: { data: { period: string; cancelledCount: number; 
         <div className="text-muted-foreground text-xs">{item.reason}</div>
       </div>
     ))}
+  </div>
   </div>
 );
 
@@ -451,7 +453,8 @@ export default function AdminReports() {
                 <CardTitle className="text-base">Dados Detalhados</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="overflow-x-auto">
+                <div className="min-w-[640px] space-y-4">
                   <div className="grid grid-cols-8 gap-4 text-sm font-medium text-muted-foreground border-b pb-2">
                     <div className="col-span-1">Mês</div>
                     <div className="col-span-1">Receita</div>
@@ -484,6 +487,7 @@ export default function AdminReports() {
                       </div>
                     </div>
                   ))}
+                </div>
                 </div>
               </CardContent>
             </Card>

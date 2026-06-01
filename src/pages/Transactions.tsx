@@ -45,7 +45,7 @@ const PERIOD_OPTIONS: { value: Period; label: string }[] = [
 const TransactionsPageSkeleton = () => (
   <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-pulse">
     <PageHeaderSkeleton />
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {[0, 1, 2].map((i) => <div key={i} className="h-24 rounded-xl bg-muted" />)}
     </div>
     <div className="h-14 rounded-lg bg-muted" />
