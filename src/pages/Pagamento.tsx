@@ -7,6 +7,7 @@ import {
   CreditCard,
   Lock,
   ArrowRight,
+  ArrowLeft,
   Loader2,
   ShieldCheck,
   Check,
@@ -22,7 +23,7 @@ import { toast } from "sonner";
 import { fmtBRL } from "@/lib/format";
 
 const logoWeb = "/logoweb.png";
-const INSTALLMENTS_ANNUAL = [1, 2, 3, 6, 12];
+const INSTALLMENTS_ANNUAL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const INSTALLMENTS_MONTHLY = [1];
 
 const BG = "linear-gradient(to bottom, #0B1F3A, #0B1F3A 50%, #0B1F3A)";
@@ -131,7 +132,7 @@ function formatExpiry(value: string) {
 function calcInstallment(price: string | number, n: number): string {
   const raw = typeof price === "number" ? price : parseFloat(String(price).replace(/[^\d.,]/g, "").replace(",", "."));
   if (isNaN(raw) || raw === 0) return "—";
-  return fmtBRL(raw / n);
+  return fmtBRL(Math.ceil((raw / n) * 100) / 100);
 }
 
 function toDisplay(price: string | number): string {
@@ -208,7 +209,8 @@ function CardForm({
 
   const installmentLabel = (n: number) => {
     const val = calcInstallment(planInfo.price, n);
-    return n === 1 ? `1x ${val} (à vista)` : `${n}x ${val} sem juros`;
+    if (n === 1) return `1x de ${val} (à vista)`;
+    return `${n}x de ${val} sem juros`;
   };
 
   const btnLabel = installments === 1
@@ -317,11 +319,11 @@ function CardForm({
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
           </div>
-          {installments > 1 && (
-            <p className="text-xs text-[#94A3B8]">
-              Total de {toDisplay(planInfo.price)} em {installments}x sem juros
-            </p>
-          )}
+          <p className="text-xs text-[#94A3B8]">
+            {installments === 1
+              ? `Total: ${toDisplay(planInfo.price)} (à vista)`
+              : `Total: ${toDisplay(planInfo.price)} — ${installments}x de ${calcInstallment(planInfo.price, installments)} sem juros`}
+          </p>
         </div>
       )}
 
@@ -472,10 +474,11 @@ const Pagamento = () => {
 
   const [method, setMethod] = useState<PaymentMethod>("cartao");
 
-  // Plano anual: PIX = R$99,90 (à vista), Cartão = R$154,80 (12x de R$12,90)
+  // Preços hardcoded — ignora valor retornado pela API (pode estar desatualizado)
   const effectivePrice = isAnnualPlan
     ? method === "pix" ? 99.9 : 154.8
-    : planInfo.price;
+    : 99.9;
+  const effectivePeriod = isAnnualPlan ? "/ano" : "/mês";
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -557,11 +560,8 @@ const Pagamento = () => {
         return;
       }
 
-      // Strip installments — not in API spec, causes 422
-      const { installments: _, ...cardPayload } = card;
-
       // 2xx = pagamento aceito pelo backend → tela de sucesso
-      await api.post(apiEndpoints.payments.confirm(paymentId), { card: cardPayload });
+      await api.post(apiEndpoints.payments.confirm(paymentId), { card });
       sessionStorage.removeItem("pendingPaymentPlan");
       sessionStorage.removeItem("postRegisterRedirect");
       navigate("/pagamento-sucesso", { state: { plan, method } });
@@ -618,9 +618,24 @@ const Pagamento = () => {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-3 mb-5 group">
-            <img src={logoWeb} alt="doutorcash" className="h-12 w-auto transition-transform group-hover:scale-105" />
-          </Link>
+          <div className="flex items-center justify-between mb-5">
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.removeItem("pendingPaymentPlan");
+                sessionStorage.removeItem("postRegisterRedirect");
+                navigate("/");
+              }}
+              className="flex items-center gap-1.5 text-[#94A3B8] hover:text-white text-sm transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </button>
+            <Link to="/" className="inline-flex items-center gap-3 group">
+              <img src={logoWeb} alt="doutorcash" className="h-10 w-auto transition-transform group-hover:scale-105" />
+            </Link>
+            <div className="w-16" />
+          </div>
           <h1 className="text-2xl font-bold text-white mb-1.5">Finalizar assinatura</h1>
           <div className="flex items-center justify-center gap-1.5 text-[#94A3B8] text-sm">
             <Lock className="w-3.5 h-3.5" />
@@ -672,7 +687,7 @@ const Pagamento = () => {
                   </div>
                   <div className="flex items-baseline gap-1 mb-2">
                     <span className="text-3xl font-bold text-green-400">{toDisplay(effectivePrice)}</span>
-                    <span className="text-sm text-[#94A3B8]">{planInfo.period}</span>
+                    <span className="text-sm text-[#94A3B8]">{effectivePeriod}</span>
                   </div>
                   {isAnnualPlan && (
                     <p className="text-xs text-[#E5E7EB]/80 mb-1">

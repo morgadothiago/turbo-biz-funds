@@ -539,40 +539,40 @@ const Cadastro = () => {
                 </div>
 
                 {/* Card do plano */}
-                <div className="rounded-xl border-2 border-primary bg-primary/5 p-4">
+                <div className="rounded-xl border-2 border-[#1B4DBF] bg-[#1B4DBF]/10 p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0">
-                        <Zap className="w-3 h-3 text-primary-foreground" />
+                      <div className="w-5 h-5 rounded-full bg-[#1B4DBF] flex items-center justify-center shrink-0">
+                        <Zap className="w-3 h-3 text-white" />
                       </div>
-                      <span className="font-semibold text-foreground">Plano Pro</span>
+                      <span className="font-semibold text-white">Plano Pro</span>
                     </div>
-                    <span className="px-2 py-0.5 bg-primary text-primary-foreground text-xs font-medium rounded-full">
+                    <span className="px-2 py-0.5 bg-[#1B4DBF] text-white text-xs font-medium rounded-full">
                       {billing === "annual" ? "Melhor Valor" : "Mensal"}
                     </span>
                   </div>
 
                   {billing === "monthly" ? (
                     <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-2xl font-bold text-foreground">R$99,90</span>
-                      <span className="text-sm text-muted-foreground">/mês</span>
+                      <span className="text-2xl font-bold text-white">R$99,90</span>
+                      <span className="text-sm text-[#94A3B8]">/mês</span>
                     </div>
                   ) : (
                     <>
                       <div className="flex items-baseline gap-1 mb-0.5">
-                        <span className="text-2xl font-bold text-foreground">R$154,80</span>
-                        <span className="text-sm text-muted-foreground">/ano</span>
+                        <span className="text-2xl font-bold text-white">R$154,80</span>
+                        <span className="text-sm text-[#94A3B8]">/ano</span>
                       </div>
-                      <p className="text-xs text-primary font-medium mb-1">
+                      <p className="text-xs text-[#60a5fa] font-medium mb-1">
                         ou 12x de R$12,90 sem juros
                       </p>
                     </>
                   )}
 
-                  <ul className="text-xs text-white/50 space-y-1 mt-2">
+                  <ul className="text-xs text-[#94A3B8] space-y-1 mt-2">
                     {PRO_FEATURES.slice(0, 4).map((feature, i) => (
                       <li key={i} className="flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-[#1B4DBF] shrink-0" />
+                        <Check className="w-3.5 h-3.5 text-[#60a5fa] shrink-0" />
                         {feature}
                       </li>
                     ))}

@@ -27,6 +27,7 @@ export interface ConfirmCardPayload {
     expiryMonth: string;
     expiryYear: string;
     cvv: string;
+    installments: number;
   };
 }
 

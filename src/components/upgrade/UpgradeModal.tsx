@@ -44,7 +44,7 @@ export function UpgradeModal({ open, onOpenChange, resource, limit }: UpgradeMod
         <div className="grid grid-cols-2 gap-3 mt-2">
           <PlanCard
             name="Pro"
-            price="R$ 97"
+            price="R$ 99,90"
             period="/mês"
             benefits={PLAN_BENEFITS.pro}
             highlight

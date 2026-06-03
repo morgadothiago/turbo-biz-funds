@@ -303,7 +303,7 @@ const STEPS: TutorialStep[] = [
     accentColor: "#7c3aed",
     bgGradient: "from-[#2e1065] via-[#4c1d95] to-[#7c3aed]",
     visual: <CategoriasVisual />,
-    route: "/dashboard/categorias",
+    route: "/dashboard/transacoes",
   },
   {
     id: "metas",

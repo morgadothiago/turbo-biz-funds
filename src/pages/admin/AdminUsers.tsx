@@ -381,7 +381,7 @@ function ChangePlanDialog({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="free">Free — Gratuito</SelectItem>
-              <SelectItem value="pro">Pro — R$ 97/mês</SelectItem>
+              <SelectItem value="pro">Pro — R$ 99,90/mês</SelectItem>
               <SelectItem value="business">Business — R$ 297/mês</SelectItem>
             </SelectContent>
           </Select>

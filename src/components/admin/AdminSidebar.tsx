@@ -138,10 +138,10 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     toast.success("Logout realizado com sucesso!");
-    navigate("/login");
+    navigate("/login", { replace: true });
     onClose?.();
   };
 
