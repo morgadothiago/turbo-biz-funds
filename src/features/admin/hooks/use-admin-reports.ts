@@ -112,9 +112,21 @@ function formatPercent(value: number): string {
   return `${value.toFixed(1)}%`;
 }
 
-function getTrendFromChange(changeStr: string): "up" | "down" {
-  const num = parseFloat(changeStr.replace(/[+%]/g, ""));
-  return num >= 0 ? "up" : "down";
+function getTrendFromChange(changeStr: string | number | null | undefined): "up" | "down" {
+  if (changeStr == null) return "up";
+  const num = typeof changeStr === "number" ? changeStr : parseFloat(String(changeStr).replace(/[+%]/g, ""));
+  return isNaN(num) || num >= 0 ? "up" : "down";
+}
+
+function toStringChange(val: string | number | null | undefined): string {
+  if (val == null) return "+0%";
+  if (typeof val === "number") return `${val >= 0 ? "+" : ""}${val.toFixed(1)}%`;
+  return String(val);
+}
+
+function toArray<T>(val: unknown): T[] {
+  if (Array.isArray(val)) return val as T[];
+  return [];
 }
 
 // ============================================
@@ -189,21 +201,21 @@ async function fetchStats(period: PeriodType): Promise<AdminReportsStats> {
   const s = data?.data ?? data ?? {};
   return {
     totalRevenue: s.totalRevenue ?? s.mrr ?? 0,
-    revenueChange: s.revenueGrowth ?? s.mrrChange ?? "+0%",
-    revenueTrend: getTrendFromChange(s.revenueGrowth ?? s.mrrChange ?? "0%"),
+    revenueChange: toStringChange(s.revenueGrowth ?? s.mrrChange),
+    revenueTrend: getTrendFromChange(s.revenueGrowth ?? s.mrrChange),
     newUsers: s.newUsers ?? s.totalClients ?? 0,
-    usersChange: s.usersGrowth ?? s.clientsChange ?? "+0%",
-    usersTrend: getTrendFromChange(s.usersGrowth ?? s.clientsChange ?? "0%"),
-    conversionRate: parseFloat(s.conversionRate ?? "0"),
-    conversionChange: s.conversionGrowth ?? "+0%",
-    conversionTrend: getTrendFromChange(s.conversionGrowth ?? "0%"),
+    usersChange: toStringChange(s.usersGrowth ?? s.clientsChange),
+    usersTrend: getTrendFromChange(s.usersGrowth ?? s.clientsChange),
+    conversionRate: typeof s.conversionRate === "number" ? s.conversionRate : parseFloat(s.conversionRate ?? "0"),
+    conversionChange: toStringChange(s.conversionGrowth),
+    conversionTrend: getTrendFromChange(s.conversionGrowth),
   };
 }
 
 async function fetchRevenueData(period: PeriodType): Promise<RevenueDataPoint[]> {
   const year = new Date().getFullYear();
   const data = await api.get<any>(`${apiEndpoints.admin.revenue}?period=${period}&year=${year}`);
-  const raw = data?.data ?? data ?? [];
+  const raw = toArray<any>(data?.data ?? data);
   return raw.map((r: any) => ({
     month: r.month ?? r.period ?? "",
     revenue: r.revenue ?? 0,
@@ -232,7 +244,7 @@ async function fetchRevenueChart(period: PeriodType): Promise<RevenueChartData> 
 async function fetchUserGrowth(period: PeriodType): Promise<UserGrowthDataPoint[]> {
   const year = new Date().getFullYear();
   const data = await api.get<any>(`${apiEndpoints.admin.users}/growth?period=${period}&year=${year}`);
-  const raw = data?.data ?? data ?? [];
+  const raw = toArray<any>(data?.data ?? data);
   return raw.map((r: any) => ({
     period: r.period ?? r.month ?? "",
     totalUsers: r.totalUsers ?? 0,
@@ -245,7 +257,7 @@ async function fetchUserGrowth(period: PeriodType): Promise<UserGrowthDataPoint[
 
 async function fetchPlanDistribution(period: PeriodType): Promise<PlanDistributionData[]> {
   const data = await api.get<any>(`${apiEndpoints.admin.plans}/distribution?period=${period}`);
-  const raw = data?.plans ?? data ?? [];
+  const raw = toArray<any>(data?.plans ?? data);
   return raw.map((p: any) => ({
     planId: p.planId ?? p.id ?? "",
     planName: p.planName ?? p.name ?? "",
@@ -258,7 +270,7 @@ async function fetchPlanDistribution(period: PeriodType): Promise<PlanDistributi
 async function fetchChurnData(period: PeriodType): Promise<ChurnDataPoint[]> {
   const year = new Date().getFullYear();
   const data = await api.get<any>(`${apiEndpoints.admin.churn}?period=${period}&year=${year}`);
-  const raw = data?.churnByPeriod ?? data ?? [];
+  const raw = toArray<any>(data?.churnByPeriod ?? data);
   return raw.map((c: any) => ({
     period: c.period ?? "",
     cancelledCount: c.cancelledCount ?? 0,
@@ -271,7 +283,7 @@ async function fetchChurnData(period: PeriodType): Promise<ChurnDataPoint[]> {
 async function fetchCashflow(): Promise<CashflowEntry[]> {
   const year = new Date().getFullYear();
   const data = await api.get<any>(`${apiEndpoints.admin.cashflow}?year=${year}`);
-  const raw = data?.entries ?? data ?? [];
+  const raw = toArray<any>(data?.entries ?? data);
   return raw.map((e: any) => ({
     id: e.id ?? "",
     date: e.date ?? "",

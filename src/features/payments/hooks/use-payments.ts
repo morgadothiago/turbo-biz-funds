@@ -21,14 +21,9 @@ export interface PaymentIntent {
 }
 
 export interface ConfirmCardPayload {
-  card: {
-    number: string;
-    holderName: string;
-    expiryMonth: string;
-    expiryYear: string;
-    cvv: string;
-    installments: number;
-  };
+  paymentToken: string;
+  holderName: string;
+  installments: number;
 }
 
 export function useCreatePaymentIntent() {

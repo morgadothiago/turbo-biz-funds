@@ -6,6 +6,7 @@ export interface AdminUser {
   name: string;
   email: string;
   phone?: string;
+  cpf?: string;
   plan: "free" | "pro" | "business" | string;
   status: "Ativo" | "Pendente" | "Bloqueado" | string;
   role: "user" | "admin" | string;

@@ -219,6 +219,16 @@ function UserDetailSheet({
 
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+              <CreditCard className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">CPF</p>
+              <p className="text-sm font-medium font-mono">{user.cpf ?? "Não informado"}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
               <Shield className="w-4 h-4 text-muted-foreground" />
             </div>
             <div>
@@ -350,7 +360,7 @@ function ChangePlanDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const [plan, setPlan] = useState(user?.plan ?? "free");
+  const [plan, setPlan] = useState(user?.plan ?? "pro");
   const updateUser = useUpdateAdminUser();
   if (!user) return null;
 
@@ -380,11 +390,12 @@ function ChangePlanDialog({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="free">Free — Gratuito</SelectItem>
-              <SelectItem value="pro">Pro — R$ 99,90/mês</SelectItem>
-              <SelectItem value="business">Business — R$ 297/mês</SelectItem>
+              <SelectItem value="pro">Doutor Cash Anual — R$ 99,90 no PIX ou 12x de R$ 12,90</SelectItem>
             </SelectContent>
           </Select>
+          <p className="text-xs text-muted-foreground">
+            Plano anual · R$ 99,90 à vista no PIX ou 12x de R$ 12,90 no cartão
+          </p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
@@ -713,14 +724,12 @@ export default function AdminUsers() {
                     />
                   </div>
                   <Select value={selectedPlan} onValueChange={(v) => { setSelectedPlan(v); setPage(1); }}>
-                    <SelectTrigger className="w-[150px]">
+                    <SelectTrigger className="w-[170px]">
                       <SelectValue placeholder="Plano" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos os planos</SelectItem>
-                      <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="pro">Pro</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
+                      <SelectItem value="pro">Doutor Cash Anual</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={selectedStatus} onValueChange={(v) => { setSelectedStatus(v); setPage(1); }}>
@@ -765,6 +774,7 @@ export default function AdminUsers() {
                   <TableHeader>
                     <TableRow className="border-muted/50 hover:bg-transparent">
                       <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Cliente</TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium hidden md:table-cell">CPF</TableHead>
                       <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Plano</TableHead>
                       <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Status</TableHead>
                       <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium hidden md:table-cell">Papel</TableHead>
@@ -792,6 +802,9 @@ export default function AdminUsers() {
                               <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                             </div>
                           </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground hidden md:table-cell font-mono">
+                          {user.cpf ?? "—"}
                         </TableCell>
                         <TableCell><PlanBadge plan={user.plan} /></TableCell>
                         <TableCell><StatusBadge status={user.status} /></TableCell>

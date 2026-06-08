@@ -64,7 +64,6 @@ interface Recurrence {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const CURRENT_YEAR = new Date().getFullYear();
-const CURRENT_MONTH = new Date().getMonth();
 const START_YEAR = 2026;
 const AVAILABLE_YEARS = Array.from(
   { length: CURRENT_YEAR - START_YEAR + 1 },
@@ -358,11 +357,8 @@ export default function RelatorioPage() {
     [allTransactions, selectedYear]
   );
 
-  // Visible months for the month selector
-  const visibleMonths = useMemo(() => {
-    const start = selectedYear === CURRENT_YEAR ? CURRENT_MONTH : 0;
-    return Array.from({ length: 12 - start }, (_, i) => start + i);
-  }, [selectedYear]);
+  // Visible months for the month selector — always all 12 months
+  const visibleMonths = useMemo(() => Array.from({ length: 12 }, (_, i) => i), []);
 
   // Filter by selected month
   const filteredTransactions = useMemo(

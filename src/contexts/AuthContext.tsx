@@ -49,6 +49,7 @@ function userFromClaims(claims: Record<string, unknown>, fallbackEmail: string):
   };
 }
 
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +58,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = storage.getToken();
     const savedUser = storage.getUser();
     if (token && savedUser) {
-      // Re-decode JWT to pick up any new fields (like plan)
       const claims = decodeJwt(token);
       const refreshedUser: User = {
         ...savedUser,
@@ -101,6 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       const claims = decodeJwt(token);
       const user = userFromClaims(claims, payload.email);
+      // JWT não tem name/phone — extrair do objeto user da resposta
+      const userData = (nested.user ?? {}) as Record<string, unknown>;
+      user.name = (userData.name as string) || payload.name;
+      if (payload.phone) user.phone = payload.phone;
       console.log("[Auth] Claims do JWT (cadastro):", claims);
       console.log("[Auth] Usuário (cadastro):", user);
       storage.setToken(token);
@@ -113,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [login]);
 
   const updateProfile = useCallback(async (data: { name?: string; phone?: string }): Promise<void> => {
-    await api.patch("/v1/users/me", data);
+    // API não possui endpoint de atualização de perfil — salvar localmente
     setUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, ...data };
@@ -132,21 +136,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const claims = decodeJwt(token);
     setUser((prev) => {
       if (!prev) return prev;
-      const updated = userFromClaims(claims, prev.email);
+      const fromJwt = userFromClaims(claims, prev.email);
+      // Preserve name/phone from stored user if JWT doesn't have them
+      const updated: User = {
+        ...fromJwt,
+        name: (claims.name as string) || prev.name,
+        phone: (claims.phone as string) || prev.phone || undefined,
+      };
       storage.setUser(updated);
       return updated;
     });
   }, []);
 
   const logout = useCallback(async () => {
-    try {
-      await api.post(apiEndpoints.auth.logout);
-    } catch {
-      // Logout local continua mesmo se o servidor falhar
-    } finally {
-      storage.clear();
-      setUser(null);
-    }
+    storage.clear();
+    setUser(null);
   }, []);
 
   return (

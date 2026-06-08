@@ -101,7 +101,7 @@ const Pricing = memo(() => {
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <p className="text-center text-[15px] font-bold text-white">
                     Acesso completo ao{" "}
-                    <span style={{ color: BRAND.light }}>Dr. Cash</span>
+                    <span style={{ color: BRAND.light }}>Doutor Cash</span>
                   </p>
                   <BadgeCheck className="w-5 h-5 shrink-0" style={{ color: BRAND.light }} />
                 </div>
@@ -175,7 +175,7 @@ const Pricing = memo(() => {
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <p className="text-center text-[15px] font-bold text-white">
                     Acesso completo ao{" "}
-                    <span style={{ color: BRAND.light }}>Dr. Cash</span>
+                    <span style={{ color: BRAND.light }}>Doutor Cash</span>
                   </p>
                   <BadgeCheck className="w-5 h-5 shrink-0" style={{ color: BRAND.light }} />
                 </div>

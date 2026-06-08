@@ -72,6 +72,42 @@ const statusColors: Record<string, string> = {
   Cancelado: "bg-muted text-muted-foreground",
 };
 
+// ── Pricing config (stored locally until backend supports these fields) ────────
+
+interface PlanPricingConfig {
+  originalPrice?: number;
+  pixPrice?: number;
+  installments?: number;
+  installmentValue?: number;
+  totalInstallmentValue?: number;
+}
+
+const PRICING_STORAGE_KEY = "adminPlanPricingConfig";
+
+function loadPricingConfig(): Record<string, PlanPricingConfig> {
+  try {
+    return JSON.parse(localStorage.getItem(PRICING_STORAGE_KEY) ?? "{}");
+  } catch { return {}; }
+}
+
+function savePricingConfig(planId: string, config: PlanPricingConfig) {
+  const all = loadPricingConfig();
+  all[planId] = config;
+  localStorage.setItem(PRICING_STORAGE_KEY, JSON.stringify(all));
+}
+
+function getPlanPricing(planId: string): PlanPricingConfig {
+  return loadPricingConfig()[planId] ?? {};
+}
+
+const EMPTY_PRICING: PlanPricingConfig = {
+  originalPrice: undefined,
+  pixPrice: undefined,
+  installments: undefined,
+  installmentValue: undefined,
+  totalInstallmentValue: undefined,
+};
+
 export default function AdminPlans() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -91,9 +127,11 @@ export default function AdminPlans() {
     features: [],
     popular: false,
   });
+  const [newPricing, setNewPricing] = useState<PlanPricingConfig>({ ...EMPTY_PRICING });
   const [newFeatureInput, setNewFeatureInput] = useState("");
 
   const [editPlanData, setEditPlanData] = useState<Partial<CreatePlanPayload>>({});
+  const [editPricing, setEditPricing] = useState<PlanPricingConfig>({ ...EMPTY_PRICING });
   const [editFeatureInput, setEditFeatureInput] = useState("");
 
   const selectedPlan = plans.find((p) => p.id === editingPlanId) ?? null;
@@ -111,6 +149,7 @@ export default function AdminPlans() {
         features: plan.features,
         popular: plan.popular,
       });
+      setEditPricing(getPlanPricing(planId));
       setEditFeatureInput("");
     }
     setEditingPlanId(planId);
@@ -191,10 +230,13 @@ export default function AdminPlans() {
     };
     
     createPlan.mutate(payload as CreatePlanPayload, {
-      onSuccess: () => {
+      onSuccess: (res: any) => {
+        const newId = res?.data?.id ?? res?.id ?? Date.now().toString();
+        savePricingConfig(newId, newPricing);
         toast({ title: "Plano criado com sucesso" });
         setIsCreateDialogOpen(false);
         setNewPlan({ name: "", description: "", price: 0, billingPeriod: "mês", features: [], popular: false });
+        setNewPricing({ ...EMPTY_PRICING });
         setNewFeatureInput("");
       },
       onError: (err: unknown) => {
@@ -275,6 +317,7 @@ export default function AdminPlans() {
       { id: editingPlanId, ...payload },
       {
         onSuccess: () => {
+          savePricingConfig(editingPlanId, editPricing);
           toast({ title: "Plano atualizado com sucesso" });
           setIsEditDialogOpen(false);
         },
@@ -463,14 +506,39 @@ export default function AdminPlans() {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
-                      <span className="text-4xl font-bold">
-                        {plan.price === 0 ? 'Grátis' : `R$ ${plan.price}`}
-                      </span>
-                      {plan.price > 0 && (
-                        <span className="text-muted-foreground">
-                          /{plan.billingPeriod === 'YEARLY' ? 'ano' : 'mês'}
-                        </span>
-                      )}
+                      {(() => {
+                        const pricing = getPlanPricing(plan.id);
+                        if (pricing.originalPrice || pricing.pixPrice) {
+                          return (
+                            <div className="space-y-1">
+                              {pricing.originalPrice && (
+                                <p className="text-xs text-muted-foreground line-through">De R$ {pricing.originalPrice.toFixed(2).replace(".", ",")}</p>
+                              )}
+                              {pricing.pixPrice && (
+                                <p className="text-2xl font-bold">R$ {pricing.pixPrice.toFixed(2).replace(".", ",")} <span className="text-sm font-normal text-muted-foreground">no PIX</span></p>
+                              )}
+                              {pricing.installments && pricing.installmentValue && (
+                                <p className="text-sm text-muted-foreground">
+                                  ou {pricing.installments}x de R$ {pricing.installmentValue.toFixed(2).replace(".", ",")}
+                                  {pricing.totalInstallmentValue && ` (R$ ${pricing.totalInstallmentValue.toFixed(2).replace(".", ",")} total)`}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }
+                        return (
+                          <>
+                            <span className="text-4xl font-bold">
+                              {plan.price === 0 ? "Grátis" : `R$ ${plan.price}`}
+                            </span>
+                            {plan.price > 0 && (
+                              <span className="text-muted-foreground">
+                                /{plan.billingPeriod === "YEARLY" ? "ano" : "mês"}
+                              </span>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 py-4 border-y">
@@ -537,7 +605,7 @@ export default function AdminPlans() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="plan-price">Preço (R$)</Label>
+                        <Label htmlFor="plan-price">Preço base (R$)</Label>
                         <Input
                           id="plan-price"
                           type="number"
@@ -548,8 +616,8 @@ export default function AdminPlans() {
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="plan-period">Período</Label>
-                        <Select 
-                          value={newPlan.billingPeriod} 
+                        <Select
+                          value={newPlan.billingPeriod}
                           onValueChange={(value) => setNewPlan({ ...newPlan, billingPeriod: value })}
                         >
                           <SelectTrigger id="plan-period">
@@ -563,6 +631,63 @@ export default function AdminPlans() {
                         </Select>
                       </div>
                     </div>
+
+                    {/* Pricing display fields */}
+                    <div className="rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Exibição de Preços no Site</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-1.5">
+                          <Label className="text-xs">Preço De (R$)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Ex: 197.00"
+                            value={newPricing.originalPrice ?? ""}
+                            onChange={(e) => setNewPricing({ ...newPricing, originalPrice: e.target.value ? Number(e.target.value) : undefined })}
+                          />
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label className="text-xs">Preço PIX (R$)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Ex: 99.90"
+                            value={newPricing.pixPrice ?? ""}
+                            onChange={(e) => setNewPricing({ ...newPricing, pixPrice: e.target.value ? Number(e.target.value) : undefined })}
+                          />
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label className="text-xs">Nº de Parcelas</Label>
+                          <Input
+                            type="number"
+                            placeholder="Ex: 12"
+                            value={newPricing.installments ?? ""}
+                            onChange={(e) => setNewPricing({ ...newPricing, installments: e.target.value ? Number(e.target.value) : undefined })}
+                          />
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label className="text-xs">Valor da Parcela (R$)</Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="Ex: 12.90"
+                            value={newPricing.installmentValue ?? ""}
+                            onChange={(e) => setNewPricing({ ...newPricing, installmentValue: e.target.value ? Number(e.target.value) : undefined })}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-1.5">
+                        <Label className="text-xs">Valor Total Parcelado (R$)</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="Ex: 154.80"
+                          value={newPricing.totalInstallmentValue ?? ""}
+                          onChange={(e) => setNewPricing({ ...newPricing, totalInstallmentValue: e.target.value ? Number(e.target.value) : undefined })}
+                        />
+                      </div>
+                    </div>
+
                     <div className="grid gap-2">
                       <Label>Funcionalidades do Plano</Label>
                       <div className="flex gap-2">
@@ -701,7 +826,7 @@ export default function AdminPlans() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-price">Preço (R$)</Label>
+                    <Label htmlFor="edit-price">Preço base (R$)</Label>
                     <Input
                       id="edit-price"
                       type="number"
@@ -711,8 +836,8 @@ export default function AdminPlans() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="edit-period">Período</Label>
-                    <Select 
-                      value={editPlanData.billingPeriod ?? selectedPlan.billingPeriod} 
+                    <Select
+                      value={editPlanData.billingPeriod ?? selectedPlan.billingPeriod}
                       onValueChange={(value) => setEditPlanData({ ...editPlanData, billingPeriod: value })}
                     >
                       <SelectTrigger id="edit-period">
@@ -726,6 +851,63 @@ export default function AdminPlans() {
                     </Select>
                   </div>
                 </div>
+
+                {/* Pricing display fields */}
+                <div className="rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Exibição de Preços no Site</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label className="text-xs">Preço De (R$)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex: 197.00"
+                        value={editPricing.originalPrice ?? ""}
+                        onChange={(e) => setEditPricing({ ...editPricing, originalPrice: e.target.value ? Number(e.target.value) : undefined })}
+                      />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label className="text-xs">Preço PIX (R$)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex: 99.90"
+                        value={editPricing.pixPrice ?? ""}
+                        onChange={(e) => setEditPricing({ ...editPricing, pixPrice: e.target.value ? Number(e.target.value) : undefined })}
+                      />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label className="text-xs">Nº de Parcelas</Label>
+                      <Input
+                        type="number"
+                        placeholder="Ex: 12"
+                        value={editPricing.installments ?? ""}
+                        onChange={(e) => setEditPricing({ ...editPricing, installments: e.target.value ? Number(e.target.value) : undefined })}
+                      />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label className="text-xs">Valor da Parcela (R$)</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex: 12.90"
+                        value={editPricing.installmentValue ?? ""}
+                        onChange={(e) => setEditPricing({ ...editPricing, installmentValue: e.target.value ? Number(e.target.value) : undefined })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label className="text-xs">Valor Total Parcelado (R$)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Ex: 154.80"
+                      value={editPricing.totalInstallmentValue ?? ""}
+                      onChange={(e) => setEditPricing({ ...editPricing, totalInstallmentValue: e.target.value ? Number(e.target.value) : undefined })}
+                    />
+                  </div>
+                </div>
+
                 <div className="grid gap-2">
                   <Label>Funcionalidades do Plano</Label>
                   <div className="flex gap-2">

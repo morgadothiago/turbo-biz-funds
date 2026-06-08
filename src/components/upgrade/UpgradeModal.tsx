@@ -7,7 +7,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { RESOURCE_LABELS, PLAN_BENEFITS, type PlanResource } from "@/lib/plan-limits";
 
 interface UpgradeModalProps {
@@ -29,7 +28,7 @@ export function UpgradeModal({ open, onOpenChange, resource, limit }: UpgradeMod
             <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
               <Lock className="w-5 h-5 text-amber-500" />
             </div>
-            <DialogTitle className="text-lg">Limite do plano gratuito</DialogTitle>
+            <DialogTitle className="text-lg">Faça seu upgrade</DialogTitle>
           </div>
         </DialogHeader>
 
@@ -37,8 +36,8 @@ export function UpgradeModal({ open, onOpenChange, resource, limit }: UpgradeMod
           Você atingiu o limite de{" "}
           <span className="font-semibold text-foreground">
             {limit} {label}
-          </span>{" "}
-          do plano <Badge variant="outline">Free</Badge>. Faça upgrade para continuar.
+          </span>
+          . Faça upgrade para continuar.
         </p>
 
         <div className="grid grid-cols-2 gap-3 mt-2">
@@ -64,10 +63,6 @@ export function UpgradeModal({ open, onOpenChange, resource, limit }: UpgradeMod
             }}
           />
         </div>
-
-        <Button variant="ghost" className="w-full text-sm" onClick={() => onOpenChange(false)}>
-          Continuar no plano gratuito
-        </Button>
       </DialogContent>
     </Dialog>
   );

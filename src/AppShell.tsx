@@ -113,7 +113,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function DashboardRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) return <AuthLoadingFallback />;
   if (!isAuthenticated && storage.getToken()) return <AuthLoadingFallback />;
@@ -123,6 +123,11 @@ function DashboardRoute({ children }: { children: React.ReactNode }) {
   const pendingPlan = sessionStorage.getItem("pendingPaymentPlan");
   if (pendingPlan) {
     return <Navigate to={`/pagamento?plan=${pendingPlan}`} replace />;
+  }
+
+  // Somente planos pagos acessam o dashboard
+  if (user?.plan === "free") {
+    return <Navigate to="/pagamento?plan=pro-monthly" replace />;
   }
 
   return <>{children}</>;

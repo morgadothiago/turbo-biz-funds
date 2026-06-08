@@ -160,6 +160,53 @@ interface PaymentIntent {
   currency: string;
 }
 
+const EFI_CLIENT_ID = import.meta.env.VITE_EFI_CLIENT_ID as string;
+const EFI_SDK_URL = "https://efipay.com.br/v1/cdn/efi.min.js";
+
+const EFI_GLOBAL_CANDIDATES = ["EfiPay", "EFIPay", "Efi", "efiPay", "GerencianetPay", "gerencianet"];
+
+function getEfiGlobal(): (new (id: string) => EfiPayInstance) | undefined {
+  for (const name of EFI_GLOBAL_CANDIDATES) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (typeof (window as any)[name] !== "undefined") return (window as any)[name];
+  }
+  return undefined;
+}
+
+function loadEfiSdk(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (getEfiGlobal()) { resolve(); return; }
+
+    if (!document.querySelector(`script[src="${EFI_SDK_URL}"]`)) {
+      const script = document.createElement("script");
+      script.src = EFI_SDK_URL;
+      document.head.appendChild(script);
+    }
+
+    let attempts = 0;
+    const check = setInterval(() => {
+      if (getEfiGlobal()) {
+        clearInterval(check);
+        resolve();
+      } else if (++attempts > 80) { // 8s timeout
+        clearInterval(check);
+        const candidates = EFI_GLOBAL_CANDIDATES.map(n => `${n}=${typeof (window as any)[n]}`).join(", ");
+        console.warn("[EFI] globals tentados:", candidates);
+        reject(new Error("Timeout ao carregar SDK EFI. Recarregue a página."));
+      }
+    }, 100);
+  });
+}
+
+const EFI_BRAND_MAP: Record<NonNullable<CardBrand>, string | null> = {
+  visa: "visa",
+  mastercard: "mastercard",
+  amex: "amex",
+  elo: "elo",
+  hipercard: "hipercard",
+  discover: null,
+};
+
 // ---------- CardForm ----------
 function CardForm({
   isLoading,
@@ -168,14 +215,7 @@ function CardForm({
   installmentOptions,
 }: {
   isLoading: boolean;
-  onSubmit: (card: {
-    number: string;
-    holderName: string;
-    expiryMonth: string;
-    expiryYear: string;
-    cvv: string;
-    installments: number;
-  }) => void;
+  onSubmit: (data: { paymentToken: string; holderName: string; installments: number }) => void;
   planInfo: PlanDisplay;
   installmentOptions: number[];
 }) {
@@ -186,10 +226,12 @@ function CardForm({
   const [installments, setInstallments] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [brand, setBrand] = useState<CardBrand>(null);
+  const [tokenizing, setTokenizing] = useState(false);
 
   const validate = () => {
     const errs: Record<string, string> = {};
     if (cardNumber.replace(/\s/g, "").length < 16) errs.cardNumber = "Número inválido";
+    if (!brand) errs.cardNumber = "Bandeira não reconhecida";
     if (cardName.trim().length < 3) errs.cardName = "Nome inválido";
     if (expiry.length < 5) errs.expiry = "Data inválida";
     if (cvv.length < 3) errs.cvv = "CVV inválido";
@@ -197,14 +239,44 @@ function CardForm({
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+
+    const efiBrand = brand ? EFI_BRAND_MAP[brand] : null;
+    if (!efiBrand) {
+      setErrors((prev) => ({ ...prev, cardNumber: "Bandeira não suportada" }));
+      return;
+    }
+
     const [expiryMonth, rawYear] = expiry.split("/");
     const expiryYear = rawYear.length === 2 ? `20${rawYear}` : rawYear;
-    onSubmit({ number: cardNumber.replace(/\s/g, ""), holderName: cardName, expiryMonth, expiryYear, cvv, installments });
-    setCardNumber("");
-    setCvv("");
+
+    setTokenizing(true);
+    try {
+      await loadEfiSdk();
+      const EfiPayClass = getEfiGlobal()!;
+      const efi = new EfiPayClass(EFI_CLIENT_ID);
+      console.log("[EFI] tokenizando:", { brand: efiBrand, expiryMonth, expiryYear, holderName: cardName });
+      const result = await efi.CreditCard.getPaymentToken({
+        brand: efiBrand,
+        number: cardNumber.replace(/\s/g, ""),
+        cvv,
+        expirationMonth: expiryMonth,
+        expirationYear: expiryYear,
+        holderName: cardName,
+      });
+      console.log("[EFI] token OK:", result);
+      onSubmit({ paymentToken: result.data.payment_token, holderName: cardName, installments });
+      setCardNumber("");
+      setCvv("");
+    } catch (err) {
+      console.error("[EFI] erro tokenização:", err);
+      const msg = (err as { message?: string })?.message ?? "Erro ao tokenizar cartão. Verifique os dados.";
+      setErrors((prev) => ({ ...prev, cardNumber: msg }));
+    } finally {
+      setTokenizing(false);
+    }
   };
 
   const installmentLabel = (n: number) => {
@@ -327,8 +399,10 @@ function CardForm({
         </div>
       )}
 
-      <button type="submit" className={CTA_BTN} disabled={isLoading}>
-        {isLoading ? (
+      <button type="submit" className={CTA_BTN} disabled={isLoading || tokenizing}>
+        {tokenizing ? (
+          <><Loader2 className="w-4 h-4 animate-spin" />Validando cartão...</>
+        ) : isLoading ? (
           <><Loader2 className="w-4 h-4 animate-spin" />Processando pagamento...</>
         ) : (
           <>{btnLabel}<ArrowRight className="w-4 h-4" /></>
@@ -542,14 +616,7 @@ const Pagamento = () => {
     return () => clearInterval(timer);
   }, [method, intent, pixApproved, navigate, plan]);
 
-  const handleCardSubmit = async (card: {
-    number: string;
-    holderName: string;
-    expiryMonth: string;
-    expiryYear: string;
-    cvv: string;
-    installments: number;
-  }) => {
+  const handleCardSubmit = async (data: { paymentToken: string; holderName: string; installments: number }) => {
     setIsConfirming(true);
     try {
       const intentRes = await api.post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan: apiPlanId, method: "cartao" });
@@ -561,7 +628,11 @@ const Pagamento = () => {
       }
 
       // 2xx = pagamento aceito pelo backend → tela de sucesso
-      await api.post(apiEndpoints.payments.confirm(paymentId), { card });
+      await api.post(apiEndpoints.payments.confirm(paymentId), {
+        paymentToken: data.paymentToken,
+        holderName: data.holderName,
+        installments: data.installments,
+      });
       sessionStorage.removeItem("pendingPaymentPlan");
       sessionStorage.removeItem("postRegisterRedirect");
       navigate("/pagamento-sucesso", { state: { plan, method } });
