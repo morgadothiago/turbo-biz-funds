@@ -1,15 +1,16 @@
-import { lazy, Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 // Lazy load components below the fold for better performance
-const Problem = lazy(() => import("@/components/landing/Problem"));
-const HowItWorks = lazy(() => import("@/components/landing/HowItWorks"));
-const Testimonials = lazy(() => import("@/components/landing/Testimonials"));
-const Pricing = lazy(() => import("@/components/landing/Pricing"));
-const FAQ = lazy(() => import("@/components/landing/FAQ"));
-const Footer = lazy(() => import("@/components/landing/Footer"));
+const Problem = lazyWithRetry(() => import("@/components/landing/Problem"));
+const HowItWorks = lazyWithRetry(() => import("@/components/landing/HowItWorks"));
+const Testimonials = lazyWithRetry(() => import("@/components/landing/Testimonials"));
+const Pricing = lazyWithRetry(() => import("@/components/landing/Pricing"));
+const FAQ = lazyWithRetry(() => import("@/components/landing/FAQ"));
+const Footer = lazyWithRetry(() => import("@/components/landing/Footer"));
 
 // Simple loading fallback that doesn't block rendering
 const SectionFallback = ({ height = 400 }: { height?: number }) => (

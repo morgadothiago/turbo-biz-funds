@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,28 +8,7 @@ import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { storage } from "@/lib/storage";
-
-// Detecta chunk stale (hash mudou após deploy) e força reload para pegar versão nova
-function lazyWithRetry<T extends React.ComponentType<unknown>>(
-  factory: () => Promise<{ default: T }>
-): React.LazyExoticComponent<T> {
-  return lazy(() =>
-    factory().catch((err: unknown) => {
-      const isChunkError =
-        err instanceof Error &&
-        (err.message.includes("Failed to fetch dynamically imported module") ||
-          err.message.includes("Importing a module script failed") ||
-          err.message.includes("error loading dynamically imported module"));
-      if (isChunkError && !sessionStorage.getItem("chunk_reload")) {
-        sessionStorage.setItem("chunk_reload", "1");
-        window.location.reload();
-        return new Promise(() => {});
-      }
-      sessionStorage.removeItem("chunk_reload");
-      throw err;
-    })
-  );
-}
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 const Login = lazyWithRetry(() => import("./pages/Login"));
 const Cadastro = lazyWithRetry(() => import("./pages/Cadastro"));
