@@ -1,7 +1,7 @@
 # Spec: Ajustes Backend — Doutor Cash
 
 **Para:** Backend  
-**Data:** 2026-06-07  
+**Data:** 2026-06-08  
 **Prioridade:** Alta  
 **Contexto:** Frontend em produção com workarounds de localStorage porque os endpoints abaixo não existem ou retornam shape incorreto. Cada item tem impacto direto na experiência do usuário final.
 
@@ -11,22 +11,23 @@
 
 | # | Problema | Impacto | Tipo |
 |---|----------|---------|------|
-| 1 | Nome exibe prefixo do email (`lary_mello1`) | Alto | Falta campo no JWT |
-| 2 | Salvar perfil falha silenciosamente | Alto | Endpoint 404 |
-| 3 | Telefone some ao trocar de dispositivo | Alto | Endpoint 404 |
-| 4 | CPF não retorna na listagem de usuários | Médio | Campo ausente na API |
-| 5 | Admin Relatórios: 6 erros JS em runtime | Alto | Shape inesperado nos responses |
+| 1 | Nome exibe prefixo do email (`lary_mello1`) | Alto | `name` ausente no JWT e no login response |
+| 2 | Perfil some ao trocar de dispositivo | Alto | `GET /v1/users/me` não existe |
+| 3 | Salvar perfil falha silenciosamente | Alto | `PATCH /v1/users/me` não existe |
+| 4 | `phone` e `cpf` somem após o cadastro | Médio | Campos ausentes no register response |
+| 5 | CPF não retorna na listagem de usuários admin | Médio | Campo ausente na API |
+| 6 | Admin Relatórios: 6 erros JS em runtime | Alto | Shape inesperado nos responses |
 
 ---
 
-## 1. JWT — Incluir `name` e `phone` nos claims
+## 1. JWT — Incluir `name`, `phone` e `cpf` nos claims
 
 ### Problema
-JWT retornado no login contém apenas `sub, id, email, role, plan, iat, exp`. Não tem `name` nem `phone`. Frontend cai no fallback `email.split("@")[0]`, exibindo `lary_mello1` em vez do nome real.
+JWT retornado no login contém apenas `sub, id, email, role, plan, iat, exp`. Sem `name`, `phone` nem `cpf`. Frontend cai no fallback `email.split("@")[0]`, exibindo `lary_mello1` em vez do nome real.
 
 ### Solução
 
-**Alterar o payload do JWT para incluir:**
+**Opção A (recomendada) — alterar payload do JWT:**
 
 ```json
 {
@@ -35,6 +36,7 @@ JWT retornado no login contém apenas `sub, id, email, role, plan, iat, exp`. N�
   "email": "usuario@email.com",
   "name": "Larissa Mello",
   "phone": "(35) 99953-7223",
+  "cpf": "12345678909",
   "role": "user",
   "plan": "pro",
   "iat": 1234567890,
@@ -42,9 +44,9 @@ JWT retornado no login contém apenas `sub, id, email, role, plan, iat, exp`. N�
 }
 ```
 
-> `phone` pode ser `null` se o usuário não cadastrou.
+> `phone` e `cpf` podem ser `null` se o usuário não cadastrou.
 
-**OU (alternativa)** — incluir `user` no response do `POST /v1/auth/login`:
+**Opção B (alternativa) — incluir `user` no response do `POST /v1/auth/login`:**
 
 ```json
 {
@@ -55,6 +57,7 @@ JWT retornado no login contém apenas `sub, id, email, role, plan, iat, exp`. N�
       "name": "Larissa Mello",
       "email": "usuario@email.com",
       "phone": "(35) 99953-7223",
+      "cpf": "12345678909",
       "role": "user",
       "plan": "pro"
     }
@@ -69,7 +72,7 @@ JWT retornado no login contém apenas `sub, id, email, role, plan, iat, exp`. N�
 ## 2. Endpoint: `GET /v1/users/me`
 
 ### Problema
-Endpoint não existe (retorna 404). Frontend não consegue buscar o perfil real após login. Se usuário troca de dispositivo ou limpa localStorage, perde nome e telefone.
+Endpoint não existe (retorna 404). Frontend não consegue buscar o perfil real após login. Se usuário troca de dispositivo ou limpa localStorage, perde nome, telefone e CPF.
 
 ### Spec
 
@@ -85,13 +88,15 @@ Endpoint não existe (retorna 404). Frontend não consegue buscar o perfil real 
     "name": "Larissa Mello",
     "email": "lary_mello1@hotmail.com",
     "phone": "(35) 99953-7223",
-    "cpf": "123.456.789-00",
+    "cpf": "12345678909",
     "role": "user",
     "plan": "pro",
     "createdAt": "2025-01-15T10:00:00Z"
   }
 }
 ```
+
+> `phone` e `cpf` podem ser `null`.
 
 **Erros:**
 - `401` — token inválido ou expirado
@@ -128,6 +133,7 @@ Endpoint não existe (retorna 404). Botão "Salvar" na tela de Configurações f
     "name": "Larissa Mello",
     "email": "lary_mello1@hotmail.com",
     "phone": "(35) 99953-7223",
+    "cpf": "12345678909",
     "role": "user",
     "plan": "pro"
   }
@@ -140,12 +146,28 @@ Endpoint não existe (retorna 404). Botão "Salvar" na tela de Configurações f
 
 ---
 
-## 4. Endpoint `POST /v1/auth/register` — Incluir `phone` no response
+## 4. Endpoint `POST /v1/auth/register` — Incluir `phone` e `cpf` no request e response
 
 ### Problema
-O body aceita `phone` mas o response de `data.user` não retorna o campo. Dado some imediatamente após o cadastro.
+O body aceita `phone` mas o response de `data.user` não retorna o campo. Frontend agora também envia `cpf` no cadastro, mas o campo não é retornado.
 
-### Ajuste
+### Request body atual → esperado
+
+**O frontend agora envia:**
+```json
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "password": "Senha123",
+  "plan": "pro",
+  "phone": "(11) 99999-9999",
+  "cpf": "12345678909"
+}
+```
+
+> `cpf`: string com 11 dígitos, sem máscara (ex: `"12345678909"`). Campo opcional.
+
+### Response atual → esperado
 
 **Response atual:**
 ```json
@@ -172,6 +194,7 @@ O body aceita `phone` mas o response de `data.user` não retorna o campo. Dado s
       "name": "João Silva",
       "email": "joao@email.com",
       "phone": "(11) 99999-9999",
+      "cpf": "12345678909",
       "role": "user"
     }
   }
@@ -197,7 +220,7 @@ Incluir `cpf` em cada item do array `data` retornado por `GET /v1/admin/users`:
       "name": "Larissa Mello",
       "email": "lary@email.com",
       "phone": "(35) 99953-7223",
-      "cpf": "123.456.789-00",
+      "cpf": "12345678909",
       "plan": "pro",
       "status": "active",
       "role": "user",
@@ -218,7 +241,7 @@ Incluir `cpf` em cada item do array `data` retornado por `GET /v1/admin/users`:
 
 ---
 
-## 6. Admin Relatórios — Shapes dos 6 Endpoints
+## 6. Admin Relatórios — Shapes dos Endpoints
 
 ### Problema
 Os endpoints existem (confirmado no Swagger) mas retornam shapes que causam 2 tipos de erro JS em runtime:
@@ -253,7 +276,7 @@ Os endpoints existem (confirmado no Swagger) mas retornam shapes que causam 2 ti
 }
 ```
 
-> **Importante:** `revenueGrowth`, `usersGrowth`, `conversionGrowth` devem ser **números** (`number`), não strings formatadas. Positivo = crescimento, negativo = queda. Ex: `12.5` significa `+12,5%`, `-3.2` significa `-3,2%`.
+> `revenueGrowth`, `usersGrowth`, `conversionGrowth` devem ser **números** (`number`), não strings formatadas. Positivo = crescimento, negativo = queda. Ex: `12.5` significa `+12,5%`, `-3.2` significa `-3,2%`.
 
 ---
 
@@ -261,7 +284,7 @@ Os endpoints existem (confirmado no Swagger) mas retornam shapes que causam 2 ti
 
 **Query params:** `?period=monthly&year=2026`
 
-**Response esperado — array direto ou dentro de `data`:**
+**Response esperado:**
 ```json
 {
   "data": [
@@ -279,7 +302,7 @@ Os endpoints existem (confirmado no Swagger) mas retornam shapes que causam 2 ti
 }
 ```
 
-> **Importante:** `data` deve ser um **array**. Não retornar objeto com propriedades indexadas (`{ "0": {...}, "1": {...} }`).
+> `data` deve ser **array**. Não retornar objeto com propriedades indexadas (`{ "0": {...}, "1": {...} }`).
 
 ---
 
@@ -321,7 +344,7 @@ Os endpoints existem (confirmado no Swagger) mas retornam shapes que causam 2 ti
 }
 ```
 
-> **Importante:** `data` deve ser **array**.
+> `data` deve ser **array**.
 
 ---
 
@@ -406,10 +429,10 @@ Os endpoints existem (confirmado no Swagger) mas retornam shapes que causam 2 ti
 
 | # | Mudança | Tipo | Impacto |
 |---|---------|------|---------|
-| 1 | `name` + `phone` no JWT / login response | Alteração | **Alto** |
-| 2 | `GET /v1/users/me` | Novo endpoint | **Alto** |
+| 1 | `name` + `phone` + `cpf` no JWT / login response | Alteração | **Alto** |
+| 2 | `GET /v1/users/me` (retorna `cpf`) | Novo endpoint | **Alto** |
 | 3 | `PATCH /v1/users/me` | Novo endpoint | **Alto** |
-| 4 | `phone` no register response | Alteração | Médio |
+| 4 | `phone` + `cpf` aceitos e retornados no register | Alteração | Médio |
 | 5 | `cpf` em `GET /v1/admin/users` | Alteração | Médio |
 | 6 | Shapes corretos nos 7 endpoints de relatórios | Alteração | **Alto** |
 
@@ -417,9 +440,9 @@ Os endpoints existem (confirmado no Swagger) mas retornam shapes que causam 2 ti
 
 ## O que o frontend fará após implementação
 
-1. **Login** → `GET /v1/users/me` → exibe nome/telefone/CPF reais em todo o app  
-2. **Configurações** → `PATCH /v1/users/me` → persiste no servidor → remove workaround localStorage  
-3. **Admin Clientes** → CPF exibido na tabela diretamente da API  
+1. **Login** → `GET /v1/users/me` → exibe nome/telefone/CPF reais em todo o app
+2. **Configurações** → `PATCH /v1/users/me` → persiste no servidor → remove workaround localStorage
+3. **Admin Clientes** → CPF exibido na tabela diretamente da API
 4. **Admin Relatórios** → gráficos e métricas carregam sem erros JS, sem dados mock
 
 ---

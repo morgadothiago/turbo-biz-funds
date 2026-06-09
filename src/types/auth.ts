@@ -8,6 +8,7 @@ export interface User {
   role: UserRole;
   plan: UserPlan;
   phone?: string;
+  cpf?: string;
 }
 
 export interface RegisterPayload {
@@ -15,6 +16,7 @@ export interface RegisterPayload {
   email: string;
   password: string;
   plan: string;
+  cpf?: string;
 }
 
 export interface AuthContextType {

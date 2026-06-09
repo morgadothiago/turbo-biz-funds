@@ -23,6 +23,7 @@ export interface PaymentIntent {
 export interface ConfirmCardPayload {
   paymentToken: string;
   holderName: string;
+  cpf: string;
   installments: number;
 }
 

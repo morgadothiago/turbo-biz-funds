@@ -13,4 +13,5 @@ interface EfiPayInstance {
   };
 }
 
+declare const EfiJs: new (clientId: string) => EfiPayInstance;
 declare const EfiPay: new (clientId: string) => EfiPayInstance;

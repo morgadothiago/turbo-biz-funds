@@ -3,12 +3,27 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, Phone, ArrowRight, Check, Loader2, Zap, Eye, EyeOff, MessageCircle, BarChart3, CreditCard, Repeat2, Brain, Wallet } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowRight, Check, Loader2, Zap, Eye, EyeOff, MessageCircle, BarChart3, CreditCard, Repeat2, Brain, Wallet, Hash } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
 import { useAuth } from "@/contexts/AuthContext";
 const logoWeb = "/logoweb.png";
+
+function validateCPF(cpf: string): boolean {
+  const digits = cpf.replace(/\D/g, "");
+  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
+  let r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  if (r !== parseInt(digits[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
+  r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  return r === parseInt(digits[10]);
+}
 
 const registerSchema = z
   .object({
@@ -17,6 +32,10 @@ const registerSchema = z
       .string()
       .min(10, "Telefone inválido")
       .regex(/^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/, "Formato: (11) 99999-9999"),
+    cpf: z
+      .string()
+      .optional()
+      .refine((v) => !v || validateCPF(v), "CPF inválido"),
     email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
     password: z
       .string()
@@ -36,6 +55,7 @@ type Billing = "monthly" | "annual";
 interface FormErrors {
   name?: string;
   phone?: string;
+  cpf?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
@@ -115,9 +135,10 @@ const Cadastro = () => {
   const location = useLocation();
   const initialBilling: Billing = (location.state as { billing?: Billing })?.billing ?? "annual";
   const [billing, setBilling] = useState<Billing>(initialBilling);
-  const [formData, setFormData] = useState<RegisterFormData & { plan: string }>({
+  const [formData, setFormData] = useState<RegisterFormData & { plan: string; cpf: string }>({
     name: "",
     phone: "",
+    cpf: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -189,6 +210,7 @@ const Cadastro = () => {
         password: formData.password,
         plan: apiPlanId,
         phone: formData.phone,
+        cpf: formData.cpf ? formData.cpf.replace(/\D/g, "") : undefined,
       });
 
       analytics.signup("email");
@@ -377,6 +399,43 @@ const Cadastro = () => {
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-destructive" />
                       {errors.phone}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cpf" className="text-sm font-medium text-white/80">
+                    CPF <span className="text-white/40 font-normal">(opcional)</span>
+                  </Label>
+                  <div className="relative">
+                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/55" />
+                    <Input
+                      id="cpf"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="000.000.000-00"
+                      value={formData.cpf}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, "").slice(0, 11);
+                        let masked = raw;
+                        if (raw.length > 3) masked = `${raw.slice(0, 3)}.${raw.slice(3)}`;
+                        if (raw.length > 6) masked = `${raw.slice(0, 3)}.${raw.slice(3, 6)}.${raw.slice(6)}`;
+                        if (raw.length > 9) masked = `${raw.slice(0, 3)}.${raw.slice(3, 6)}.${raw.slice(6, 9)}-${raw.slice(9)}`;
+                        setFormData({ ...formData, cpf: masked });
+                        if (errors.cpf) setErrors({ ...errors, cpf: undefined });
+                      }}
+                      className={`auth-input pl-11 h-11 ${
+                        errors.cpf
+                          ? "border-destructive focus:border-destructive"
+                          : "bg-[#0c1938] border-[#1B4DBF]/40 text-white placeholder:text-white/40 focus:border-[#1B4DBF] focus:bg-[#0e1d42] focus:ring-[#1B4DBF]/20"
+                      }`}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  {errors.cpf && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-destructive" />
+                      {errors.cpf}
                     </p>
                   )}
                 </div>
