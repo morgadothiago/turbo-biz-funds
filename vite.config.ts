@@ -72,25 +72,12 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        // Precacheia só assets críticos da landing + shell.
-        // Antes: todos os chunks (2.3 MB) eram precacheados no first load.
-        // Chunks grandes (recharts, dashboard) são carregados on-demand.
+        // JS chunks NÃO são precacheados nem cacheados pelo SW.
+        // Motivo: chunks têm hash no nome + Cache-Control: immutable no HTTP.
+        // SW cacheando JS impedia reload automático de pegar chunks novos após deploy.
         globPatterns: ['**/*.{html,css,ico,png,svg,woff2}'],
-        maximumFileSizeToCacheInBytes: 300 * 1024, // ignora chunks > 300 KB
+        maximumFileSizeToCacheInBytes: 300 * 1024,
         runtimeCaching: [
-          {
-            // Chunks JS do app — StaleWhileRevalidate: responde rápido do cache,
-            // atualiza em background. Só chunks pequenos (vendor-react, vendor-router, etc.)
-            urlPattern: /\/assets\/.*\.js$/,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'js-chunks-cache',
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 dias
-              },
-            },
-          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
