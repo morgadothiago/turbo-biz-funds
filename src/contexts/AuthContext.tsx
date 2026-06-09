@@ -32,6 +32,7 @@ interface RegisterPayload {
   password: string;
   plan: string;
   phone?: string;
+  cpf?: string;
 }
 
 function userFromClaims(claims: Record<string, unknown>, fallbackEmail: string): User {
@@ -47,6 +48,35 @@ function userFromClaims(claims: Record<string, unknown>, fallbackEmail: string):
     plan,
     phone: (claims.phone as string) || undefined,
   };
+}
+
+interface MeApiResponse {
+  data: {
+    id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    cpf?: string;
+    role?: string;
+    plan?: string;
+  };
+}
+
+async function fetchAndMergeMe(base: User): Promise<User> {
+  try {
+    const res = await api.get<MeApiResponse>("/v1/users/me");
+    const raw = res as unknown as Record<string, unknown>;
+    const d = ((raw.data ?? raw) as Record<string, unknown>);
+    return {
+      ...base,
+      name: (d.name as string) || base.name,
+      phone: (d.phone as string) || base.phone || undefined,
+      cpf: (d.cpf as string) || base.cpf || undefined,
+      plan: (["free", "pro", "business"].includes(d.plan as string) ? d.plan : base.plan) as UserPlan,
+    };
+  } catch {
+    return base;
+  }
 }
 
 
@@ -83,16 +113,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("[Auth] Usuário:", user);
 
       storage.setToken(token);
-      storage.setUser(user);
-      setUser(user);
-      return user;
+      const enriched = await fetchAndMergeMe(user);
+      storage.setUser(enriched);
+      setUser(enriched);
+      return enriched;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload): Promise<void> => {
-    const response = await publicApi.post<RegisterApiResponse>(apiEndpoints.auth.register, payload);
+    // cpf removido do payload até backend implementar o campo (evita 422)
+    const { cpf: _cpf, ...apiPayload } = payload;
+    const response = await publicApi.post<RegisterApiResponse>(apiEndpoints.auth.register, apiPayload);
     // API pode retornar token no nível raiz ou aninhado em `data`
     const raw = response as unknown as Record<string, unknown>;
     const nested = (raw.data ?? {}) as Record<string, unknown>;
@@ -105,11 +138,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = (nested.user ?? {}) as Record<string, unknown>;
       user.name = (userData.name as string) || payload.name;
       if (payload.phone) user.phone = payload.phone;
+      if (payload.cpf) user.cpf = payload.cpf;
       console.log("[Auth] Claims do JWT (cadastro):", claims);
       console.log("[Auth] Usuário (cadastro):", user);
       storage.setToken(token);
-      storage.setUser(user);
-      setUser(user);
+      const enriched = await fetchAndMergeMe(user);
+      storage.setUser(enriched);
+      setUser(enriched);
     } else {
       // API não retornou token no cadastro — faz login automaticamente
       await login(payload.email, payload.password);
@@ -142,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...fromJwt,
         name: (claims.name as string) || prev.name,
         phone: (claims.phone as string) || prev.phone || undefined,
+        cpf: (claims.cpf as string) || prev.cpf || undefined,
       };
       storage.setUser(updated);
       return updated;
