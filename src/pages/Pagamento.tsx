@@ -182,12 +182,14 @@ function CardForm({
   planInfo,
   installmentOptions,
   holderDocument,
+  onInstallmentsChange,
 }: {
   isLoading: boolean;
   onSubmit: (data: { paymentToken: string; holderName: string; installments: number; cpf: string }) => void;
   planInfo: PlanDisplay;
   installmentOptions: number[];
   holderDocument?: string;
+  onInstallmentsChange?: (n: number) => void;
 }) {
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
@@ -388,7 +390,7 @@ function CardForm({
           <div className="relative">
             <select
               value={installments}
-              onChange={(e) => setInstallments(Number(e.target.value))}
+              onChange={(e) => { const n = Number(e.target.value); setInstallments(n); onInstallmentsChange?.(n); }}
               disabled={isLoading}
               className="w-full h-11 appearance-none rounded-xl border border-white/10 bg-[#0B1F3A] px-3 pr-9 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#1B4DBF]/40 focus:border-[#1B4DBF] disabled:opacity-50 transition-colors"
             >
@@ -535,7 +537,7 @@ function PixForm({
 const Pagamento = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const plan = (location.state as { plan?: string })?.plan ?? new URLSearchParams(location.search).get("plan") ?? "pro";
 
   // Mapeia IDs de UI para IDs que a API reconhece
@@ -555,6 +557,7 @@ const Pagamento = () => {
   const installmentOptions = isAnnualPlan ? INSTALLMENTS_ANNUAL : INSTALLMENTS_MONTHLY;
 
   const [method, setMethod] = useState<PaymentMethod>("pix");
+  const [selectedInstallments, setSelectedInstallments] = useState(1);
 
   // Preços hardcoded — ignora valor retornado pela API (pode estar desatualizado)
   const effectivePrice = isAnnualPlan
@@ -704,9 +707,15 @@ const Pagamento = () => {
             <button
               type="button"
               onClick={() => {
+                const fromRegister = !!sessionStorage.getItem("pendingPaymentPlan");
                 sessionStorage.removeItem("pendingPaymentPlan");
                 sessionStorage.removeItem("postRegisterRedirect");
-                navigate("/");
+                if (fromRegister) {
+                  logout();
+                  navigate("/cadastro", { replace: true });
+                } else {
+                  navigate("/");
+                }
               }}
               className="flex items-center gap-1.5 text-[#94A3B8] hover:text-white text-sm transition-colors"
             >
@@ -796,14 +805,29 @@ const Pagamento = () => {
                 </div>
               )}
               <div className="border-t border-white/[0.07] pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#94A3B8]">Subtotal</span>
-                  <span className="text-white">{toDisplay(effectivePrice)}</span>
-                </div>
-                <div className="flex justify-between text-sm font-bold">
-                  <span className="text-white">Total hoje</span>
-                  <span className="text-green-400 text-base">{toDisplay(effectivePrice)}</span>
-                </div>
+                {method === "cartao" && selectedInstallments > 1 ? (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-[#94A3B8]">Parcelas</span>
+                      <span className="text-white">{selectedInstallments}x de {calcInstallment(effectivePrice, selectedInstallments)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-bold">
+                      <span className="text-white">Total hoje</span>
+                      <span className="text-green-400 text-base">{toDisplay(effectivePrice)}</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-[#94A3B8]">Subtotal</span>
+                      <span className="text-white">{toDisplay(effectivePrice)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-bold">
+                      <span className="text-white">Total hoje</span>
+                      <span className="text-green-400 text-base">{toDisplay(effectivePrice)}</span>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="mt-4 flex items-center gap-2 p-3 bg-green-500/5 border border-green-500/10 rounded-xl text-xs text-green-400/80">
                 <ShieldCheck className="w-4 h-4 shrink-0" />
@@ -818,7 +842,7 @@ const Pagamento = () => {
               <h2 className="font-bold text-white mb-5 text-base">Forma de pagamento</h2>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
-                <button type="button" onClick={() => setMethod("pix")} className={METHOD_BTN(method === "pix")}>
+                <button type="button" onClick={() => { setMethod("pix"); setSelectedInstallments(1); }} className={METHOD_BTN(method === "pix")}>
                   <svg className="w-4 h-4" viewBox="-10 -50 540 562" fill="currentColor">
                     <path d="M242.4 292.5C247.8 287.1 254.4 284.1 260 284.1C265.7 284.1 272.3 287.1 277.7 292.5L416 430.8C436.8 451.5 469.2 451.5 490 430.8C510.8 410.1 510.8 377.7 490 356.9L351.6 218.5C346.2 213.1 343.2 206.5 343.2 200.9C343.2 195.3 346.2 188.7 351.6 183.2L490 44.9C510.8 24.1 510.8-8.3 490-29.1C469.2-49.9 436.8-49.9 416-29.1L277.7 109.2C272.3 114.6 265.7 117.6 260 117.6C254.4 117.6 247.8 114.6 242.4 109.2L104 -29.1C83.2-49.9 50.8-49.9 30-29.1C9.2-8.3 9.2 24.1 30 44.9L168.4 183.2C173.8 188.6 176.8 195.2 176.8 200.9C176.8 206.5 173.8 213.1 168.4 218.5L30 356.9C9.2 377.7 9.2 410.1 30 430.8C50.8 451.5 83.2 451.5 104 430.8L242.4 292.5z" />
                   </svg>
@@ -831,7 +855,7 @@ const Pagamento = () => {
               </div>
 
               {method === "cartao" ? (
-                <CardForm isLoading={isConfirming} onSubmit={handleCardSubmit} planInfo={{ ...planInfo, price: effectivePrice }} installmentOptions={installmentOptions} holderDocument={user?.cpf} />
+                <CardForm isLoading={isConfirming} onSubmit={handleCardSubmit} planInfo={{ ...planInfo, price: effectivePrice }} installmentOptions={installmentOptions} holderDocument={user?.cpf} onInstallmentsChange={setSelectedInstallments} />
               ) : (
                 <PixForm intent={isCreatingIntent ? null : intent} isCheckingStatus={isCheckingStatus} onCheckStatus={handlePixStatusCheck} />
               )}

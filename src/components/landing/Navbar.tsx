@@ -1,8 +1,9 @@
 import { useState, useCallback, memo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X } from "lucide-react";
 import { analytics } from "@/lib/analytics";
+import { useAuth } from "@/contexts/AuthContext";
 
 const logoWeb = "/logoweb.png";
 
@@ -15,9 +16,22 @@ const NAV_LINKS = [
 
 const Navbar = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const closeMenu   = useCallback(() => setIsOpen(false), []);
   const trackClick  = useCallback((name: string) => analytics.click(name, "navbar"), []);
+
+  const handleLogin = useCallback((extraAction?: () => void) => {
+    trackClick("login");
+    extraAction?.();
+    sessionStorage.removeItem("pendingPaymentPlan");
+    sessionStorage.removeItem("postRegisterRedirect");
+    if (isAuthenticated) {
+      logout();
+    }
+    navigate("/login");
+  }, [isAuthenticated, logout, navigate, trackClick]);
 
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
@@ -66,9 +80,9 @@ const Navbar = memo(() => {
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-3">
             {/* LOGIN — transparent + cyan border */}
-            <Link
-              to="/login"
-              onClick={() => trackClick("login")}
+            <button
+              type="button"
+              onClick={() => handleLogin()}
               className="
                 inline-flex items-center px-5 py-2 rounded-lg
                 border border-[#1B4DBF]/70 text-white text-sm font-bold uppercase tracking-wide
@@ -77,7 +91,7 @@ const Navbar = memo(() => {
               "
             >
               LOGIN
-            </Link>
+            </button>
 
             {/* CADASTRE-SE — solid #0047FF */}
             <Link
@@ -125,9 +139,9 @@ const Navbar = memo(() => {
                 </nav>
 
                 <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-white/10">
-                  <Link
-                    to="/login"
-                    onClick={() => { closeMenu(); trackClick("login_mobile"); }}
+                  <button
+                    type="button"
+                    onClick={() => handleLogin(closeMenu)}
                     className="
                       flex items-center justify-center w-full px-5 py-2.5 rounded-lg
                       border border-[#1B4DBF]/70 text-white text-sm font-bold uppercase
@@ -135,7 +149,7 @@ const Navbar = memo(() => {
                     "
                   >
                     LOGIN
-                  </Link>
+                  </button>
                   <Link
                     to="/cadastro"
                     onClick={() => { closeMenu(); trackClick("sign_up_mobile"); }}
