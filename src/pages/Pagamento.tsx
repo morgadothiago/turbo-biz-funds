@@ -134,7 +134,7 @@ function formatExpiry(value: string) {
 function calcInstallment(price: string | number, n: number): string {
   const raw = typeof price === "number" ? price : parseFloat(String(price).replace(/[^\d.,]/g, "").replace(",", "."));
   if (isNaN(raw) || raw === 0) return "—";
-  return fmtBRL(Math.ceil((raw / n) * 100) / 100);
+  return fmtBRL(Math.round((raw / n) * 100) / 100);
 }
 
 function toDisplay(price: string | number): string {
@@ -554,7 +554,7 @@ const Pagamento = () => {
   const isAnnualPlan = plan.includes("annual") || plan.includes("anual") || planInfo.period === "/ano";
   const installmentOptions = isAnnualPlan ? INSTALLMENTS_ANNUAL : INSTALLMENTS_MONTHLY;
 
-  const [method, setMethod] = useState<PaymentMethod>("cartao");
+  const [method, setMethod] = useState<PaymentMethod>("pix");
 
   // Preços hardcoded — ignora valor retornado pela API (pode estar desatualizado)
   const effectivePrice = isAnnualPlan
@@ -647,10 +647,11 @@ const Pagamento = () => {
       navigate("/pagamento-sucesso", { state: { plan, method } });
     } catch (err: unknown) {
       const e = err as { message?: string; status?: number; code?: string; response?: { data?: unknown } };
-      console.error("[Pagamento] confirm 422 response:", (e as any)?.response?.data ?? e);
+      console.error("[Pagamento] confirm error:", (e as any)?.response?.data ?? e);
       if (e?.code === "CARD_DECLINED") toast.error("Cartão recusado pela operadora.");
       else if (e?.code === "INSUFFICIENT_FUNDS") toast.error("Saldo insuficiente no cartão.");
       else if (e?.code === "INVALID_CARD" || e?.code === "EXPIRED_CARD") toast.error("Dados inválidos ou cartão vencido.");
+      else if (e?.code === "ServiceUnavailableException" || e?.status === 503) toast.error("Limite operacional atingido. Entre em contato com o suporte para aumentar seu limite de transações.");
       else if (e?.status === 402) toast.error(e.message ?? "Pagamento recusado.");
       else if (e?.status === 422) toast.error(e.message ?? "Dados de pagamento inválidos.");
       else toast.error(e?.message ?? "Erro ao processar pagamento. Tente novamente.");
@@ -766,14 +767,22 @@ const Pagamento = () => {
                       Selecionado
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-1 mb-2">
-                    <span className="text-3xl font-bold text-green-400">{toDisplay(effectivePrice)}</span>
-                    <span className="text-sm text-[#94A3B8]">{effectivePeriod}</span>
-                  </div>
-                  {isAnnualPlan && (
-                    <p className="text-xs text-[#E5E7EB]/80 mb-1">
-                      {method === "pix" ? "À vista no PIX" : "12x de R$12,90 sem juros no cartão"}
-                    </p>
+                  {isAnnualPlan && method === "cartao" ? (
+                    <div className="mb-2">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-3xl font-bold text-green-400">12x de R$12,90</span>
+                      </div>
+                      <p className="text-xs text-green-400/70 font-medium mt-0.5">sem juros no cartão</p>
+                      <p className="text-xs text-[#94A3B8] mt-0.5">Total: R$154,80</p>
+                    </div>
+                  ) : (
+                    <div className="flex items-baseline gap-1 mb-2">
+                      <span className="text-3xl font-bold text-green-400">{toDisplay(effectivePrice)}</span>
+                      <span className="text-sm text-[#94A3B8]">{effectivePeriod}</span>
+                    </div>
+                  )}
+                  {isAnnualPlan && method === "pix" && (
+                    <p className="text-xs text-[#E5E7EB]/80 mb-1">À vista no PIX</p>
                   )}
                   <p className="text-xs text-[#94A3B8] mb-3">{planInfo.description}</p>
                   <ul className="space-y-1.5">
@@ -809,15 +818,15 @@ const Pagamento = () => {
               <h2 className="font-bold text-white mb-5 text-base">Forma de pagamento</h2>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
-                <button type="button" onClick={() => setMethod("cartao")} className={METHOD_BTN(method === "cartao")}>
-                  <CreditCard className="w-4 h-4" />
-                  Cartão de Crédito
-                </button>
                 <button type="button" onClick={() => setMethod("pix")} className={METHOD_BTN(method === "pix")}>
                   <svg className="w-4 h-4" viewBox="-10 -50 540 562" fill="currentColor">
                     <path d="M242.4 292.5C247.8 287.1 254.4 284.1 260 284.1C265.7 284.1 272.3 287.1 277.7 292.5L416 430.8C436.8 451.5 469.2 451.5 490 430.8C510.8 410.1 510.8 377.7 490 356.9L351.6 218.5C346.2 213.1 343.2 206.5 343.2 200.9C343.2 195.3 346.2 188.7 351.6 183.2L490 44.9C510.8 24.1 510.8-8.3 490-29.1C469.2-49.9 436.8-49.9 416-29.1L277.7 109.2C272.3 114.6 265.7 117.6 260 117.6C254.4 117.6 247.8 114.6 242.4 109.2L104 -29.1C83.2-49.9 50.8-49.9 30-29.1C9.2-8.3 9.2 24.1 30 44.9L168.4 183.2C173.8 188.6 176.8 195.2 176.8 200.9C176.8 206.5 173.8 213.1 168.4 218.5L30 356.9C9.2 377.7 9.2 410.1 30 430.8C50.8 451.5 83.2 451.5 104 430.8L242.4 292.5z" />
                   </svg>
                   Pix
+                </button>
+                <button type="button" onClick={() => setMethod("cartao")} className={METHOD_BTN(method === "cartao")}>
+                  <CreditCard className="w-4 h-4" />
+                  Cartão de Crédito
                 </button>
               </div>
 

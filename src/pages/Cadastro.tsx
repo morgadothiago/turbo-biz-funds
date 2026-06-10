@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, Phone, ArrowRight, Check, Loader2, Zap, Eye, EyeOff, MessageCircle, BarChart3, CreditCard, Repeat2, Brain, Wallet, Hash } from "lucide-react";
+import { Mail, Lock, User, Phone, ArrowRight, Check, Loader2, Zap, Eye, EyeOff, MessageCircle, BarChart3, CreditCard, Repeat2, Brain, Wallet, Hash, Crown, BadgePercent, TrendingUp, BadgeCheck, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { analytics } from "@/lib/analytics";
@@ -50,8 +50,6 @@ const registerSchema = z
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
-type Billing = "monthly" | "annual";
-
 interface FormErrors {
   name?: string;
   phone?: string;
@@ -133,8 +131,6 @@ const PRO_FEATURES = [
 const Cadastro = () => {
   const [step, setStep] = useState(1);
   const location = useLocation();
-  const initialBilling: Billing = (location.state as { billing?: Billing })?.billing ?? "annual";
-  const [billing, setBilling] = useState<Billing>(initialBilling);
   const [formData, setFormData] = useState<RegisterFormData & { plan: string; cpf: string }>({
     name: "",
     phone: "",
@@ -142,7 +138,7 @@ const Cadastro = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    plan: initialBilling === "annual" ? "pro-annual" : "pro-monthly",
+    plan: "pro-annual",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -156,11 +152,6 @@ const Cadastro = () => {
       navigate("/dashboard", { replace: true });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleBillingChange = (b: Billing) => {
-    setBilling(b);
-    setFormData((prev) => ({ ...prev, plan: b === "annual" ? "pro-annual" : "pro-monthly" }));
-  };
 
   const isPaid = formData.plan !== "free";
 
@@ -564,78 +555,68 @@ const Cadastro = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Toggle Mensal / Anual */}
-                <div className="flex justify-center mb-2">
-                  <div className="inline-flex items-center rounded-xl bg-muted p-1 border border-border/60">
-                    <button
-                      type="button"
-                      onClick={() => handleBillingChange("monthly")}
-                      className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                        billing === "monthly"
-                          ? "bg-white text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Mensal
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleBillingChange("annual")}
-                      className={`relative px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                        billing === "annual"
-                          ? "bg-white text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Anual
-                      {billing === "monthly" && (
-                        <span className="absolute -top-2 -right-1.5 px-1 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full leading-none">
-                          -35%
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Card do plano */}
-                <div className="rounded-xl border-2 border-[#1B4DBF] bg-[#1B4DBF]/10 p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-[#1B4DBF] flex items-center justify-center shrink-0">
-                        <Zap className="w-3 h-3 text-white" />
+                {/* Card do plano — igual landing page */}
+                <div
+                  className="relative rounded-3xl shadow-2xl p-6"
+                  style={{ background: "#0B1F3A", border: "1px solid rgba(27,77,191,0.31)", boxShadow: "0 25px 60px rgba(11,31,58,0.5)" }}
+                >
+                  <>
+                      <div className="flex items-center justify-center gap-3 mb-4">
+                        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border-2" style={{ borderColor: "rgba(27,77,191,0.6)", background: "rgba(27,77,191,0.2)" }}>
+                          <Crown className="w-3.5 h-3.5 text-white" />
+                          <span className="text-xs font-bold text-white uppercase tracking-wide">Plano Anual</span>
+                        </div>
+                        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border-2" style={{ borderColor: "rgba(27,77,191,0.8)", background: "rgba(27,77,191,0.3)" }}>
+                          <BadgePercent className="w-3.5 h-3.5 text-[#E5E7EB]" />
+                          <span className="text-xs font-bold uppercase tracking-wide text-[#E5E7EB]">49% OFF</span>
+                        </div>
                       </div>
-                      <span className="font-semibold text-white">Plano Pro</span>
-                    </div>
-                    <span className="px-2 py-0.5 bg-[#1B4DBF] text-white text-xs font-medium rounded-full">
-                      {billing === "annual" ? "Melhor Valor" : "Mensal"}
-                    </span>
-                  </div>
 
-                  {billing === "monthly" ? (
-                    <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-2xl font-bold text-white">R$99,90</span>
-                      <span className="text-sm text-[#94A3B8]">/mês</span>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-baseline gap-1 mb-0.5">
-                        <span className="text-2xl font-bold text-white">R$154,80</span>
-                        <span className="text-sm text-[#94A3B8]">/ano</span>
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <p className="text-center text-[15px] font-bold text-white">
+                          Acesso completo ao <span className="text-[#E5E7EB]">Doutor Cash</span>
+                        </p>
+                        <BadgeCheck className="w-5 h-5 shrink-0 text-[#E5E7EB]" />
                       </div>
-                      <p className="text-xs text-[#60a5fa] font-medium mb-1">
-                        ou 12x de R$12,90 sem juros
-                      </p>
-                    </>
-                  )}
 
-                  <ul className="text-xs text-[#94A3B8] space-y-1 mt-2">
-                    {PRO_FEATURES.slice(0, 4).map((feature, i) => (
-                      <li key={i} className="flex items-center gap-1.5">
-                        <Check className="w-3.5 h-3.5 text-[#60a5fa] shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                      <p className="text-center text-sm text-white/40 line-through mb-1">De R$197,00 por</p>
+
+                      <div className="flex items-baseline justify-center gap-0.5 mb-3">
+                        <span className="text-2xl font-bold text-white">R$</span>
+                        <span className="text-6xl font-black text-white leading-none tracking-tighter">99</span>
+                        <span className="text-3xl font-black text-white">,90</span>
+                      </div>
+
+                      <div className="flex justify-center mb-3">
+                        <div className="flex items-center gap-2 px-6 py-2 rounded-full" style={{ background: "#1B4DBF", boxShadow: "0 0 20px rgba(27,77,191,0.6)" }}>
+                          <QrCode className="w-4 h-4 text-white" />
+                          <span className="text-sm font-bold text-white">à vista no PIX</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex-1 h-px bg-white/15" />
+                        <span className="text-xs font-semibold text-white/40 uppercase">ou</span>
+                        <div className="flex-1 h-px bg-white/15" />
+                      </div>
+
+                      <div
+                        className="rounded-2xl p-3 mb-3 text-center"
+                        style={{ background: "rgba(27,77,191,0.2)", border: "1px solid rgba(27,77,191,0.5)" }}
+                      >
+                        <p className="text-2xl font-black text-white">
+                          12x de <span className="text-[#E5E7EB]">R$ 12,90</span>
+                        </p>
+                        <p className="text-xs text-white/50 mt-0.5">Valor total: R$ 154,80 no cartão</p>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <div className="flex items-center gap-2 px-5 py-1.5 rounded-full border-2" style={{ borderColor: "rgba(27,77,191,0.5)", background: "rgba(27,77,191,0.15)" }}>
+                          <TrendingUp className="w-3.5 h-3.5 text-white/70" />
+                          <span className="text-sm font-semibold text-white/80">Economia de 49%</span>
+                        </div>
+                      </div>
+                  </>
                 </div>
 
                 <button

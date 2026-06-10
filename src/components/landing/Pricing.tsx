@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Check, MessageCircle, Shield, Crown, BadgePercent, TrendingUp, BadgeCheck, QrCode } from "lucide-react";
 import { analytics } from "@/lib/analytics";
@@ -10,8 +10,6 @@ const BRAND = {
   light: "#E5E7EB",
 };
 
-type Billing = "monthly" | "annual";
-
 const TRUST = [
   { icon: Shield, label: "Compra segura" },
   { icon: Check, label: "7 dias de garantia" },
@@ -19,9 +17,6 @@ const TRUST = [
 ] as const;
 
 const Pricing = memo(() => {
-  const [billing, setBilling] = useState<Billing>("annual");
-  const isAnnual = billing === "annual";
-
   return (
     <section id="planos" className="py-24 bg-transparent">
       <div className="container mx-auto px-4">
@@ -31,40 +26,6 @@ const Pricing = memo(() => {
             Simples assim. Um plano, tudo incluído.
           </h2>
           <p className="text-lg text-white/60">Sem taxas escondidas. Cancele quando quiser.</p>
-        </div>
-
-        {/* Toggle */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center rounded-2xl p-1 border border-white/10" style={{ background: "rgba(255,255,255,0.08)" }}>
-            <button
-              type="button"
-              onClick={() => setBilling("monthly")}
-              className={`px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                billing === "monthly" ? "bg-white shadow-md" : "text-white/50 hover:text-white"
-              }`}
-              style={billing === "monthly" ? { color: BRAND.dark } : {}}
-            >
-              Mensal
-            </button>
-            <button
-              type="button"
-              onClick={() => setBilling("annual")}
-              className={`relative px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                billing === "annual" ? "bg-white shadow-md" : "text-white/50 hover:text-white"
-              }`}
-              style={billing === "annual" ? { color: BRAND.dark } : {}}
-            >
-              Anual
-              {billing === "monthly" && (
-                <span
-                  className="absolute -top-2 -right-1 px-1 py-0.5 text-white text-[9px] font-bold rounded-full leading-none"
-                  style={{ background: BRAND.primary }}
-                >
-                  -49%
-                </span>
-              )}
-            </button>
-          </div>
         </div>
 
         {/* Card */}
@@ -77,8 +38,7 @@ const Pricing = memo(() => {
               boxShadow: `0 25px 60px ${BRAND.dark}80`,
             }}
           >
-            {isAnnual ? (
-              <>
+            <>
                 {/* Badges — Anual */}
                 <div className="flex items-center justify-center gap-3 mb-6">
                   <div
@@ -139,13 +99,16 @@ const Pricing = memo(() => {
                   <div className="flex-1 h-px bg-white/15" />
                 </div>
 
-                {/* Cartão parcelado */}
-                <p className="text-center text-xl font-bold text-white/80 mb-1">
-                  12x de <span className="text-white">R$ 12,90</span>
-                </p>
-                <p className="text-center text-xs text-white/40 mb-3">
-                  Valor total: R$ 154,80 no cartão
-                </p>
+                {/* Cartão parcelado — destaque */}
+                <div
+                  className="rounded-2xl p-3 mb-3 text-center"
+                  style={{ background: `${BRAND.primary}20`, border: `1px solid ${BRAND.primary}50` }}
+                >
+                  <p className="text-2xl font-black text-white">
+                    12x de <span style={{ color: BRAND.light }}>R$ 12,90</span>
+                  </p>
+                  <p className="text-xs text-white/50 mt-0.5">Valor total: R$ 154,80 no cartão</p>
+                </div>
 
                 {/* Economia badge */}
                 <div className="flex justify-center mb-6">
@@ -157,57 +120,13 @@ const Pricing = memo(() => {
                     <span className="text-sm font-semibold text-white/80">Economia de 49%</span>
                   </div>
                 </div>
-              </>
-            ) : (
-              <>
-                {/* Badges — Mensal */}
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <div
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-full border-2"
-                    style={{ borderColor: `${BRAND.primary}60`, background: `${BRAND.primary}20` }}
-                  >
-                    <span className="w-2 h-2 rounded-full bg-white" />
-                    <span className="text-xs font-bold text-white uppercase tracking-wide">Plano Mensal</span>
-                  </div>
-                </div>
-
-                {/* Título */}
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <p className="text-center text-[15px] font-bold text-white">
-                    Acesso completo ao{" "}
-                    <span style={{ color: BRAND.light }}>Doutor Cash</span>
-                  </p>
-                  <BadgeCheck className="w-5 h-5 shrink-0" style={{ color: BRAND.light }} />
-                </div>
-
-                {/* Preço mensal */}
-                <div className="flex items-baseline justify-center gap-0.5 mb-4">
-                  <span className="text-3xl font-bold text-white">R$</span>
-                  <span className="text-8xl font-black text-white leading-none tracking-tighter">99</span>
-                  <span className="text-4xl font-black text-white">,90</span>
-                </div>
-                <p className="text-center text-sm text-white/50 mb-4">/mês · cobrado mensalmente</p>
-
-                {/* Nudge para anual */}
-                <div className="flex justify-center mb-6">
-                  <div
-                    className="flex items-center gap-2 px-5 py-1.5 rounded-full border"
-                    style={{ borderColor: `${BRAND.primary}50`, background: `${BRAND.primary}20` }}
-                  >
-                    <TrendingUp className="w-3.5 h-3.5" style={{ color: BRAND.light }} />
-                    <span className="text-sm font-semibold" style={{ color: BRAND.light }}>
-                      Mude para Anual e economize 49%
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
+            </>
 
             {/* CTA */}
             <Link
               to="/cadastro"
-              state={{ billing }}
-              onClick={() => analytics.click(`pricing_pro_${billing}`, "pricing")}
+              state={{ billing: "annual" }}
+              onClick={() => analytics.click("pricing_pro_annual", "pricing")}
               className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl text-white font-bold text-lg transition-all duration-200 active:scale-[0.98]"
               style={{
                 background: `linear-gradient(135deg, ${BRAND.primary}, #0f3a9e)`,
