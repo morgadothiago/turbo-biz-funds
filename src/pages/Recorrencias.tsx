@@ -27,6 +27,7 @@ import {
   useActiveRecurrences,
   useCreateRecurrence,
   useUpdateRecurrence,
+  useDeleteRecurrence,
   useGenerateRecurrences,
 } from "@/features/recurrences/hooks/use-recurrences";
 import { useCategories } from "@/features/categories/hooks/use-categories";
@@ -56,6 +57,7 @@ const RecorrenciasPage = memo(() => {
   const { categories } = useCategories();
   const createRecurrence = useCreateRecurrence();
   const updateRecurrence = useUpdateRecurrence();
+  const deleteRecurrence = useDeleteRecurrence();
   const generateRecurrences = useGenerateRecurrences();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -133,14 +135,11 @@ const RecorrenciasPage = memo(() => {
     });
   };
 
-  const handleDeactivate = (id: string) => {
-    updateRecurrence.mutate(
-      { id, active: false } as Partial<RecurrencePayload> & { id: string; active: boolean },
-      {
-        onSuccess: () => toast.success("Recorrência desativada"),
-        onError: () => toast.error("Erro ao desativar recorrência"),
-      }
-    );
+  const handleDelete = (id: string) => {
+    deleteRecurrence.mutate(id, {
+      onSuccess: () => toast.success("Recorrência excluída"),
+      onError: () => toast.error("Erro ao excluir recorrência"),
+    });
   };
 
   const handleGenerate = () => {
@@ -349,10 +348,10 @@ const RecorrenciasPage = memo(() => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Desativar recorrência"
+                    aria-label="Excluir recorrência"
                     className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={(e) => { e.stopPropagation(); handleDeactivate(rec.id); }}
-                    disabled={updateRecurrence.isPending}
+                    onClick={(e) => { e.stopPropagation(); handleDelete(rec.id); }}
+                    disabled={deleteRecurrence.isPending}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

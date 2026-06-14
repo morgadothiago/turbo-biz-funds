@@ -131,6 +131,7 @@ export const apiEndpoints = {
   recurrences: {
     create: "/v1/recurrences",
     update: (id: string) => `/v1/recurrences/${id}`,
+    delete: (id: string) => `/v1/recurrences/${id}`,
     active: "/v1/recurrences/active",
     generate: "/v1/recurrences/generate",
   },

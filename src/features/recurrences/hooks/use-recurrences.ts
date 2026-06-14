@@ -91,6 +91,16 @@ export function useUpdateRecurrence() {
   });
 }
 
+export function useDeleteRecurrence() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<void>(apiEndpoints.recurrences.delete(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurrences"] });
+    },
+  });
+}
+
 export function useGenerateRecurrences() {
   const queryClient = useQueryClient();
   return useMutation({
