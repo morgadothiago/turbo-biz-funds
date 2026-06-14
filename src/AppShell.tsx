@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { storage } from "@/lib/storage";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
@@ -105,7 +105,14 @@ function DashboardRoute({ children }: { children: React.ReactNode }) {
   }
 
   // Somente planos pagos acessam o dashboard
-  if (user?.plan === "free") {
+  const justPaid = sessionStorage.getItem("paymentCompleted");
+  if (user?.plan !== "free") {
+    // Plan confirmed paid — clear flag if present
+    if (justPaid) sessionStorage.removeItem("paymentCompleted");
+  } else if (justPaid) {
+    // Plan still "free" but payment just completed — refreshUser API in-flight, hold
+    // (flag stays until plan updates)
+  } else {
     return <Navigate to="/pagamento?plan=pro-monthly" replace />;
   }
 
@@ -222,14 +229,12 @@ function AppRoutes() {
 
 const AppShell = () => (
   <ThemeProvider storageKey="doutorcash-theme">
-    <AuthProvider>
-      <TooltipProvider>
-        <OfflineBanner />
-        <Toaster />
-        <Sonner />
-        <AppRoutes />
-      </TooltipProvider>
-    </AuthProvider>
+    <TooltipProvider>
+      <OfflineBanner />
+      <Toaster />
+      <Sonner />
+      <AppRoutes />
+    </TooltipProvider>
   </ThemeProvider>
 );
 

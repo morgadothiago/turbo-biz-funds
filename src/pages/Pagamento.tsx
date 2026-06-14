@@ -425,11 +425,15 @@ function CardForm({
 function PixForm({
   intent,
   isCheckingStatus,
+  intentFailed,
   onCheckStatus,
+  onRefresh,
 }: {
   intent: PaymentIntent | null;
   isCheckingStatus: boolean;
+  intentFailed: boolean;
   onCheckStatus: () => void;
+  onRefresh: () => void;
 }) {
   const [copied, setCopied] = useState(false);
   const [seconds, setSeconds] = useState(intent?.pix?.expiresInSeconds ?? 15 * 60);
@@ -453,6 +457,24 @@ function PixForm({
     setTimeout(() => setCopied(false), 2500);
   };
 
+  // PIX intent failed to load
+  if (intentFailed) {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-col items-center gap-4 py-6 px-4 rounded-xl bg-red-500/10 border border-red-500/20">
+          <AlertCircle className="w-10 h-10 text-red-400" />
+          <div className="text-center">
+            <p className="text-sm font-medium text-red-300">Falha ao gerar QR Code Pix</p>
+            <p className="text-xs text-red-400/70 mt-1">Verifique sua conexão e tente novamente.</p>
+          </div>
+          <button type="button" className={CTA_BTN} onClick={onRefresh}>
+            Tentar novamente <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       <div className={`flex items-center justify-center gap-2 text-sm font-medium rounded-xl px-4 py-2.5 ${expired ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-[#1B4DBF]/10 text-blue-300 border border-[#1B4DBF]/20"}`}>
@@ -462,11 +484,11 @@ function PixForm({
 
       <div className="flex flex-col items-center gap-3">
         {qrBase64 ? (
-          <div className="p-3 bg-white rounded-2xl">
+          <div className={`p-3 bg-white rounded-2xl ${expired ? "opacity-40" : ""}`}>
             <img
               src={`data:image/png;base64,${qrBase64}`}
               alt="QR Code Pix"
-              className={`w-40 h-40 object-contain ${expired ? "opacity-40" : ""}`}
+              className="w-40 h-40 object-contain"
             />
           </div>
         ) : (
@@ -477,58 +499,68 @@ function PixForm({
         <p className="text-xs text-[#94A3B8] text-center">Abra o app do seu banco e escaneie o QR Code</p>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-white/10" />
-        <span className="text-xs text-white/30">ou copie o código</span>
-        <div className="flex-1 h-px bg-white/10" />
-      </div>
-
-      <div className="space-y-2">
-        <Label className={LABEL_CLS}>Pix Copia e Cola</Label>
-        {!intent ? (
-          <div className="flex items-center gap-2 h-11 text-white/40 text-sm">
-            <Loader2 className="w-4 h-4 animate-spin" />Gerando código Pix...
+      {expired ? (
+        <div className="flex flex-col items-center gap-3 py-2">
+          <p className="text-sm text-red-400 text-center">QR Code expirado. Gere um novo para continuar.</p>
+          <button type="button" className={CTA_BTN} onClick={onRefresh}>
+            Gerar novo QR Code <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-xs text-white/30">ou copie o código</span>
+            <div className="flex-1 h-px bg-white/10" />
           </div>
-        ) : pixCode ? (
-          <div className="flex gap-2">
-            <Input
-              readOnly
-              value={pixCode}
-              className={`font-mono text-xs truncate ${INPUT_CLS}`}
-            />
-            <button
-              type="button"
-              onClick={handleCopy}
-              disabled={expired}
-              className="h-11 w-11 shrink-0 rounded-xl border border-white/10 bg-[#0B1F3A] flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors disabled:opacity-40"
-            >
-              {copied ? <CheckCheck className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 h-11 text-red-400 text-sm">
-            <AlertCircle className="w-4 h-4" />Falha ao gerar código. Tente novamente.
-          </div>
-        )}
-        {copied && <p className="text-xs text-green-400 font-medium">Código copiado!</p>}
-      </div>
 
-      <button
-        type="button"
-        className={CTA_BTN}
-        disabled={isCheckingStatus || expired || !intent}
-        onClick={onCheckStatus}
-      >
-        {isCheckingStatus ? (
-          <><Loader2 className="w-4 h-4 animate-spin" />Verificando pagamento...</>
-        ) : (
-          <>Já fiz o pagamento<ArrowRight className="w-4 h-4" /></>
-        )}
-      </button>
+          <div className="space-y-2">
+            <Label className={LABEL_CLS}>Pix Copia e Cola</Label>
+            {!intent ? (
+              <div className="flex items-center gap-2 h-11 text-white/40 text-sm">
+                <Loader2 className="w-4 h-4 animate-spin" />Gerando código Pix...
+              </div>
+            ) : pixCode ? (
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={pixCode}
+                  className={`font-mono text-xs truncate ${INPUT_CLS}`}
+                />
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="h-11 w-11 shrink-0 rounded-xl border border-white/10 bg-[#0B1F3A] flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-colors"
+                >
+                  {copied ? <CheckCheck className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 h-11 text-red-400 text-sm">
+                <AlertCircle className="w-4 h-4" />Falha ao gerar código. Tente novamente.
+              </div>
+            )}
+            {copied && <p className="text-xs text-green-400 font-medium">Código copiado!</p>}
+          </div>
 
-      <p className="text-xs text-[#94A3B8] text-center">
-        Pagamento via Pix confirmado em até 1 minuto após o envio.
-      </p>
+          <button
+            type="button"
+            className={CTA_BTN}
+            disabled={isCheckingStatus || !intent}
+            onClick={onCheckStatus}
+          >
+            {isCheckingStatus ? (
+              <><Loader2 className="w-4 h-4 animate-spin" />Verificando pagamento...</>
+            ) : (
+              <>Já fiz o pagamento<ArrowRight className="w-4 h-4" /></>
+            )}
+          </button>
+
+          <p className="text-xs text-[#94A3B8] text-center">
+            Pagamento via Pix confirmado em até 1 minuto após o envio.
+          </p>
+        </>
+      )}
     </div>
   );
 }
@@ -566,22 +598,22 @@ const Pagamento = () => {
   const effectivePeriod = isAnnualPlan ? "/ano" : "/mês";
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
+  const [pixIntentFailed, setPixIntentFailed] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [pixApproved, setPixApproved] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (method !== "pix") return;
+  const createPixIntent = () => {
     setIntent(null);
     setPixApproved(false);
+    setPixIntentFailed(false);
     setIsCreatingIntent(true);
     api
       .post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan: apiPlanId, method: "pix" })
       .then((res) => {
         const raw = (res as any).data ?? res as any;
         console.log("[Pagamento] PIX intent raw response:", raw);
-
-        // Normaliza resposta — API pode retornar campos PIX flat ou aninhados em `pix`
         const normalized: PaymentIntent = {
           paymentId: raw.paymentId ?? raw.id ?? "",
           method: "pix",
@@ -596,12 +628,16 @@ const Pagamento = () => {
               (raw.expiresAt ? Math.max(0, Math.floor((new Date(raw.expiresAt).getTime() - Date.now()) / 1000)) : 15 * 60),
           },
         };
-
         console.log("[Pagamento] PIX intent normalizado:", normalized);
         setIntent(normalized);
       })
-      .catch(() => toast.error("Erro ao gerar QR Code Pix. Tente novamente."))
+      .catch(() => setPixIntentFailed(true))
       .finally(() => setIsCreatingIntent(false));
+  };
+
+  useEffect(() => {
+    if (method !== "pix") return;
+    createPixIntent();
   }, [method, plan]);
 
   // Auto-polling PIX a cada 5s enquanto pendente
@@ -616,6 +652,7 @@ const Pagamento = () => {
           clearInterval(timer);
           sessionStorage.removeItem("pendingPaymentPlan");
           sessionStorage.removeItem("postRegisterRedirect");
+          sessionStorage.setItem("paymentCompleted", "true");
           navigate("/pagamento-sucesso", { state: { plan, method } });
         } else if (status === "expired" || status === "cancelled" || status === "declined") {
           clearInterval(timer);
@@ -629,35 +666,55 @@ const Pagamento = () => {
 
   const handleCardSubmit = async (data: { paymentToken: string; holderName: string; installments: number; cpf: string }) => {
     setIsConfirming(true);
+    setCardError(null);
     try {
       const intentRes = await api.post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan: apiPlanId, method: "cartao" });
       const paymentId = ((intentRes as any).data ?? intentRes as any).paymentId as string | undefined;
 
       if (!paymentId) {
-        toast.error("Erro ao iniciar pagamento: ID não retornado. Tente novamente.");
+        setCardError("Erro ao iniciar pagamento. Tente novamente.");
         return;
       }
 
-      // 2xx = pagamento aceito pelo backend → tela de sucesso
-      await api.post(apiEndpoints.payments.confirm(paymentId), {
+      const confirmRes = await api.post(apiEndpoints.payments.confirm(paymentId), {
         paymentToken: data.paymentToken,
         holderName: data.holderName,
         cpf: data.cpf,
         installments: data.installments,
       });
+
+      // Rejeita status não-aprovado mesmo que backend retorne 2xx
+      const confirmData = (confirmRes as any)?.data ?? confirmRes as any;
+      const confirmStatus = confirmData?.status as string | undefined;
+      if (confirmStatus && confirmStatus !== "approved" && confirmStatus !== "authorized") {
+        const statusMsgMap: Record<string, string> = {
+          declined:    "Cartão recusado pela operadora. Verifique os dados ou use outro cartão.",
+          refused:     "Cartão recusado pela operadora. Verifique os dados ou use outro cartão.",
+          pending:     "Pagamento em análise. Aguarde a confirmação por e-mail.",
+          failed:      "Falha no processamento. Tente novamente ou use o Pix.",
+          cancelled:   "Pagamento cancelado. Tente novamente.",
+        };
+        setCardError(statusMsgMap[confirmStatus] ?? `Pagamento não confirmado (status: ${confirmStatus}). Tente novamente.`);
+        return;
+      }
+
       sessionStorage.removeItem("pendingPaymentPlan");
       sessionStorage.removeItem("postRegisterRedirect");
+      sessionStorage.setItem("paymentCompleted", "true");
       navigate("/pagamento-sucesso", { state: { plan, method } });
     } catch (err: unknown) {
       const e = err as { message?: string; status?: number; code?: string; response?: { data?: unknown } };
       console.error("[Pagamento] confirm error:", (e as any)?.response?.data ?? e);
-      if (e?.code === "CARD_DECLINED") toast.error("Cartão recusado pela operadora.");
-      else if (e?.code === "INSUFFICIENT_FUNDS") toast.error("Saldo insuficiente no cartão.");
-      else if (e?.code === "INVALID_CARD" || e?.code === "EXPIRED_CARD") toast.error("Dados inválidos ou cartão vencido.");
-      else if (e?.code === "ServiceUnavailableException" || e?.status === 503) toast.error("Limite operacional atingido. Entre em contato com o suporte para aumentar seu limite de transações.");
-      else if (e?.status === 402) toast.error(e.message ?? "Pagamento recusado.");
-      else if (e?.status === 422) toast.error(e.message ?? "Dados de pagamento inválidos.");
-      else toast.error(e?.message ?? "Erro ao processar pagamento. Tente novamente.");
+      let msg: string;
+      if (e?.code === "CARD_DECLINED") msg = "Cartão recusado pela operadora. Verifique os dados ou use outro cartão.";
+      else if (e?.code === "INSUFFICIENT_FUNDS") msg = "Saldo insuficiente. Use outro cartão ou pague via Pix.";
+      else if (e?.code === "INVALID_CARD") msg = "Dados do cartão inválidos. Verifique número, validade e CVV.";
+      else if (e?.code === "EXPIRED_CARD") msg = "Cartão vencido. Use outro cartão.";
+      else if (e?.code === "ServiceUnavailableException" || e?.status === 503) msg = "Serviço indisponível no momento. Tente novamente em alguns minutos ou use o Pix.";
+      else if (e?.status === 402) msg = e.message ?? "Pagamento recusado pela operadora.";
+      else if (e?.status === 422) msg = e.message ?? "Dados de pagamento inválidos. Verifique as informações.";
+      else msg = e?.message ?? "Erro ao processar pagamento. Tente novamente.";
+      setCardError(msg);
     } finally {
       setIsConfirming(false);
     }
@@ -673,6 +730,7 @@ const Pagamento = () => {
         setPixApproved(true);
         sessionStorage.removeItem("pendingPaymentPlan");
         sessionStorage.removeItem("postRegisterRedirect");
+        sessionStorage.setItem("paymentCompleted", "true");
         navigate("/pagamento-sucesso", { state: { plan, method } });
       } else if (status === "expired") {
         toast.error("QR Code expirado. Volte e tente novamente.");
@@ -842,7 +900,7 @@ const Pagamento = () => {
               <h2 className="font-bold text-white mb-5 text-base">Forma de pagamento</h2>
 
               <div className="grid grid-cols-2 gap-3 mb-6">
-                <button type="button" onClick={() => { setMethod("pix"); setSelectedInstallments(1); }} className={METHOD_BTN(method === "pix")}>
+                <button type="button" onClick={() => { setMethod("pix"); setSelectedInstallments(1); setCardError(null); }} className={METHOD_BTN(method === "pix")}>
                   <svg className="w-4 h-4" viewBox="-10 -50 540 562" fill="currentColor">
                     <path d="M242.4 292.5C247.8 287.1 254.4 284.1 260 284.1C265.7 284.1 272.3 287.1 277.7 292.5L416 430.8C436.8 451.5 469.2 451.5 490 430.8C510.8 410.1 510.8 377.7 490 356.9L351.6 218.5C346.2 213.1 343.2 206.5 343.2 200.9C343.2 195.3 346.2 188.7 351.6 183.2L490 44.9C510.8 24.1 510.8-8.3 490-29.1C469.2-49.9 436.8-49.9 416-29.1L277.7 109.2C272.3 114.6 265.7 117.6 260 117.6C254.4 117.6 247.8 114.6 242.4 109.2L104 -29.1C83.2-49.9 50.8-49.9 30-29.1C9.2-8.3 9.2 24.1 30 44.9L168.4 183.2C173.8 188.6 176.8 195.2 176.8 200.9C176.8 206.5 173.8 213.1 168.4 218.5L30 356.9C9.2 377.7 9.2 410.1 30 430.8C50.8 451.5 83.2 451.5 104 430.8L242.4 292.5z" />
                   </svg>
@@ -855,9 +913,34 @@ const Pagamento = () => {
               </div>
 
               {method === "cartao" ? (
-                <CardForm isLoading={isConfirming} onSubmit={handleCardSubmit} planInfo={{ ...planInfo, price: effectivePrice }} installmentOptions={installmentOptions} holderDocument={user?.cpf} onInstallmentsChange={setSelectedInstallments} />
+                <>
+                  <CardForm isLoading={isConfirming} onSubmit={handleCardSubmit} planInfo={{ ...planInfo, price: effectivePrice }} installmentOptions={installmentOptions} holderDocument={user?.cpf} onInstallmentsChange={setSelectedInstallments} />
+                  {cardError && (
+                    <div className="mt-4 flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                      <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-red-300">Pagamento não processado</p>
+                        <p className="text-xs text-red-400/80 mt-0.5">{cardError}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setCardError(null)}
+                        className="text-red-400/60 hover:text-red-300 transition-colors shrink-0"
+                        aria-label="Fechar"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
-                <PixForm intent={isCreatingIntent ? null : intent} isCheckingStatus={isCheckingStatus} onCheckStatus={handlePixStatusCheck} />
+                <PixForm
+                  intent={isCreatingIntent ? null : intent}
+                  isCheckingStatus={isCheckingStatus}
+                  intentFailed={pixIntentFailed}
+                  onCheckStatus={handlePixStatusCheck}
+                  onRefresh={createPixIntent}
+                />
               )}
             </div>
 

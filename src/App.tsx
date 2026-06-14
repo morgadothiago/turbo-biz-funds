@@ -6,6 +6,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { analytics } from "./lib/analytics";
 import { I18nProvider } from "./lib/i18n-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const AppShell = lazy(() => import("./AppShell"));
 
@@ -59,11 +60,13 @@ const App = () => {
             v7_startTransition: true,
             v7_relativeSplatPath: true,
           }}>
-            <AnalyticsTracker />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/*" element={<Suspense fallback={<AppLoading />}><AppShell /></Suspense>} />
-            </Routes>
+            <AuthProvider>
+              <AnalyticsTracker />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/*" element={<Suspense fallback={<AppLoading />}><AppShell /></Suspense>} />
+              </Routes>
+            </AuthProvider>
           </BrowserRouter>
         </QueryClientProvider>
       </I18nProvider>

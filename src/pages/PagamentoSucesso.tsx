@@ -13,6 +13,9 @@ const PLAN_LABELS: Record<string, string> = {
 
 const REDIRECT_SECONDS = 5;
 
+const PLAN_POLL_INTERVAL = 3000;
+const PLAN_POLL_TIMEOUT = 30000;
+
 const PagamentoSucesso = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -22,10 +25,12 @@ const PagamentoSucesso = () => {
     "pro";
   const planLabel = PLAN_LABELS[plan] ?? "Pro";
   const hasInit = useRef(false);
-  const { refreshUser } = useAuth();
+  const { refreshUser, user } = useAuth();
   const [seconds, setSeconds] = useState(REDIRECT_SECONDS);
   const [visible, setVisible] = useState(false);
+  const planConfirmed = user?.plan !== "free";
 
+  // Poll /v1/users/me until plan updates to paid or 30s timeout
   useEffect(() => {
     if (hasInit.current) return;
     hasInit.current = true;
@@ -33,11 +38,28 @@ const PagamentoSucesso = () => {
     sessionStorage.removeItem("postRegisterRedirect");
     refreshUser();
     requestAnimationFrame(() => setVisible(true));
+
+    const start = Date.now();
+    const poll = setInterval(() => {
+      if (Date.now() - start >= PLAN_POLL_TIMEOUT) {
+        clearInterval(poll);
+        return;
+      }
+      refreshUser();
+    }, PLAN_POLL_INTERVAL);
+    return () => clearInterval(poll);
   }, [refreshUser]);
+
+  // Clear flag once plan is confirmed paid
+  useEffect(() => {
+    if (planConfirmed) {
+      sessionStorage.removeItem("paymentCompleted");
+    }
+  }, [planConfirmed]);
 
   useEffect(() => {
     if (seconds <= 0) {
-      navigate("/login", { replace: true });
+      navigate("/dashboard", { replace: true });
       return;
     }
     const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
@@ -180,7 +202,7 @@ const PagamentoSucesso = () => {
 
             {/* CTA with countdown */}
             <button
-              onClick={() => navigate("/login", { replace: true })}
+              onClick={() => navigate("/dashboard", { replace: true })}
               className="w-full h-12 flex items-center justify-center gap-3 rounded-xl font-semibold text-white text-sm transition-all active:scale-[.98]"
               style={{
                 background: "linear-gradient(135deg,#059669,#10b981)",
@@ -203,7 +225,7 @@ const PagamentoSucesso = () => {
                 </svg>
                 <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">{seconds}</span>
               </div>
-              Ir para o login
+              Ir para o dashboard
               <ArrowRight className="w-4 h-4" />
             </button>
 

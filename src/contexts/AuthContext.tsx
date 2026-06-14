@@ -152,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [login]);
 
   const updateProfile = useCallback(async (data: { name?: string; phone?: string }): Promise<void> => {
-    // API não possui endpoint de atualização de perfil — salvar localmente
+    await api.patch("/v1/users/me", data);
     setUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, ...data };
@@ -165,22 +165,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await api.patch("/v1/users/me/password", data);
   }, []);
 
-  const refreshUser = useCallback(() => {
+  const refreshUser = useCallback(async () => {
     const token = storage.getToken();
     if (!token) return;
-    const claims = decodeJwt(token);
+    // Fetch updated user from API — JWT plan claim may be stale after payment
     setUser((prev) => {
       if (!prev) return prev;
-      const fromJwt = userFromClaims(claims, prev.email);
-      // Preserve name/phone from stored user if JWT doesn't have them
-      const updated: User = {
-        ...fromJwt,
-        name: (claims.name as string) || prev.name,
-        phone: (claims.phone as string) || prev.phone || undefined,
-        cpf: (claims.cpf as string) || prev.cpf || undefined,
-      };
-      storage.setUser(updated);
-      return updated;
+      fetchAndMergeMe(prev).then((updated) => {
+        storage.setUser(updated);
+        setUser(updated);
+      });
+      return prev;
     });
   }, []);
 
