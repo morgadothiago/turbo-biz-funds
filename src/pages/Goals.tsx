@@ -66,7 +66,12 @@ const GoalsPage = memo(() => {
     }
     
     const currentValue = parseFloat(form.current) || 0;
-    
+
+    if (currentValue > targetValue) {
+      toast.error("Valor já economizado não pode ser maior que o valor alvo");
+      return;
+    }
+
     createGoal.mutate(
       {
         name: form.name.trim(),
@@ -86,7 +91,12 @@ const GoalsPage = memo(() => {
           console.error("[Goals] Erro ao criar meta:", error);
           // Se for 422, mostra mensagem de validação
           if (error?.status === 422) {
-            toast.error(error?.message || "Dados inválidos. Verifique os campos.");
+            const code = error?.code;
+            if (code === "GOAL_INVALID_VALUES") {
+              toast.error("Valor já economizado não pode ser maior que o valor alvo");
+            } else {
+              toast.error("Dados inválidos. Verifique os campos.");
+            }
           } else if (error?.status === 500) {
             toast.error("Erro no servidor. Tente novamente mais tarde.");
           } else if (error?.status === 404) {
