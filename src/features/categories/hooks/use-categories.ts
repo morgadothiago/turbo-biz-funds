@@ -27,7 +27,7 @@ export function useCategories() {
   });
 
   return {
-    categories: query.data ?? [],
+    categories: Array.isArray(query.data) ? query.data : [],
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
