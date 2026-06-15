@@ -1,7 +1,7 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "doutorcash",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -126,7 +126,7 @@
     "vitest": "^3.2.4",
     "vitest-axe": "^0.1.0"
   },
-  "description": "**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID",
+  "description": "SaaS de gestão financeira pessoal com dashboard, metas, recorrências e pagamento PIX integrado.",
   "main": "eslint.config.js",
   "directories": {
     "test": "tests"

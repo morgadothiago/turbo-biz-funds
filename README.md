@@ -1,73 +1,155 @@
-# Welcome to your Lovable project
+<h1 align="center">
+  <img src="public/logoweb.png" alt="DoutorCash" width="180" />
+  <br/>
+  DoutorCash
+</h1>
 
-## Project info
+<p align="center">
+  SaaS de gestão financeira pessoal com dashboard inteligente, controle de recorrências, metas e pagamento PIX integrado.
+</p>
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+<p align="center">
+  <a href="https://turbo-biz-funds-rje4.vercel.app">🔗 Demo ao vivo</a> &nbsp;·&nbsp;
+  <a href="#-stack">Stack</a> &nbsp;·&nbsp;
+  <a href="#-funcionalidades">Funcionalidades</a> &nbsp;·&nbsp;
+  <a href="#-como-rodar">Como rodar</a>
+</p>
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Visão geral
 
-**Use Lovable**
+O **DoutorCash** é um aplicativo web SaaS voltado para controle financeiro pessoal. Usuários podem registrar transações, acompanhar metas de economia, gerenciar recorrências e visualizar relatórios de gastos por categoria e período.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+O sistema possui dois perfis distintos: **usuário final** (plano pago via PIX) e **administrador** (gestão de clientes, planos e assinaturas).
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## ✨ Funcionalidades
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Área do usuário
+- **Dashboard** com cards de resumo, gráfico de gastos mensais, distribuição por categoria e comparativo mês a mês
+- **Transações** — cadastro, edição e exclusão com categorização
+- **Metas** — acompanhamento de progresso com valor atual vs. objetivo
+- **Recorrências** — controle de despesas e receitas fixas com detalhamento por item
+- **Cartões** — gestão de cartões de crédito/débito
+- **Relatórios** — exportação e análise por período
+- **WhatsApp** — integração para alertas e notificações
+- **Configurações** — perfil, senha, tema claro/escuro e preferências
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Área administrativa
+- Gestão de clientes e assinaturas
+- Criação e edição de planos
+- Categorias globais
+- Relatórios consolidados
+- Suporte e notificações
 
-Follow these steps:
+### Infraestrutura
+- **PWA** — instalável, funciona offline com Service Worker
+- **Pagamento PIX** via SDK EFI (Gerencianet) com fluxo de ativação de plano
+- **Auth completa** — login, cadastro, recuperação e redefinição de senha
+- **RBAC** — rotas protegidas por papel (user/admin) e por plano ativo
+- **i18n** — internacionalização preparada
+- **LGPD** — conformidade com legislação brasileira de dados
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛠 Stack
 
-# Step 3: Install the necessary dependencies.
-npm i
+| Camada | Tecnologia |
+|--------|-----------|
+| Framework | React 18 + TypeScript |
+| Build | Vite 5 |
+| Estilização | Tailwind CSS + shadcn/ui (Radix) |
+| State / Server | TanStack Query v5 |
+| Formulários | React Hook Form + Zod |
+| Roteamento | React Router v6 (lazy + retry) |
+| Gráficos | Recharts |
+| Pagamentos | SDK EFI (PIX) |
+| PWA | vite-plugin-pwa + Workbox |
+| Testes | Vitest + Playwright + axe-core |
+| CI local | Husky + lint-staged |
+| Deploy | Vercel + Vercel Analytics |
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+---
+
+## 📁 Estrutura do projeto
+
+```
+src/
+├── features/          # Módulos por domínio (dashboard, transactions, goals…)
+│   ├── auth/
+│   ├── dashboard/
+│   ├── transactions/
+│   ├── goals/
+│   ├── recurrences/
+│   ├── payments/
+│   ├── plans/
+│   └── admin/
+├── pages/             # Páginas roteadas
+├── layouts/           # UserLayout / AdminLayout
+├── contexts/          # AuthContext
+├── hooks/             # Hooks globais reutilizáveis
+├── lib/               # Utils, i18n, analytics, performance
+└── shared/            # Tipos compartilhados
+```
+
+---
+
+## 🚀 Como rodar
+
+### Pré-requisitos
+- Node.js 18+
+- npm ou bun
+
+### Instalação
+
+```bash
+# Clone o repositório
+git clone https://github.com/morgadothiago/turbo-biz-funds.git
+cd turbo-biz-funds
+
+# Instale as dependências
+npm install
+
+# Configure as variáveis de ambiente
+cp .env.example .env
+# Edite .env com suas credenciais
+
+# Inicie o servidor de desenvolvimento
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Comandos disponíveis
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm run dev           # Dev server
+npm run build         # Build de produção
+npm run test          # Testes unitários (Vitest)
+npm run test:e2e      # Testes E2E (Playwright)
+npm run test:coverage # Cobertura de testes
+npm run storybook     # Storybook de componentes
+npm run lint          # ESLint
+```
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🔐 Variáveis de ambiente
 
-## What technologies are used for this project?
+```env
+VITE_API_URL=          # URL da API backend
+VITE_EFI_CLIENT_ID=    # Credencial EFI (PIX)
+VITE_EFI_CLIENT_SECRET=
+```
 
-This project is built with:
+Consulte `.env.example` para a lista completa.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 📄 Licença
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Projeto proprietário — todos os direitos reservados.
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+<p align="center">Desenvolvido por <a href="https://github.com/morgadothiago">Thiago Morgado</a></p>
