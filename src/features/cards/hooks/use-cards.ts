@@ -21,7 +21,7 @@ function mapCard(raw: any): CreditCard {
     number: raw.number ?? "",
     limit: raw.limit ?? 0,
     used: raw.used ?? 0,
-    dueDate: raw.dueDate ?? raw.due_date ?? "",
+    dueDate: ((d: string) => d ? d.slice(0, 10) : "")(raw.dueDate ?? raw.due_date ?? ""),
     color: raw.color ?? "",
     flag: raw.flag ?? "",
   };

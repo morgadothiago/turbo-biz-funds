@@ -159,7 +159,7 @@ const CardsPage = memo(() => {
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-border">
-                  <Badge variant="outline">Vencimento: {card.dueDate}</Badge>
+                  <Badge variant="outline">Vencimento: {card.dueDate ? card.dueDate.split("-").reverse().join("/") : "—"}</Badge>
                   <Button
                     variant="ghost"
                     size="sm"
