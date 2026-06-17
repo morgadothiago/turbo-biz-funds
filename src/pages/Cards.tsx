@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { CreditCard, Plus, Loader2, Trash2, Pencil, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { CreditCard, Plus, Loader2, Trash2, Pencil, ArrowDownCircle, ArrowUpCircle, History } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,7 @@ const CardsPage = memo(() => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<CreditCardType | null>(null);
   const [usageCard, setUsageCard] = useState<CreditCardType | null>(null);
+  const [historyCard, setHistoryCard] = useState<CreditCardType | null>(null);
   const [usageAmount, setUsageAmount] = useState("");
   const [usageType, setUsageType] = useState<"gasto" | "pagamento">("gasto");
   const [form, setForm] = useState(EMPTY_FORM);
@@ -308,12 +309,15 @@ const CardsPage = memo(() => {
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Limite Utilizado</p>
-                    <p className="text-lg font-semibold text-foreground">{fmtBRL(card.used)}</p>
+                    <p className="text-lg font-semibold text-red-500">{fmtBRL(card.used)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Limite Total</p>
-                    <p className="text-lg font-semibold text-foreground">{fmtBRL(card.limit)}</p>
+                    <p className="text-sm text-muted-foreground">Limite Disponível</p>
+                    <p className="text-lg font-semibold text-green-600">{fmtBRL(Math.max(0, card.limit - card.used))}</p>
                   </div>
+                </div>
+                <div className="flex justify-end mb-1">
+                  <p className="text-xs text-muted-foreground">Total: {fmtBRL(card.limit)}</p>
                 </div>
 
                 <div className="mb-4">
@@ -330,15 +334,16 @@ const CardsPage = memo(() => {
 
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                   <Badge variant="outline">Vencimento: {card.dueDate ? card.dueDate.split("-").reverse().join("/") : "—"}</Badge>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary hover:text-primary hover:bg-primary/10"
-                    onClick={() => openUsage(card)}
-                  >
-                    <ArrowUpCircle className="w-4 h-4 mr-1" />
-                    Atualizar uso
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-muted/50" onClick={() => setHistoryCard(card)}>
+                      <History className="w-4 h-4 mr-1" />
+                      Histórico
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10" onClick={() => openUsage(card)}>
+                      <ArrowUpCircle className="w-4 h-4 mr-1" />
+                      Atualizar uso
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -358,6 +363,43 @@ const CardsPage = memo(() => {
             <Button onClick={handleCreate} disabled={createCard.isPending}>
               {createCard.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4 mr-2" />Adicionar</>}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog — Histórico */}
+      <Dialog open={!!historyCard} onOpenChange={(open) => { if (!open) setHistoryCard(null); }}>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-md sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Histórico — {historyCard?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-3">
+            {historyCard && (
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center p-3 rounded-lg bg-muted/40">
+                  <p className="text-xs text-muted-foreground mb-1">Utilizado</p>
+                  <p className="text-sm font-semibold text-red-500">{fmtBRL(historyCard.used)}</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/40">
+                  <p className="text-xs text-muted-foreground mb-1">Disponível</p>
+                  <p className="text-sm font-semibold text-green-600">{fmtBRL(Math.max(0, historyCard.limit - historyCard.used))}</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/40">
+                  <p className="text-xs text-muted-foreground mb-1">Total</p>
+                  <p className="text-sm font-semibold">{fmtBRL(historyCard.limit)}</p>
+                </div>
+              </div>
+            )}
+            <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+              <History className="w-10 h-10 text-muted-foreground/30" />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Histórico em breve</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Endpoint <code className="bg-muted px-1 rounded">GET /v1/cards/:id/history</code> ainda não disponível no backend.</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setHistoryCard(null)}>Fechar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
