@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useState, useCallback } from "react";
 import { CreditCard, Plus, Loader2, Trash2, Pencil, ArrowDownCircle, ArrowUpCircle, History } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,26 @@ const CARD_COLORS = [
 
 const EMPTY_FORM = { name: "", number: "", limit: "", dueDate: "", flag: "Visa", color: CARD_COLORS[0] };
 
+interface UsageEntry {
+  id: string;
+  type: "gasto" | "pagamento";
+  amount: number;
+  description: string;
+  usedBefore: number;
+  usedAfter: number;
+  date: string;
+}
+
+const HISTORY_KEY = (cardId: string) => `card_history_${cardId}`;
+
+function loadHistory(cardId: string): UsageEntry[] {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY(cardId)) ?? "[]"); } catch { return []; }
+}
+
+function saveHistory(cardId: string, entries: UsageEntry[]) {
+  localStorage.setItem(HISTORY_KEY(cardId), JSON.stringify(entries.slice(0, 100)));
+}
+
 const CardsPage = memo(() => {
   const { cards, isLoading, isError } = useCards();
   const createCard = useCreateCard();
@@ -45,7 +65,9 @@ const CardsPage = memo(() => {
   const [usageCard, setUsageCard] = useState<CreditCardType | null>(null);
   const [historyCard, setHistoryCard] = useState<CreditCardType | null>(null);
   const [usageAmount, setUsageAmount] = useState("");
+  const [usageDescription, setUsageDescription] = useState("");
   const [usageType, setUsageType] = useState<"gasto" | "pagamento">("gasto");
+  const [historyEntries, setHistoryEntries] = useState<UsageEntry[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editForm, setEditForm] = useState(EMPTY_FORM);
 
@@ -77,6 +99,7 @@ const CardsPage = memo(() => {
   const openUsage = (card: CreditCardType) => {
     setUsageCard(card);
     setUsageAmount("");
+    setUsageDescription("");
     setUsageType("gasto");
   };
 
@@ -84,17 +107,37 @@ const CardsPage = memo(() => {
     if (!usageCard) return;
     const amount = parseFloat(usageAmount);
     if (!amount || amount <= 0) { toast.error("Informe um valor válido"); return; }
+    const usedBefore = usageCard.used;
     const newUsed = usageType === "gasto"
-      ? Math.min(usageCard.used + amount, usageCard.limit)
-      : Math.max(0, usageCard.used - amount);
+      ? Math.min(usedBefore + amount, usageCard.limit)
+      : Math.max(0, usedBefore - amount);
     updateCard.mutate(
       { id: String(usageCard.id), used: newUsed },
       {
-        onSuccess: () => { toast.success(usageType === "gasto" ? "Gasto registrado!" : "Pagamento registrado!"); setUsageCard(null); },
+        onSuccess: () => {
+          const entry: UsageEntry = {
+            id: crypto.randomUUID(),
+            type: usageType,
+            amount,
+            description: usageDescription.trim() || (usageType === "gasto" ? "Gasto" : "Pagamento"),
+            usedBefore,
+            usedAfter: newUsed,
+            date: new Date().toISOString(),
+          };
+          const prev = loadHistory(String(usageCard.id));
+          saveHistory(String(usageCard.id), [entry, ...prev]);
+          toast.success(usageType === "gasto" ? "Gasto registrado!" : "Pagamento registrado!");
+          setUsageCard(null);
+        },
         onError: () => toast.error("Erro ao atualizar limite"),
       }
     );
   };
+
+  const openHistory = useCallback((card: CreditCardType) => {
+    setHistoryCard(card);
+    setHistoryEntries(loadHistory(String(card.id)));
+  }, []);
 
   const openEdit = (card: CreditCardType) => {
     setEditingCard(card);
@@ -341,7 +384,7 @@ const CardsPage = memo(() => {
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                   <Badge variant="outline">Vencimento: {card.dueDate ? card.dueDate.split("-").reverse().join("/") : "—"}</Badge>
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-muted/50" onClick={() => setHistoryCard(card)}>
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-muted/50" onClick={() => openHistory(card)}>
                       <History className="w-4 h-4 mr-1" />
                       Histórico
                     </Button>
@@ -400,15 +443,39 @@ const CardsPage = memo(() => {
             </div>
           )}
 
-          <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
-            <History className="w-12 h-12 text-muted-foreground/30" />
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Histórico em breve</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">
-                Endpoint <code className="bg-muted px-1 rounded text-xs">GET /v1/cards/:id/history</code> ainda não disponível no backend.
-              </p>
+          {historyEntries.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+              <History className="w-12 h-12 text-muted-foreground/30" />
+              <p className="text-sm text-muted-foreground">Nenhum lançamento registrado ainda.</p>
+              <p className="text-xs text-muted-foreground/60">Use "Atualizar uso" para registrar gastos e pagamentos.</p>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              {historyEntries.map((entry) => (
+                <div key={entry.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/20">
+                  <div className={`mt-0.5 shrink-0 ${entry.type === "gasto" ? "text-red-500" : "text-green-600"}`}>
+                    {entry.type === "gasto" ? <ArrowUpCircle className="w-4 h-4" /> : <ArrowDownCircle className="w-4 h-4" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium truncate">{entry.description}</p>
+                      <p className={`text-sm font-semibold shrink-0 ${entry.type === "gasto" ? "text-red-500" : "text-green-600"}`}>
+                        {entry.type === "gasto" ? "+" : "-"}{fmtBRL(entry.amount)}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(entry.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {fmtBRL(entry.usedBefore)} → {fmtBRL(entry.usedAfter)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </SheetContent>
       </Sheet>
 
@@ -444,6 +511,14 @@ const CardsPage = memo(() => {
               >
                 <ArrowDownCircle className="w-4 h-4" /> Pagamento
               </button>
+            </div>
+            <div className="space-y-2">
+              <Label>Descrição (opcional)</Label>
+              <Input
+                placeholder={usageType === "gasto" ? "Ex: Supermercado, Restaurante..." : "Ex: Pagamento fatura..."}
+                value={usageDescription}
+                onChange={(e) => setUsageDescription(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Valor (R$)</Label>
