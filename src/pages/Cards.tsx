@@ -13,6 +13,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useCards, useCreateCard, useUpdateCard, useDeleteCard } from "@/features/cards/hooks/use-cards";
 import type { CreditCard as CreditCardType } from "@/features/cards/hooks/use-cards";
@@ -367,42 +373,44 @@ const CardsPage = memo(() => {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog — Histórico */}
-      <Dialog open={!!historyCard} onOpenChange={(open) => { if (!open) setHistoryCard(null); }}>
-        <DialogContent className="w-[calc(100vw-2rem)] max-w-md sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Histórico — {historyCard?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="py-4 space-y-3">
-            {historyCard && (
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="text-center p-3 rounded-lg bg-muted/40">
-                  <p className="text-xs text-muted-foreground mb-1">Utilizado</p>
-                  <p className="text-sm font-semibold text-red-500">{fmtBRL(historyCard.used)}</p>
-                </div>
-                <div className="text-center p-3 rounded-lg bg-muted/40">
-                  <p className="text-xs text-muted-foreground mb-1">Disponível</p>
-                  <p className="text-sm font-semibold text-green-600">{fmtBRL(Math.max(0, historyCard.limit - historyCard.used))}</p>
-                </div>
-                <div className="text-center p-3 rounded-lg bg-muted/40">
-                  <p className="text-xs text-muted-foreground mb-1">Total</p>
-                  <p className="text-sm font-semibold">{fmtBRL(historyCard.limit)}</p>
-                </div>
+      {/* Sheet — Histórico */}
+      <Sheet open={!!historyCard} onOpenChange={(open) => { if (!open) setHistoryCard(null); }}>
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="flex items-center gap-2">
+              <History className="w-5 h-5" />
+              Histórico — {historyCard?.name}
+            </SheetTitle>
+          </SheetHeader>
+
+          {historyCard && (
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="text-center p-3 rounded-lg bg-muted/40">
+                <p className="text-xs text-muted-foreground mb-1">Utilizado</p>
+                <p className="text-sm font-semibold text-red-500">{fmtBRL(historyCard.used)}</p>
               </div>
-            )}
-            <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
-              <History className="w-10 h-10 text-muted-foreground/30" />
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Histórico em breve</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Endpoint <code className="bg-muted px-1 rounded">GET /v1/cards/:id/history</code> ainda não disponível no backend.</p>
+              <div className="text-center p-3 rounded-lg bg-muted/40">
+                <p className="text-xs text-muted-foreground mb-1">Disponível</p>
+                <p className="text-sm font-semibold text-green-600">{fmtBRL(Math.max(0, historyCard.limit - historyCard.used))}</p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-muted/40">
+                <p className="text-xs text-muted-foreground mb-1">Total</p>
+                <p className="text-sm font-semibold">{fmtBRL(historyCard.limit)}</p>
               </div>
             </div>
+          )}
+
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+            <History className="w-12 h-12 text-muted-foreground/30" />
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Histórico em breve</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                Endpoint <code className="bg-muted px-1 rounded text-xs">GET /v1/cards/:id/history</code> ainda não disponível no backend.
+              </p>
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setHistoryCard(null)}>Fechar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       {/* Dialog — Atualizar uso */}
       <Dialog open={!!usageCard} onOpenChange={(open) => { if (!open) setUsageCard(null); }}>
