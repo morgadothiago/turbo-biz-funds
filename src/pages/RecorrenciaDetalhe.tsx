@@ -126,7 +126,7 @@ function fmtDate(date: Date): string {
 
 function LoadingSkeleton() {
   return (
-    <div className="p-6 lg:p-8 w-full space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 w-full space-y-6">
       <Skeleton className="h-8 w-40" />
       <Skeleton className="h-10 w-64" />
       <div className="grid gap-6 lg:grid-cols-2">
@@ -359,8 +359,8 @@ function PaymentList({
 
   return (
     <div className="rounded-lg border border-border overflow-hidden">
-      <div className="max-h-80 overflow-y-auto">
-        <table className="w-full text-sm">
+      <div className="max-h-80 overflow-auto">
+        <table className="w-full text-sm min-w-[360px]">
           <thead className="sticky top-0 z-10 bg-muted">
             <tr>
               <th className="text-left px-3 py-2 font-medium text-muted-foreground text-xs">Parcela</th>
@@ -494,7 +494,7 @@ const RecorrenciaDetalhePage = memo(() => {
   };
 
   return (
-    <div className="p-6 lg:p-8 w-full">
+    <div className="p-4 sm:p-6 lg:p-8 w-full">
       {/* Back button */}
       <Button
         variant="ghost"
@@ -550,7 +550,7 @@ const RecorrenciaDetalhePage = memo(() => {
             {/* Valor destacado */}
             <div className="flex items-center justify-between py-3 px-4 rounded-xl border border-border bg-muted/30">
               <span className="text-sm text-muted-foreground font-medium">Valor da parcela</span>
-              <span className={`text-2xl font-bold ${colorClass}`}>
+              <span className={`text-xl sm:text-2xl font-bold ${colorClass}`}>
                 {isIncome ? "+" : "-"}R$ {fmt(rec.amount)}
               </span>
             </div>

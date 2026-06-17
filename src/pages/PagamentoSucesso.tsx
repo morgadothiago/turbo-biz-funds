@@ -176,7 +176,7 @@ const PagamentoSucesso = () => {
             </div>
 
             {/* Text */}
-            <h1 className="text-2xl font-bold text-white mb-1">Assinatura ativada!</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Assinatura ativada!</h1>
             <p className="text-white/60 text-sm mb-1">
               Plano <span className="text-emerald-400 font-semibold">{planLabel}</span> está ativo
             </p>

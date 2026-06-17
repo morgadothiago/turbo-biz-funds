@@ -15,12 +15,12 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DashboardSkeleton = () => (
-  <div className="p-5 lg:p-7 space-y-5">
+  <div className="p-4 sm:p-5 lg:p-7 space-y-5">
     <div className="space-y-1.5">
       <Skeleton className="h-7 w-44" />
       <Skeleton className="h-4 w-64" />
     </div>
-    <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {[1, 2, 3, 4].map((i) => (
         <Skeleton key={i} className="h-[110px] rounded-2xl" />
       ))}
@@ -46,7 +46,7 @@ const UserDashboard = memo(() => {
 
   if (isError || !dashboardData) {
     return (
-      <div className="p-6 lg:p-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <div className="p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center min-h-[400px] gap-4">
         <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
           <AlertCircle className="h-6 w-6 text-destructive" />
         </div>
@@ -63,10 +63,10 @@ const UserDashboard = memo(() => {
   }
 
   return (
-    <div className="p-5 lg:p-7 space-y-5">
+    <div className="p-4 sm:p-5 lg:p-7 space-y-5">
       {/* Greeting */}
       <div>
-        <h2 className="text-2xl font-bold text-foreground tracking-tight">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
           Olá, {firstName}! 👋
         </h2>
         <p className="text-sm text-muted-foreground mt-0.5">

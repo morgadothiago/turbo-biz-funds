@@ -45,9 +45,9 @@ export default function Notifications() {
   return (
     <div className="flex-1 p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Notificações</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Notificações</h1>
           <p className="text-muted-foreground text-sm">
             {unreadCount > 0
               ? `Você tem ${unreadCount} notificação${unreadCount !== 1 ? "ões" : ""} não lida${unreadCount !== 1 ? "s" : ""}`
@@ -55,7 +55,7 @@ export default function Notifications() {
           </p>
         </div>
         {unreadCount > 0 && (
-          <Button variant="outline" size="sm" onClick={markAllRead}>
+          <Button variant="outline" size="sm" onClick={markAllRead} className="w-full sm:w-auto">
             <CheckCheck className="h-4 w-4 mr-2" />
             Marcar todas como lidas
           </Button>

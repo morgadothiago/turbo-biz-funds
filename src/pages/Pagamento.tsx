@@ -125,6 +125,21 @@ function CardBrandIcon({ brand }: { brand: CardBrand }) {
   return <>{icons[brand]}</>;
 }
 
+function validateCPF(cpf: string): boolean {
+  const d = cpf.replace(/\D/g, "");
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(d[i]) * (10 - i);
+  let r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  if (r !== parseInt(d[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(d[i]) * (11 - i);
+  r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  return r === parseInt(d[10]);
+}
+
 function formatExpiry(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 4);
   if (digits.length >= 3) return digits.slice(0, 2) + "/" + digits.slice(2);
@@ -208,8 +223,7 @@ function CardForm({
     if (cardName.trim().length < 3) errs.cardName = "Nome inválido";
     if (expiry.length < 5) errs.expiry = "Data inválida";
     if (cvv.length < 3) errs.cvv = "CVV inválido";
-    const cpfDigits = cpf.replace(/\D/g, "");
-    if (cpfDigits.length !== 11) errs.cpf = "CPF inválido";
+    if (!validateCPF(cpf)) errs.cpf = "CPF inválido";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -255,10 +269,16 @@ function CardForm({
       setCvv("");
     } catch (err) {
       console.error("[EFI] erro tokenização:", err);
-      const msg = (err as { message?: string; error_description?: string })?.error_description
-        ?? (err as { message?: string })?.message
-        ?? "Erro ao tokenizar cartão. Verifique os dados.";
-      setErrors((prev) => ({ ...prev, cardNumber: msg }));
+      const efiErr = err as { message?: string; error_description?: string; error?: string };
+      const msg = efiErr?.error_description ?? efiErr?.message ?? "Erro ao tokenizar cartão. Verifique os dados.";
+      const isDocError = efiErr?.error === "invalid_holder_document"
+        || msg.toLowerCase().includes("documento")
+        || msg.toLowerCase().includes("document");
+      if (isDocError) {
+        setErrors((prev) => ({ ...prev, cpf: "CPF do titular inválido. Verifique o número." }));
+      } else {
+        setErrors((prev) => ({ ...prev, cardNumber: msg }));
+      }
     } finally {
       setTokenizing(false);
     }
@@ -756,7 +776,7 @@ const Pagamento = () => {
     }`;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 py-10" style={{ background: BG }}>
+    <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 py-6 sm:py-10" style={{ background: BG }}>
       <div className="w-full max-w-4xl">
 
         {/* Header */}
@@ -775,17 +795,17 @@ const Pagamento = () => {
                   navigate("/");
                 }
               }}
-              className="flex items-center gap-1.5 text-[#94A3B8] hover:text-white text-sm transition-colors"
+              className="flex items-center gap-1.5 text-[#94A3B8] hover:text-white text-sm transition-colors shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
-              Voltar
+              <span className="hidden sm:inline">Voltar</span>
             </button>
             <Link to="/" className="inline-flex items-center gap-3 group">
-              <img src={logoWeb} alt="doutorcash" className="h-10 w-auto transition-transform group-hover:scale-105" />
+              <img src={logoWeb} alt="doutorcash" className="h-8 sm:h-10 w-auto transition-transform group-hover:scale-105" />
             </Link>
-            <div className="w-16" />
+            <div className="w-8 sm:w-16 shrink-0" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1.5">Finalizar assinatura</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-1.5">Finalizar assinatura</h1>
           <div className="flex items-center justify-center gap-1.5 text-[#94A3B8] text-sm">
             <Lock className="w-3.5 h-3.5" />
             Seus dados estão protegidos com criptografia SSL
@@ -808,10 +828,10 @@ const Pagamento = () => {
               </div>
             ))}
           </div>
-          <div className="flex justify-center gap-10 mt-2 text-xs text-[#94A3B8]">
-            <span>Dados pessoais</span>
-            <span>Plano</span>
-            <span>Pagamento</span>
+          <div className="flex justify-center gap-4 sm:gap-10 mt-2 text-xs text-[#94A3B8]">
+            <span className="text-center">Dados</span>
+            <span className="text-center">Plano</span>
+            <span className="text-center">Pagamento</span>
           </div>
         </div>
 
@@ -837,14 +857,14 @@ const Pagamento = () => {
                   {isAnnualPlan && method === "cartao" ? (
                     <div className="mb-2">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-green-400">12x de R$12,90</span>
+                        <span className="text-xl sm:text-3xl font-bold text-green-400">12x de R$12,90</span>
                       </div>
                       <p className="text-xs text-green-400/70 font-medium mt-0.5">sem juros no cartão</p>
                       <p className="text-xs text-[#94A3B8] mt-0.5">Total: R$154,80</p>
                     </div>
                   ) : (
                     <div className="flex items-baseline gap-1 mb-2">
-                      <span className="text-3xl font-bold text-green-400">{toDisplay(effectivePrice)}</span>
+                      <span className="text-xl sm:text-3xl font-bold text-green-400">{toDisplay(effectivePrice)}</span>
                       <span className="text-sm text-[#94A3B8]">{effectivePeriod}</span>
                     </div>
                   )}

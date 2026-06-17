@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RefreshCw, Plus, Repeat, TrendingUp, TrendingDown, Trash2, Loader2, Zap, CreditCard, Pencil } from "lucide-react";
+import { RefreshCw, Plus, Repeat, TrendingUp, TrendingDown, Trash2, Loader2, CreditCard, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,6 @@ import {
   useCreateRecurrence,
   useUpdateRecurrence,
   useDeleteRecurrence,
-  useGenerateRecurrences,
 } from "@/features/recurrences/hooks/use-recurrences";
 import { useCategories } from "@/features/categories/hooks/use-categories";
 import type { RecurrencePayload } from "@/shared/types";
@@ -58,7 +57,6 @@ const RecorrenciasPage = memo(() => {
   const createRecurrence = useCreateRecurrence();
   const updateRecurrence = useUpdateRecurrence();
   const deleteRecurrence = useDeleteRecurrence();
-  const generateRecurrences = useGenerateRecurrences();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isInstallment, setIsInstallment] = useState(false);
@@ -142,12 +140,6 @@ const RecorrenciasPage = memo(() => {
     });
   };
 
-  const handleGenerate = () => {
-    generateRecurrences.mutate(undefined, {
-      onSuccess: () => toast.success("Lançamentos futuros gerados!"),
-      onError: () => toast.error("Erro ao gerar lançamentos"),
-    });
-  };
 
   const openEdit = (rec: typeof recurrences[0]) => {
     setEditingId(rec.id);
@@ -198,7 +190,7 @@ const RecorrenciasPage = memo(() => {
   const fmt = fmtNumber;
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
       <PageHeader
         title="Recorrências"
         subtitle="Gerencie receitas e despesas fixas"
@@ -208,7 +200,7 @@ const RecorrenciasPage = memo(() => {
         }}
       />
 
-      <div className="grid gap-4 md:grid-cols-3 mb-8">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-8">
         <Card className="border-border shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
@@ -254,20 +246,6 @@ const RecorrenciasPage = memo(() => {
         </Card>
       </div>
 
-      <div className="flex justify-end mb-4">
-        <Button
-          variant="outline"
-          onClick={handleGenerate}
-          disabled={generateRecurrences.isPending}
-        >
-          {generateRecurrences.isPending ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Zap className="w-4 h-4 mr-2" />
-          )}
-          Gerar Lançamentos Futuros
-        </Button>
-      </div>
 
       {isLoading ? (
         <div className="flex justify-center py-16">
@@ -340,7 +318,7 @@ const RecorrenciasPage = memo(() => {
                     variant="ghost"
                     size="icon"
                     aria-label="Editar recorrência"
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground hover:bg-muted"
+                    className="h-8 w-8 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground hover:bg-muted shrink-0"
                     onClick={(e) => { e.stopPropagation(); openEdit(rec); }}
                   >
                     <Pencil className="w-4 h-4" />
@@ -349,7 +327,7 @@ const RecorrenciasPage = memo(() => {
                     variant="ghost"
                     size="icon"
                     aria-label="Excluir recorrência"
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="h-8 w-8 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
                     onClick={(e) => { e.stopPropagation(); handleDelete(rec.id); }}
                     disabled={deleteRecurrence.isPending}
                   >
@@ -373,7 +351,7 @@ const RecorrenciasPage = memo(() => {
           }
         }}
       >
-        <DialogContent>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg sm:max-w-lg overflow-y-auto max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Nova Recorrência</DialogTitle>
           </DialogHeader>
@@ -634,7 +612,7 @@ const RecorrenciasPage = memo(() => {
             )}
 
             {/* 6. Datas */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Data de início</Label>
                 <Input
@@ -677,7 +655,7 @@ const RecorrenciasPage = memo(() => {
 
       {/* ── Modal de Edição ── */}
       <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Editar Recorrência</DialogTitle>
           </DialogHeader>
@@ -742,7 +720,7 @@ const RecorrenciasPage = memo(() => {
             </div>
 
             {/* Datas */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Data de início</Label>
                 <Input

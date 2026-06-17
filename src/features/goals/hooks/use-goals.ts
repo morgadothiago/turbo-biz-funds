@@ -42,7 +42,7 @@ export function useGoals() {
   const query = useQuery({
     queryKey: ["goals"],
     queryFn: fetchGoals,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
     retry: 1,
   });
 
@@ -84,8 +84,16 @@ export function useCreateGoal() {
 export function useUpdateGoal() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...payload }: Partial<CreateGoalPayload> & { id: string }) =>
-      api.patch<ApiItemResponse<Goal>>(apiEndpoints.goals.update(id), payload),
+    mutationFn: ({ id, ...payload }: Partial<CreateGoalPayload> & { id: string }) => {
+      // Backend espera snake_case, igual ao create
+      const backendPayload: Record<string, unknown> = {};
+      if (payload.name !== undefined)     backendPayload.title          = payload.name;
+      if (payload.target !== undefined)   backendPayload.target_value   = payload.target;
+      if (payload.current !== undefined)  backendPayload.current_value  = payload.current;
+      if (payload.deadline !== undefined) backendPayload.target_date    = payload.deadline;
+      if (payload.category !== undefined) backendPayload.goal_category  = payload.category;
+      return api.patch<ApiItemResponse<Goal>>(apiEndpoints.goals.update(id), backendPayload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["goals"] });
     },

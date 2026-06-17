@@ -106,7 +106,7 @@ export default function Support() {
     <div className="flex-1 p-4 md:p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
           <HelpCircle className="h-6 w-6 text-primary" />
           Central de Suporte
         </h1>
@@ -247,9 +247,9 @@ export default function Support() {
       {/* Documentation Link */}
       <Card className="border-0 shadow-sm bg-muted/30">
         <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
+                <div className="p-2 rounded-lg bg-primary/10 shrink-0">
                   <FileText className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -259,7 +259,7 @@ export default function Support() {
                   </p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="outline" size="sm" className="w-full sm:w-auto" asChild>
                 <a href="https://docs.doutorcashapp.com.br" target="_blank" rel="noopener noreferrer">
                   Acessar
                   <ExternalLink className="h-3 w-3 ml-2" />

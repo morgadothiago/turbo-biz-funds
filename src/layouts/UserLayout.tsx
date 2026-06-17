@@ -93,7 +93,7 @@ export default function UserLayout() {
       {show && <UserTutorial onComplete={complete} onSkip={skip} />}
 
       <div
-        className="h-screen flex p-3 gap-3 overflow-hidden"
+        className="h-screen flex p-2 sm:p-3 gap-2 sm:gap-3 overflow-hidden"
         style={{ background: "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)" }}
       >
         {/* Desktop sidebar flutuante */}
@@ -102,7 +102,7 @@ export default function UserLayout() {
         </aside>
 
         {/* Coluna direita */}
-        <div className="flex-1 flex flex-col gap-3 min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col gap-2 sm:gap-3 min-w-0 overflow-hidden">
           <Header />
 
           {/* Card branco principal com scroll */}

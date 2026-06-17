@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Target, Plus, Trophy, TrendingUp, Trash2, Loader2 } from "lucide-react";
+import { Target, Plus, Trophy, TrendingUp, Trash2, Loader2, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +19,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { useGoals, useCreateGoal, useDeleteGoal } from "@/features/goals/hooks/use-goals";
+import { useGoals, useCreateGoal, useDeleteGoal, useUpdateGoal } from "@/features/goals/hooks/use-goals";
 import { fmtBRL } from "@/lib/format";
 
 const GOAL_COLORS = [
@@ -41,8 +41,11 @@ const GoalsPage = memo(() => {
   const { goals, isLoading, isError, error, refetch } = useGoals();
   const createGoal = useCreateGoal();
   const deleteGoal = useDeleteGoal();
+  const updateGoal = useUpdateGoal();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editGoal, setEditGoal] = useState<{ id: string; name: string; current: number; target: number } | null>(null);
+  const [editCurrentValue, setEditCurrentValue] = useState("");
   const [form, setForm] = useState({
     name: "",
     target: "",
@@ -109,6 +112,30 @@ const GoalsPage = memo(() => {
     );
   };
 
+  const handleUpdateProgress = () => {
+    if (!editGoal) return;
+    const value = parseFloat(editCurrentValue.replace(",", "."));
+    if (isNaN(value) || value < 0) {
+      toast.error("Valor inválido");
+      return;
+    }
+    if (value > editGoal.target) {
+      toast.error("Valor não pode ser maior que o objetivo");
+      return;
+    }
+    updateGoal.mutate(
+      { id: editGoal.id, current: value },
+      {
+        onSuccess: () => {
+          toast.success("Progresso atualizado!");
+          setEditGoal(null);
+          setEditCurrentValue("");
+        },
+        onError: () => toast.error("Erro ao atualizar progresso"),
+      }
+    );
+  };
+
   if (isLoading) {
     return <GoalsPageSkeleton />;
   }
@@ -118,7 +145,7 @@ const GoalsPage = memo(() => {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
       <PageHeader
         title="Metas Financeiras"
         subtitle="Acompanhe seus objetivos de economia"
@@ -128,7 +155,7 @@ const GoalsPage = memo(() => {
         }}
       />
 
-      <div className="grid gap-4 md:grid-cols-3 mb-8">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-8">
         <Card className="border-border shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
@@ -192,7 +219,7 @@ const GoalsPage = memo(() => {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {goals.map((goal) => {
             const percentage = Math.min(100, Math.round((goal.current / goal.target) * 100));
             return (
@@ -218,8 +245,20 @@ const GoalsPage = memo(() => {
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label={`Atualizar progresso de ${goal.name}`}
+                        className="h-7 w-7 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:text-primary hover:bg-primary/10"
+                        onClick={() => {
+                          setEditGoal({ id: String(goal.id), name: goal.name, current: goal.current, target: goal.target });
+                          setEditCurrentValue(String(goal.current));
+                        }}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         aria-label={`Remover meta ${goal.name}`}
-                        className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="h-7 w-7 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => {
                           deleteGoal.mutate(String(goal.id), {
                             onSuccess: () => toast.success("Meta removida"),
@@ -262,8 +301,46 @@ const GoalsPage = memo(() => {
         </div>
       )}
 
+      {/* Modal atualizar progresso */}
+      <Dialog open={!!editGoal} onOpenChange={(open) => { if (!open) { setEditGoal(null); setEditCurrentValue(""); } }}>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Atualizar Progresso</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Meta: <span className="font-medium text-foreground">{editGoal?.name}</span>
+            </p>
+            <div className="space-y-2">
+              <Label>Valor já economizado (R$)</Label>
+              <Input
+                type="number"
+                placeholder="0,00"
+                value={editCurrentValue}
+                onChange={(e) => setEditCurrentValue(e.target.value)}
+                min="0"
+                max={editGoal?.target}
+                step="0.01"
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Objetivo: {fmtBRL(editGoal?.target ?? 0)}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setEditGoal(null); setEditCurrentValue(""); }}>
+              Cancelar
+            </Button>
+            <Button onClick={handleUpdateProgress} disabled={updateGoal.isPending}>
+              {updateGoal.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Nova Meta</DialogTitle>
           </DialogHeader>
@@ -276,7 +353,7 @@ const GoalsPage = memo(() => {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Valor alvo (R$)</Label>
                 <Input
@@ -300,7 +377,7 @@ const GoalsPage = memo(() => {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Prazo</Label>
                 <Input

@@ -67,7 +67,7 @@ const CardsPage = memo(() => {
 
   if (isLoading) {
     return (
-      <div className="p-6 lg:p-8 max-w-6xl mx-auto flex items-center justify-center min-h-[400px]">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto flex items-center justify-center min-h-[400px]">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span>Carregando cartões...</span>
@@ -81,7 +81,7 @@ const CardsPage = memo(() => {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
       <PageHeader
         title="Cartões de Crédito"
         subtitle="Gerencie seus cartões e limites"
@@ -102,7 +102,7 @@ const CardsPage = memo(() => {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {cards.map((card) => (
             <Card key={card.id} className="border-border shadow-sm overflow-hidden group">
               <div className={`h-36 bg-gradient-to-br ${card.color} p-6 flex flex-col justify-between relative`}>
@@ -127,7 +127,7 @@ const CardsPage = memo(() => {
                     </Button>
                   </div>
                 </div>
-                <p className="text-white text-xl tracking-widest font-mono">{card.number}</p>
+                <p className="text-white text-base sm:text-xl tracking-widest font-mono truncate">{card.number}</p>
               </div>
 
               <CardContent className="p-6">
@@ -176,7 +176,7 @@ const CardsPage = memo(() => {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-lg sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Adicionar Cartão</DialogTitle>
           </DialogHeader>
@@ -200,7 +200,7 @@ const CardsPage = memo(() => {
                 onChange={(e) => setForm({ ...form, number: e.target.value.replace(/\D/g, "").slice(0, 16) })}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Limite (R$)</Label>
                 <Input
@@ -223,7 +223,7 @@ const CardsPage = memo(() => {
             </div>
             <div className="space-y-2">
               <Label>Bandeira</Label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {["Visa", "Mastercard", "Elo", "Amex"].map((flag) => (
                   <button
                     key={flag}

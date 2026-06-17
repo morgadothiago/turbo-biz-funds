@@ -150,10 +150,10 @@ const Hero = memo(() => {
       style={{ background: "transparent" }}
     >
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center pt-16 pb-44">
+        <div className="max-w-4xl mx-auto text-center pt-16 pb-24 sm:pb-44">
           {/* Headline */}
           <h1
-            className="text-4xl md:text-5xl font-extrabold leading-tight mb-5"
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-5"
             style={{
               ...fadeUp,
               animationDelay: "0s",

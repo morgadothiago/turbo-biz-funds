@@ -155,7 +155,7 @@ const TransactionsPage = memo(() => {
   if (isLoading) return <TransactionsPageSkeleton />;
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       <PageHeader
         title="Transações"
         subtitle="Gerencie todas as suas movimentações"
@@ -207,17 +207,17 @@ const TransactionsPage = memo(() => {
       {/* Filters */}
       <Card className="border-border shadow-sm">
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar por descrição ou categoria..."
-                className="pl-10"
+                className="pl-10 w-full"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex flex-wrap gap-2">
               {/* Type filter */}
               {(["ALL", "INCOME", "EXPENSE"] as TypeFilter[]).map((t) => (
                 <button
@@ -236,21 +236,21 @@ const TransactionsPage = memo(() => {
                   {t === "ALL" ? "Todos" : t === "INCOME" ? "Receitas" : "Despesas"}
                 </button>
               ))}
-            </div>
-            <div className="flex gap-1.5 shrink-0 bg-muted/50 rounded-lg p-1 border border-border">
-              {PERIOD_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setPeriod(opt.value)}
-                  className={`px-3 py-1 text-sm rounded-md transition-colors font-medium ${
-                    period === opt.value
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+              <div className="flex gap-1.5 bg-muted/50 rounded-lg p-1 border border-border">
+                {PERIOD_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setPeriod(opt.value)}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors font-medium ${
+                      period === opt.value
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -286,41 +286,41 @@ const TransactionsPage = memo(() => {
                 return (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-accent/40 transition-all duration-150 group"
+                    className="flex items-center justify-between p-3 sm:p-4 rounded-xl border border-border bg-card hover:bg-accent/40 transition-all duration-150 group gap-2"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${
                         isIncome ? "bg-emerald-500/10" : "bg-red-500/10"
                       }`}>
                         {isIncome
-                          ? <ArrowUpRight className="w-5 h-5 text-emerald-500" />
-                          : <ArrowDownRight className="w-5 h-5 text-red-500" />
+                          ? <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" />
+                          : <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                         }
                       </div>
-                      <div>
-                        <p className="font-medium text-foreground leading-tight">
+                      <div className="min-w-0">
+                        <p className="font-medium text-foreground leading-tight text-sm truncate">
                           {transaction.description ?? "Sem descrição"}
                         </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Badge variant="outline" className="text-xs px-2 py-0 h-5 bg-background font-normal">
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          <Badge variant="outline" className="text-xs px-2 py-0 h-5 bg-background font-normal shrink-0">
                             {catName}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">{date}</span>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">{date}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 shrink-0">
                       <div className="text-right">
-                        <span className={`font-bold text-base ${isIncome ? "text-emerald-500" : "text-foreground"}`}>
+                        <span className={`font-bold text-sm sm:text-base whitespace-nowrap ${isIncome ? "text-emerald-500" : "text-foreground"}`}>
                           {isIncome ? "+" : "−"}{fmtBRL(transaction.amount)}
                         </span>
-                        <p className="text-xs text-muted-foreground capitalize">{isIncome ? "receita" : "despesa"}</p>
+                        <p className="text-xs text-muted-foreground capitalize hidden sm:block">{isIncome ? "receita" : "despesa"}</p>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         aria-label="Remover transação"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                        className="opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
                         onClick={() => deleteMutation.mutate(transaction.id)}
                         disabled={deleteMutation.isPending}
                       >

@@ -43,7 +43,11 @@ function createApiClient(): AxiosInstance {
       const code = error.response?.data?.code;
 
       const isAuthEndpoint = error.config?.url?.startsWith("/v1/auth/");
-      if (status === 401 && !isAuthEndpoint) {
+      // Não força logout durante o fluxo de pagamento: o token pode expirar
+      // enquanto o usuário demora a pagar o Pix, e o polling de status/plano
+      // não deve te chutar pra /login no meio da confirmação.
+      const isPaymentFlow = window.location.pathname.startsWith("/pagamento");
+      if (status === 401 && !isAuthEndpoint && !isPaymentFlow) {
         storage.clear();
         window.dispatchEvent(new CustomEvent("auth:session-expired"));
       }

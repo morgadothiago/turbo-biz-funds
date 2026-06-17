@@ -107,7 +107,7 @@ const SettingsPage = memo(() => {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl mx-auto space-y-5">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto space-y-5">
       <div>
         <h1 className="text-xl font-semibold text-foreground tracking-tight">Configurações</h1>
         <p className="text-sm text-muted-foreground mt-0.5">Gerencie sua conta e preferências</p>
@@ -335,7 +335,7 @@ const SettingsPage = memo(() => {
 
       {/* ── Delete Dialog ── */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir conta permanentemente?</AlertDialogTitle>
             <AlertDialogDescription>

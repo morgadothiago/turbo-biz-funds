@@ -292,7 +292,7 @@ function ChartTooltip({ active, payload, label }: any) {
 
 function RelatorioSkeleton() {
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-pulse">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6 animate-pulse">
       <div className="h-14 rounded-xl bg-muted" />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[0, 1, 2].map((i) => (
@@ -461,11 +461,11 @@ export default function RelatorioPage() {
   if (isLoading) return <RelatorioSkeleton />;
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#1a3799]/10">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#1a3799]/10 shrink-0">
             <BarChart2 className="h-5 w-5 text-[#1a3799]" />
           </div>
           <div>
@@ -479,7 +479,7 @@ export default function RelatorioPage() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 flex-1 sm:flex-none"
             onClick={exportExcel}
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
@@ -488,7 +488,7 @@ export default function RelatorioPage() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="gap-2 flex-1 sm:flex-none"
             onClick={() => window.print()}
           >
             <Download className="w-4 h-4" />
@@ -519,9 +519,9 @@ export default function RelatorioPage() {
       </div>
 
       {/* Month selector */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm font-medium text-muted-foreground">Mês:</span>
-        <div className="flex gap-1 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+        <span className="text-sm font-medium text-muted-foreground shrink-0">Mês:</span>
+        <div className="flex gap-1 flex-wrap overflow-x-auto pb-1">
           <button
             type="button"
             onClick={() => setSelectedMonth(null)}
@@ -538,13 +538,14 @@ export default function RelatorioPage() {
               key={mIdx}
               type="button"
               onClick={() => setSelectedMonth(mIdx)}
-              className={`px-3 py-1 text-sm rounded-md transition-colors font-medium border ${
+              className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition-colors font-medium border whitespace-nowrap ${
                 selectedMonth === mIdx
                   ? "bg-primary text-primary-foreground border-primary"
                   : "border-border bg-muted/50 text-muted-foreground hover:text-foreground"
               }`}
             >
-              {MONTH_NAMES[mIdx]}
+              <span className="hidden sm:inline">{MONTH_NAMES[mIdx]}</span>
+              <span className="sm:hidden">{MONTH_NAMES[mIdx].slice(0, 3)}</span>
             </button>
           ))}
         </div>
