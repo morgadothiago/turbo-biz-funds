@@ -73,7 +73,7 @@ export function useCreateCard() {
 export function useUpdateCard() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...payload }: Partial<CreateCardPayload> & { id: string }) =>
+    mutationFn: ({ id, ...payload }: Partial<CreateCardPayload & { used: number }> & { id: string }) =>
       api.patch<ApiItemResponse<CreditCard>>(apiEndpoints.cards.update(id), payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cards"] });

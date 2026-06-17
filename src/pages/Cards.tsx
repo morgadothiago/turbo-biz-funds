@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { CreditCard, Plus, Loader2, Trash2, Pencil } from "lucide-react";
+import { CreditCard, Plus, Loader2, Trash2, Pencil, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +36,9 @@ const CardsPage = memo(() => {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<CreditCardType | null>(null);
+  const [usageCard, setUsageCard] = useState<CreditCardType | null>(null);
+  const [usageAmount, setUsageAmount] = useState("");
+  const [usageType, setUsageType] = useState<"gasto" | "pagamento">("gasto");
   const [form, setForm] = useState(EMPTY_FORM);
   const [editForm, setEditForm] = useState(EMPTY_FORM);
 
@@ -60,6 +63,28 @@ const CardsPage = memo(() => {
           setForm(EMPTY_FORM);
         },
         onError: () => toast.error("Erro ao adicionar cartão"),
+      }
+    );
+  };
+
+  const openUsage = (card: CreditCardType) => {
+    setUsageCard(card);
+    setUsageAmount("");
+    setUsageType("gasto");
+  };
+
+  const handleUsage = () => {
+    if (!usageCard) return;
+    const amount = parseFloat(usageAmount);
+    if (!amount || amount <= 0) { toast.error("Informe um valor válido"); return; }
+    const newUsed = usageType === "gasto"
+      ? Math.min(usageCard.used + amount, usageCard.limit)
+      : Math.max(0, usageCard.used - amount);
+    updateCard.mutate(
+      { id: String(usageCard.id), used: newUsed },
+      {
+        onSuccess: () => { toast.success(usageType === "gasto" ? "Gasto registrado!" : "Pagamento registrado!"); setUsageCard(null); },
+        onError: () => toast.error("Erro ao atualizar limite"),
       }
     );
   };
@@ -309,9 +334,10 @@ const CardsPage = memo(() => {
                     variant="ghost"
                     size="sm"
                     className="text-primary hover:text-primary hover:bg-primary/10"
-                    onClick={() => toast.info("Em breve: ver fatura")}
+                    onClick={() => openUsage(card)}
                   >
-                    Ver fatura
+                    <ArrowUpCircle className="w-4 h-4 mr-1" />
+                    Atualizar uso
                   </Button>
                 </div>
               </CardContent>
@@ -331,6 +357,77 @@ const CardsPage = memo(() => {
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
             <Button onClick={handleCreate} disabled={createCard.isPending}>
               {createCard.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4 mr-2" />Adicionar</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog — Atualizar uso */}
+      <Dialog open={!!usageCard} onOpenChange={(open) => { if (!open) setUsageCard(null); }}>
+        <DialogContent className="w-[calc(100vw-2rem)] max-w-sm sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Atualizar limite utilizado</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {usageCard && (
+              <div className="flex justify-between text-sm text-muted-foreground bg-muted/40 rounded-lg px-4 py-3">
+                <span>Atual: <strong>{fmtBRL(usageCard.used)}</strong></span>
+                <span>Limite: <strong>{fmtBRL(usageCard.limit)}</strong></span>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setUsageType("gasto")}
+                className={`flex items-center justify-center gap-2 rounded-lg border-2 py-2.5 text-sm font-medium transition-colors ${
+                  usageType === "gasto" ? "border-red-500 bg-red-500/10 text-red-500" : "border-border text-muted-foreground hover:border-red-400/40"
+                }`}
+              >
+                <ArrowUpCircle className="w-4 h-4" /> Gasto
+              </button>
+              <button
+                type="button"
+                onClick={() => setUsageType("pagamento")}
+                className={`flex items-center justify-center gap-2 rounded-lg border-2 py-2.5 text-sm font-medium transition-colors ${
+                  usageType === "pagamento" ? "border-green-500 bg-green-500/10 text-green-500" : "border-border text-muted-foreground hover:border-green-400/40"
+                }`}
+              >
+                <ArrowDownCircle className="w-4 h-4" /> Pagamento
+              </button>
+            </div>
+            <div className="space-y-2">
+              <Label>Valor (R$)</Label>
+              <Input
+                type="number"
+                placeholder="0,00"
+                value={usageAmount}
+                onChange={(e) => setUsageAmount(e.target.value)}
+                min="0"
+                step="0.01"
+                autoFocus
+              />
+            </div>
+            {usageCard && usageAmount && parseFloat(usageAmount) > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Novo limite utilizado:{" "}
+                <strong>
+                  {fmtBRL(
+                    usageType === "gasto"
+                      ? Math.min(usageCard.used + parseFloat(usageAmount), usageCard.limit)
+                      : Math.max(0, usageCard.used - parseFloat(usageAmount))
+                  )}
+                </strong>
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUsageCard(null)}>Cancelar</Button>
+            <Button
+              onClick={handleUsage}
+              disabled={updateCard.isPending}
+              className={usageType === "gasto" ? "bg-red-500 hover:bg-red-600" : "bg-green-600 hover:bg-green-700"}
+            >
+              {updateCard.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : usageType === "gasto" ? "Registrar gasto" : "Registrar pagamento"}
             </Button>
           </DialogFooter>
         </DialogContent>
