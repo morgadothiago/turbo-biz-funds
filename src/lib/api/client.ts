@@ -154,6 +154,8 @@ export const apiEndpoints = {
     create: "/v1/cards",
     update: (id: string) => `/v1/cards/${id}`,
     delete: (id: string) => `/v1/cards/${id}`,
+    history: (id: string) => `/v1/cards/${id}/history`,
+    addHistory: (id: string) => `/v1/cards/${id}/history`,
   },
   notifications: {
     list: "/v1/notifications",

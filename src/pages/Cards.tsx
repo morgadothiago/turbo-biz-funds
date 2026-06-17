@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { useCards, useCreateCard, useUpdateCard, useDeleteCard } from "@/features/cards/hooks/use-cards";
 import type { CreditCard as CreditCardType } from "@/features/cards/hooks/use-cards";
+import { useCardHistory, useAddCardHistory } from "@/features/cards/hooks/use-card-history";
 import { fmtBRL } from "@/lib/format";
 
 const CARD_COLORS = [
@@ -33,26 +34,6 @@ const CARD_COLORS = [
 ];
 
 const EMPTY_FORM = { name: "", number: "", limit: "", dueDate: "", flag: "Visa", color: CARD_COLORS[0] };
-
-interface UsageEntry {
-  id: string;
-  type: "gasto" | "pagamento";
-  amount: number;
-  description: string;
-  usedBefore: number;
-  usedAfter: number;
-  date: string;
-}
-
-const HISTORY_KEY = (cardId: string) => `card_history_${cardId}`;
-
-function loadHistory(cardId: string): UsageEntry[] {
-  try { return JSON.parse(localStorage.getItem(HISTORY_KEY(cardId)) ?? "[]"); } catch { return []; }
-}
-
-function saveHistory(cardId: string, entries: UsageEntry[]) {
-  localStorage.setItem(HISTORY_KEY(cardId), JSON.stringify(entries.slice(0, 100)));
-}
 
 const CardsPage = memo(() => {
   const { cards, isLoading, isError } = useCards();
@@ -67,9 +48,12 @@ const CardsPage = memo(() => {
   const [usageAmount, setUsageAmount] = useState("");
   const [usageDescription, setUsageDescription] = useState("");
   const [usageType, setUsageType] = useState<"gasto" | "pagamento">("gasto");
-  const [historyEntries, setHistoryEntries] = useState<UsageEntry[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editForm, setEditForm] = useState(EMPTY_FORM);
+
+  const historyCardId = historyCard ? String(historyCard.id) : null;
+  const { data: historyEntries = [], isLoading: isHistoryLoading } = useCardHistory(historyCardId);
+  const addHistory = useAddCardHistory(usageCard ? String(usageCard.id) : null);
 
   const handleCreate = () => {
     if (!form.name.trim() || !form.number || !form.limit || !form.dueDate) {
@@ -115,17 +99,13 @@ const CardsPage = memo(() => {
       { id: String(usageCard.id), used: newUsed },
       {
         onSuccess: () => {
-          const entry: UsageEntry = {
-            id: crypto.randomUUID(),
-            type: usageType,
+          addHistory.mutate({
+            type: usageType === "gasto" ? "expense" : "payment",
             amount,
             description: usageDescription.trim() || (usageType === "gasto" ? "Gasto" : "Pagamento"),
             usedBefore,
             usedAfter: newUsed,
-            date: new Date().toISOString(),
-          };
-          const prev = loadHistory(String(usageCard.id));
-          saveHistory(String(usageCard.id), [entry, ...prev]);
+          });
           toast.success(usageType === "gasto" ? "Gasto registrado!" : "Pagamento registrado!");
           setUsageCard(null);
         },
@@ -136,7 +116,6 @@ const CardsPage = memo(() => {
 
   const openHistory = useCallback((card: CreditCardType) => {
     setHistoryCard(card);
-    setHistoryEntries(loadHistory(String(card.id)));
   }, []);
 
   const openEdit = (card: CreditCardType) => {
@@ -443,7 +422,12 @@ const CardsPage = memo(() => {
             </div>
           )}
 
-          {historyEntries.length === 0 ? (
+          {isHistoryLoading ? (
+            <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">Carregando histórico...</span>
+            </div>
+          ) : historyEntries.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
               <History className="w-12 h-12 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">Nenhum lançamento registrado ainda.</p>
@@ -451,29 +435,32 @@ const CardsPage = memo(() => {
             </div>
           ) : (
             <div className="space-y-2">
-              {historyEntries.map((entry) => (
-                <div key={entry.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/20">
-                  <div className={`mt-0.5 shrink-0 ${entry.type === "gasto" ? "text-red-500" : "text-green-600"}`}>
-                    {entry.type === "gasto" ? <ArrowUpCircle className="w-4 h-4" /> : <ArrowDownCircle className="w-4 h-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium truncate">{entry.description}</p>
-                      <p className={`text-sm font-semibold shrink-0 ${entry.type === "gasto" ? "text-red-500" : "text-green-600"}`}>
-                        {entry.type === "gasto" ? "+" : "-"}{fmtBRL(entry.amount)}
-                      </p>
+              {historyEntries.map((entry) => {
+                const isExpense = entry.type === "expense";
+                return (
+                  <div key={entry.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/20">
+                    <div className={`mt-0.5 shrink-0 ${isExpense ? "text-red-500" : "text-green-600"}`}>
+                      {isExpense ? <ArrowUpCircle className="w-4 h-4" /> : <ArrowDownCircle className="w-4 h-4" />}
                     </div>
-                    <div className="flex items-center justify-between mt-0.5">
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(entry.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {fmtBRL(entry.usedBefore)} → {fmtBRL(entry.usedAfter)}
-                      </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium truncate">{entry.description}</p>
+                        <p className={`text-sm font-semibold shrink-0 ${isExpense ? "text-red-500" : "text-green-600"}`}>
+                          {isExpense ? "+" : "-"}{fmtBRL(entry.amount)}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between mt-0.5">
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(entry.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {fmtBRL(entry.usedBefore)} → {fmtBRL(entry.usedAfter)}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </SheetContent>
