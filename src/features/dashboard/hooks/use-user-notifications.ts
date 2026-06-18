@@ -412,11 +412,29 @@ async function fetchClientSideNotifications(plan: string): Promise<UserNotificat
   ];
 }
 
+// ─── Transaction fetch (for watcher) ─────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchTransactionsRaw(): Promise<any[]> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await api.get<any>(`${apiEndpoints.transactions.list}?period=15d`);
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.items)) return res.items;
+    if (Array.isArray(res?.transactions)) return res.transactions;
+    return [];
+  } catch {
+    return [];
+  }
+}
+
 // ─── Global goal change watcher (fires toasts for external updates) ───────────
 
 export function useGoalChangeWatcher() {
   const { user } = useAuth();
   const prevRef = useRef<{ id: string; current: number; target: number }[]>([]);
+  const prevTxIdsRef = useRef<Set<string>>(new Set());
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const goalsQuery = useQuery<any[]>({
@@ -426,6 +444,44 @@ export function useGoalChangeWatcher() {
     staleTime: 5_000,
     refetchInterval: 15_000,
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const txQuery = useQuery<any[]>({
+    queryKey: ["notifications-transactions"],
+    queryFn: fetchTransactionsRaw,
+    enabled: !!user,
+    staleTime: 5_000,
+    refetchInterval: 15_000,
+  });
+
+  useEffect(() => {
+    const txs = txQuery.data;
+    if (!txs?.length) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentIds = new Set(txs.map((t: any) => t.id as string));
+
+    if (prevTxIdsRef.current.size === 0) {
+      prevTxIdsRef.current = currentIds;
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    txs.forEach((t: any) => {
+      if (prevTxIdsRef.current.has(t.id)) return;
+      const amount = t.amount ?? 0;
+      const type = t.type === "INCOME" ? "Receita" : "Despesa";
+      const desc = t.description ? ` — ${t.description}` : "";
+      if (t.type === "INCOME") {
+        toast.success(`💰 ${type} adicionada: ${fmtBRL(amount)}${desc}`);
+      } else {
+        toast.info(`💸 ${type} adicionada: ${fmtBRL(amount)}${desc}`);
+      }
+    });
+
+    prevTxIdsRef.current = currentIds;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [txQuery.data]);
 
   useEffect(() => {
     const goals = goalsQuery.data;
