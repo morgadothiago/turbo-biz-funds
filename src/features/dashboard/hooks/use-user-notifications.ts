@@ -396,11 +396,11 @@ export function useGoalChangeWatcher() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const goalsQuery = useQuery<any[]>({
-    queryKey: ["goals"],
+    queryKey: ["notifications-goals"],
     queryFn: fetchGoalsRaw,
     enabled: !!user,
-    staleTime: 25_000,
-    refetchInterval: 30_000,
+    staleTime: 5_000,
+    refetchInterval: 15_000,
   });
 
   useEffect(() => {
@@ -437,20 +437,20 @@ export function useUserNotifications() {
   // ── Always-on goals + cards queries (feed bell regardless of server mode) ─
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const goalsQuery = useQuery<any[]>({
-    queryKey: ["goals"],
+    queryKey: ["notifications-goals"],
     queryFn: fetchGoalsRaw,
     enabled: !!user,
-    staleTime: 25_000,
-    refetchInterval: 30_000,
+    staleTime: 5_000,
+    refetchInterval: 15_000,
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cardsQuery = useQuery<any[]>({
-    queryKey: ["cards"],
+    queryKey: ["notifications-cards"],
     queryFn: fetchCardsRaw,
     enabled: !!user,
-    staleTime: 25_000,
-    refetchInterval: 30_000,
+    staleTime: 5_000,
+    refetchInterval: 15_000,
   });
 
   const goalNotifs = buildGoalNotifications(goalsQuery.data ?? []);
@@ -461,8 +461,8 @@ export function useUserNotifications() {
     queryKey: ["notifications", "server"],
     queryFn: () => api.get<NotificationsResponse>(apiEndpoints.notifications.list),
     enabled: !!user,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 10_000,
+    refetchInterval: 30_000,
     retry: false,
   });
 
@@ -487,7 +487,7 @@ export function useUserNotifications() {
     };
 
     run();
-    const timer = setInterval(run, 60_000);
+    const timer = setInterval(run, 30_000);
     return () => { cancelled = true; clearInterval(timer); };
   }, [isServerError, user]);
 
