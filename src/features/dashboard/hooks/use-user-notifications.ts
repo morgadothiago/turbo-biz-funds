@@ -264,7 +264,11 @@ async function fetchGoalsRaw(): Promise<any[]> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const res = await api.get<any>(apiEndpoints.goals.list);
-    return Array.isArray(res) ? res : (res?.data ?? []);
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.items)) return res.items;
+    if (Array.isArray(res?.goals)) return res.goals;
+    return [];
   } catch {
     return [];
   }
@@ -298,6 +302,22 @@ function buildGoalNotifications(goals: any[]): UserNotification[] {
         action: { label: "Ver metas", href: "/dashboard/metas" },
         createdAt: now,
       });
+    } else if (pct >= 0.5) {
+      notifications.push({
+        id: `goal-half-${g.id}`, severity: "info",
+        title: `Metade do caminho: ${name}`,
+        body: `${Math.round(pct * 100)}% concluída — faltam ${fmtBRL(target - current)}.`,
+        action: { label: "Ver metas", href: "/dashboard/metas" },
+        createdAt: now,
+      });
+    } else if (current > 0) {
+      notifications.push({
+        id: `goal-progress-${g.id}`, severity: "info",
+        title: `Em andamento: ${name}`,
+        body: `${fmtBRL(current)} de ${fmtBRL(target)} (${Math.round(pct * 100)}%)`,
+        action: { label: "Ver metas", href: "/dashboard/metas" },
+        createdAt: now,
+      });
     }
   });
 
@@ -311,7 +331,11 @@ async function fetchCardsRaw(): Promise<any[]> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const res = await api.get<any>(apiEndpoints.cards.list);
-    return Array.isArray(res) ? res : (res?.data ?? []);
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    if (Array.isArray(res?.items)) return res.items;
+    if (Array.isArray(res?.cards)) return res.cards;
+    return [];
   } catch {
     return [];
   }
@@ -413,10 +437,15 @@ export function useGoalChangeWatcher() {
       const name = g.name ?? g.title ?? "Meta";
       const prev = prevRef.current.find((p) => p.id === g.id);
 
-      if (prev && prev.current < prev.target && current >= target) {
+      if (!prev || current <= prev.current) return;
+
+      const added = current - prev.current;
+      if (current >= target && prev.current < target) {
         toast.success(`🎉 Meta "${name}" concluída!`);
-      } else if (prev && prev.current < target * 0.8 && current >= target * 0.8 && current < target) {
+      } else if (current >= target * 0.8 && prev.current < target * 0.8) {
         toast.info(`📈 Meta "${name}" chegou a ${Math.round((current / target) * 100)}%!`);
+      } else {
+        toast.info(`📊 "${name}": +${fmtBRL(added)} adicionado (${Math.round((current / target) * 100)}%)`);
       }
     });
 
