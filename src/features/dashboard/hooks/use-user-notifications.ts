@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, apiEndpoints } from "@/lib/api/client";
 import type { Recurrence } from "@/shared/types";
@@ -256,14 +257,110 @@ function buildRecurrenceNotifications(recurrences: Recurrence[]): UserNotificati
   return notifications;
 }
 
+// ─── Goal notifications ───────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchGoalsRaw(): Promise<any[]> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await api.get<any>(apiEndpoints.goals.list);
+    return Array.isArray(res) ? res : (res?.data ?? []);
+  } catch {
+    return [];
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildGoalNotifications(goals: any[]): UserNotification[] {
+  const notifications: UserNotification[] = [];
+  const now = new Date().toISOString();
+
+  goals.forEach((g) => {
+    const current = g.current ?? g.current_value ?? 0;
+    const target = g.target ?? g.target_value ?? 0;
+    const name = g.name ?? g.title ?? "Meta";
+    if (target <= 0) return;
+    const pct = current / target;
+
+    if (pct >= 1) {
+      notifications.push({
+        id: `goal-done-${g.id}`, severity: "success",
+        title: `🎉 Meta concluída: ${name}`,
+        body: `Você atingiu ${fmtBRL(current)} de ${fmtBRL(target)}. Parabéns!`,
+        action: { label: "Ver metas", href: "/dashboard/metas" },
+        createdAt: now,
+      });
+    } else if (pct >= 0.8) {
+      notifications.push({
+        id: `goal-near-${g.id}`, severity: "info",
+        title: `Quase lá: ${name}`,
+        body: `${Math.round(pct * 100)}% concluída — faltam ${fmtBRL(target - current)}.`,
+        action: { label: "Ver metas", href: "/dashboard/metas" },
+        createdAt: now,
+      });
+    }
+  });
+
+  return notifications;
+}
+
+// ─── Card limit notifications ─────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchCardsRaw(): Promise<any[]> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await api.get<any>(apiEndpoints.cards.list);
+    return Array.isArray(res) ? res : (res?.data ?? []);
+  } catch {
+    return [];
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildCardNotifications(cards: any[]): UserNotification[] {
+  const notifications: UserNotification[] = [];
+  const now = new Date().toISOString();
+
+  cards.forEach((c) => {
+    const limit = c.limit ?? 0;
+    const used = c.used ?? 0;
+    const name = c.name ?? "Cartão";
+    if (limit <= 0) return;
+    const pct = used / limit;
+
+    if (pct >= 1) {
+      notifications.push({
+        id: `card-over-${c.id}`, severity: "error",
+        title: `Limite esgotado: ${name}`,
+        body: `Usado ${fmtBRL(used)} de ${fmtBRL(limit)} (${Math.round(pct * 100)}%).`,
+        action: { label: "Ver cartões", href: "/dashboard/cartoes" },
+        createdAt: now,
+      });
+    } else if (pct >= 0.8) {
+      notifications.push({
+        id: `card-warn-${c.id}`, severity: "warning",
+        title: `Limite alto: ${name}`,
+        body: `${Math.round(pct * 100)}% do limite usado — disponível ${fmtBRL(limit - used)}.`,
+        action: { label: "Ver cartões", href: "/dashboard/cartoes" },
+        createdAt: now,
+      });
+    }
+  });
+
+  return notifications;
+}
+
 // ─── Client-side fallback fetch ───────────────────────────────────────────────
 
 async function fetchClientSideNotifications(plan: string): Promise<UserNotification[]> {
-  const [sub, recRes] = await Promise.all([
+  const [sub, recRes, goals, cards] = await Promise.all([
     fetchSubscription(),
     api
       .get<{ data: Recurrence[] }>(apiEndpoints.recurrences.active)
       .catch(() => ({ data: [] as Recurrence[] })),
+    fetchGoalsRaw(),
+    fetchCardsRaw(),
   ]);
 
   const recurrences: Recurrence[] = Array.isArray(recRes)
@@ -272,17 +369,63 @@ async function fetchClientSideNotifications(plan: string): Promise<UserNotificat
 
   const subNotifs = buildSubscriptionNotifications(plan, sub);
   const recNotifs = buildRecurrenceNotifications(recurrences);
+  const goalNotifs = buildGoalNotifications(goals);
+  const cardNotifs = buildCardNotifications(cards);
   const activityNotifs: UserNotification[] = getActivityLog().map((a) => ({ ...a }));
 
   return [
+    ...cardNotifs.filter((n) => n.severity === "error"),
     ...recNotifs.filter((n) => n.severity === "error"),
-    ...recNotifs.filter((n) => n.severity === "warning"),
     ...subNotifs.filter((n) => n.severity === "error"),
+    ...cardNotifs.filter((n) => n.severity === "warning"),
+    ...recNotifs.filter((n) => n.severity === "warning"),
     ...subNotifs.filter((n) => n.severity === "warning"),
+    ...goalNotifs.filter((n) => n.severity === "success"),
     ...activityNotifs,
+    ...goalNotifs.filter((n) => n.severity === "info"),
     ...subNotifs.filter((n) => n.severity === "info" || n.severity === "success"),
     ...recNotifs.filter((n) => n.severity === "info" || n.severity === "success"),
   ];
+}
+
+// ─── Global goal change watcher (fires toasts for external updates) ───────────
+
+export function useGoalChangeWatcher() {
+  const { user } = useAuth();
+  const prevRef = useRef<{ id: string; current: number; target: number }[]>([]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const goalsQuery = useQuery<any[]>({
+    queryKey: ["goals"],
+    queryFn: fetchGoalsRaw,
+    enabled: !!user,
+    staleTime: 25_000,
+    refetchInterval: 30_000,
+  });
+
+  useEffect(() => {
+    const goals = goalsQuery.data;
+    if (!goals?.length) return;
+
+    goals.forEach((g) => {
+      const current = g.current ?? g.current_value ?? 0;
+      const target = g.target ?? g.target_value ?? 0;
+      const name = g.name ?? g.title ?? "Meta";
+      const prev = prevRef.current.find((p) => p.id === g.id);
+
+      if (prev && prev.current < prev.target && current >= target) {
+        toast.success(`🎉 Meta "${name}" concluída!`);
+      } else if (prev && prev.current < target * 0.8 && current >= target * 0.8 && current < target) {
+        toast.info(`📈 Meta "${name}" chegou a ${Math.round((current / target) * 100)}%!`);
+      }
+    });
+
+    prevRef.current = goals.map((g) => ({
+      id: g.id,
+      current: g.current ?? g.current_value ?? 0,
+      target: g.target ?? g.target_value ?? 0,
+    }));
+  }, [goalsQuery.data]);
 }
 
 // ─── Main hook ────────────────────────────────────────────────────────────────
@@ -290,6 +433,28 @@ async function fetchClientSideNotifications(plan: string): Promise<UserNotificat
 export function useUserNotifications() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // ── Always-on goals + cards queries (feed bell regardless of server mode) ─
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const goalsQuery = useQuery<any[]>({
+    queryKey: ["goals"],
+    queryFn: fetchGoalsRaw,
+    enabled: !!user,
+    staleTime: 25_000,
+    refetchInterval: 30_000,
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cardsQuery = useQuery<any[]>({
+    queryKey: ["cards"],
+    queryFn: fetchCardsRaw,
+    enabled: !!user,
+    staleTime: 25_000,
+    refetchInterval: 30_000,
+  });
+
+  const goalNotifs = buildGoalNotifications(goalsQuery.data ?? []);
+  const cardNotifs = buildCardNotifications(cardsQuery.data ?? []);
 
   // ── Server-side path ──────────────────────────────────────────────────────
   const serverQuery = useQuery<NotificationsResponse>({
@@ -313,33 +478,48 @@ export function useUserNotifications() {
     if (!isServerError || !user) return;
 
     let cancelled = false;
-    setIsClientLoading(true);
 
-    fetchClientSideNotifications(user.plan ?? "free")
-      .then((notifs) => {
-        if (!cancelled) {
-          setClientNotifications(notifs);
-          setIsClientLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setIsClientLoading(false);
-      });
+    const run = () => {
+      setIsClientLoading(true);
+      fetchClientSideNotifications(user.plan ?? "free")
+        .then((notifs) => { if (!cancelled) { setClientNotifications(notifs); setIsClientLoading(false); } })
+        .catch(() => { if (!cancelled) setIsClientLoading(false); });
+    };
 
-    return () => { cancelled = true; };
+    run();
+    const timer = setInterval(run, 60_000);
+    return () => { cancelled = true; clearInterval(timer); };
   }, [isServerError, user]);
 
   // ── Derived state ─────────────────────────────────────────────────────────
+  // Merge goals+cards into whichever mode is active (dedup by id)
+  const mergeLocal = (base: UserNotification[]): UserNotification[] => {
+    const ids = new Set(base.map((n) => n.id));
+    const extra = [
+      ...cardNotifs.filter((n) => n.severity === "error"),
+      ...cardNotifs.filter((n) => n.severity === "warning"),
+      ...goalNotifs.filter((n) => n.severity === "success"),
+      ...goalNotifs.filter((n) => n.severity === "info"),
+    ].filter((n) => !ids.has(n.id));
+    return [...extra, ...base];
+  };
+
   const notifications: UserNotification[] = isServerMode
-    ? (serverQuery.data?.data ?? [])
+    ? mergeLocal(serverQuery.data?.data ?? [])
     : clientNotifications;
 
   const readIds: string[] = isServerMode
     ? notifications.filter((n) => n.readAt != null).map((n) => n.id)
     : clientReadIds;
 
+  const extraUnread = isServerMode
+    ? [...cardNotifs, ...goalNotifs].filter(
+        (n) => !notifications.some((s) => s.id === n.id && s.readAt != null)
+      ).length
+    : 0;
+
   const unreadCount = isServerMode
-    ? (serverQuery.data?.unreadCount ?? 0)
+    ? (serverQuery.data?.unreadCount ?? 0) + extraUnread
     : notifications.filter((n) => !clientReadIds.includes(n.id)).length;
 
   const isLoading = serverQuery.isPending || isClientLoading;

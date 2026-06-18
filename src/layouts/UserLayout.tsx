@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationsSheet } from "@/components/user/NotificationsSheet";
 import { UserTutorial, useUserTutorial } from "@/components/user/UserTutorial";
+import { useGoalChangeWatcher } from "@/features/dashboard/hooks/use-user-notifications";
 
 const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   "/dashboard": { title: "Dashboard", subtitle: "Visão geral das suas finanças" },
@@ -23,6 +24,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
 function Header() {
   const { user } = useAuth();
   const location = useLocation();
+  useGoalChangeWatcher();
 
   const page =
     PAGE_TITLES[location.pathname] ??
