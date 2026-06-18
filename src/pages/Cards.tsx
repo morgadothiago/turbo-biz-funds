@@ -35,6 +35,108 @@ const CARD_COLORS = [
 
 const EMPTY_FORM = { name: "", number: "", limit: "", dueDate: "", flag: "Visa", color: CARD_COLORS[0] };
 
+const CardFormFields = ({
+  values,
+  onChange,
+  hideNumber,
+}: {
+  values: typeof EMPTY_FORM;
+  onChange: (v: typeof EMPTY_FORM) => void;
+  hideNumber?: boolean;
+}) => (
+  <div className="space-y-4 py-2">
+    <div className="space-y-2">
+      <Label>Nome do cartão</Label>
+      <Input
+        placeholder="Ex: Nubank Platinum"
+        value={values.name}
+        onChange={(e) => onChange({ ...values, name: e.target.value })}
+      />
+    </div>
+    {!hideNumber && (
+      <div className="space-y-2">
+        <Label>Número do cartão</Label>
+        <Input
+          type="text"
+          inputMode="numeric"
+          placeholder="0000 0000 0000 0000"
+          maxLength={19}
+          value={values.number.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim()}
+          onChange={(e) => onChange({ ...values, number: e.target.value.replace(/\D/g, "").slice(0, 16) })}
+        />
+      </div>
+    )}
+    {hideNumber && (
+      <div className="space-y-2">
+        <Label>Novo número (opcional)</Label>
+        <Input
+          type="text"
+          inputMode="numeric"
+          placeholder="Deixe vazio para manter o atual"
+          maxLength={19}
+          value={values.number.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim()}
+          onChange={(e) => onChange({ ...values, number: e.target.value.replace(/\D/g, "").slice(0, 16) })}
+        />
+      </div>
+    )}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Limite (R$)</Label>
+        <Input
+          type="number"
+          placeholder="0,00"
+          value={values.limit}
+          onChange={(e) => onChange({ ...values, limit: e.target.value })}
+          min="0"
+          step="0.01"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Vencimento</Label>
+        <Input
+          type="date"
+          value={values.dueDate}
+          onChange={(e) => onChange({ ...values, dueDate: e.target.value })}
+        />
+      </div>
+    </div>
+    <div className="space-y-2">
+      <Label>Bandeira</Label>
+      <div className="flex flex-wrap gap-2">
+        {["Visa", "Mastercard", "Elo", "Amex"].map((flag) => (
+          <button
+            key={flag}
+            type="button"
+            onClick={() => onChange({ ...values, flag })}
+            className={`px-3 py-1.5 rounded-lg border-2 text-sm font-medium transition-colors ${
+              values.flag === flag
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40"
+            }`}
+          >
+            {flag}
+          </button>
+        ))}
+      </div>
+    </div>
+    <div className="space-y-2">
+      <Label>Cor</Label>
+      <div className="flex gap-2">
+        {CARD_COLORS.map((color) => (
+          <button
+            key={color}
+            type="button"
+            onClick={() => onChange({ ...values, color })}
+            className={`w-8 h-8 rounded-full bg-gradient-to-br ${color} border-2 transition-all ${
+              values.color === color ? "border-foreground scale-110" : "border-transparent"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 const CardsPage = memo(() => {
   const { cards, isLoading, isError } = useCards();
   const createCard = useCreateCard();
@@ -171,108 +273,6 @@ const CardsPage = memo(() => {
   if (isError) {
     // Endpoint ainda não implementado no backend — exibe tela funcional com lista vazia
   }
-
-  const CardFormFields = ({
-    values,
-    onChange,
-    hideNumber,
-  }: {
-    values: typeof EMPTY_FORM;
-    onChange: (v: typeof EMPTY_FORM) => void;
-    hideNumber?: boolean;
-  }) => (
-    <div className="space-y-4 py-2">
-      <div className="space-y-2">
-        <Label>Nome do cartão</Label>
-        <Input
-          placeholder="Ex: Nubank Platinum"
-          value={values.name}
-          onChange={(e) => onChange({ ...values, name: e.target.value })}
-        />
-      </div>
-      {!hideNumber && (
-        <div className="space-y-2">
-          <Label>Número do cartão</Label>
-          <Input
-            type="text"
-            inputMode="numeric"
-            placeholder="0000 0000 0000 0000"
-            maxLength={19}
-            value={values.number.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim()}
-            onChange={(e) => onChange({ ...values, number: e.target.value.replace(/\D/g, "").slice(0, 16) })}
-          />
-        </div>
-      )}
-      {hideNumber && (
-        <div className="space-y-2">
-          <Label>Novo número (opcional)</Label>
-          <Input
-            type="text"
-            inputMode="numeric"
-            placeholder="Deixe vazio para manter o atual"
-            maxLength={19}
-            value={values.number.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim()}
-            onChange={(e) => onChange({ ...values, number: e.target.value.replace(/\D/g, "").slice(0, 16) })}
-          />
-        </div>
-      )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Limite (R$)</Label>
-          <Input
-            type="number"
-            placeholder="0,00"
-            value={values.limit}
-            onChange={(e) => onChange({ ...values, limit: e.target.value })}
-            min="0"
-            step="0.01"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Vencimento</Label>
-          <Input
-            type="date"
-            value={values.dueDate}
-            onChange={(e) => onChange({ ...values, dueDate: e.target.value })}
-          />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label>Bandeira</Label>
-        <div className="flex flex-wrap gap-2">
-          {["Visa", "Mastercard", "Elo", "Amex"].map((flag) => (
-            <button
-              key={flag}
-              type="button"
-              onClick={() => onChange({ ...values, flag })}
-              className={`px-3 py-1.5 rounded-lg border-2 text-sm font-medium transition-colors ${
-                values.flag === flag
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-primary/40"
-              }`}
-            >
-              {flag}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label>Cor</Label>
-        <div className="flex gap-2">
-          {CARD_COLORS.map((color) => (
-            <button
-              key={color}
-              type="button"
-              onClick={() => onChange({ ...values, color })}
-              className={`w-8 h-8 rounded-full bg-gradient-to-br ${color} border-2 transition-all ${
-                values.color === color ? "border-foreground scale-110" : "border-transparent"
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">

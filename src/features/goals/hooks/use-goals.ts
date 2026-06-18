@@ -43,6 +43,7 @@ export function useGoals() {
     queryKey: ["goals"],
     queryFn: fetchGoals,
     staleTime: 30 * 1000,
+    refetchInterval: 30 * 1000,
     retry: 1,
   });
 

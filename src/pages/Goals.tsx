@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useState, useEffect, useRef } from "react";
 import { Target, Plus, Trophy, TrendingUp, Trash2, Loader2, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,18 @@ const GoalsPage = memo(() => {
   const createGoal = useCreateGoal();
   const deleteGoal = useDeleteGoal();
   const updateGoal = useUpdateGoal();
+
+  const prevGoalsRef = useRef<typeof goals>([]);
+  useEffect(() => {
+    if (!goals.length) return;
+    goals.forEach((goal) => {
+      const prev = prevGoalsRef.current.find((g) => g.id === goal.id);
+      if (prev && prev.current < prev.target && goal.current >= goal.target) {
+        toast.success(`🎉 Meta "${goal.name}" concluída!`);
+      }
+    });
+    prevGoalsRef.current = goals;
+  }, [goals]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editGoal, setEditGoal] = useState<{ id: string; name: string; current: number; target: number } | null>(null);
@@ -127,7 +139,11 @@ const GoalsPage = memo(() => {
       { id: editGoal.id, current: value },
       {
         onSuccess: () => {
-          toast.success("Progresso atualizado!");
+          if (value >= editGoal.target) {
+            toast.success(`🎉 Meta "${editGoal.name}" concluída!`);
+          } else {
+            toast.success("Progresso atualizado!");
+          }
           setEditGoal(null);
           setEditCurrentValue("");
         },
