@@ -179,13 +179,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const activatePro = useCallback(() => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated: User = { ...prev, plan: "pro" };
+      storage.setUser(updated);
+      return updated;
+    });
+  }, []);
+
   const logout = useCallback(async () => {
     storage.clear();
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, updateProfile, changePassword, refreshUser }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, updateProfile, changePassword, refreshUser, activatePro }}>
       {children}
     </AuthContext.Provider>
   );

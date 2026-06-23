@@ -589,7 +589,7 @@ function PixForm({
 const Pagamento = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout, refreshUser, activatePro } = useAuth();
   const plan = (location.state as { plan?: string })?.plan ?? new URLSearchParams(location.search).get("plan") ?? "pro";
 
   // Mapeia IDs de UI para IDs que a API reconhece
@@ -671,6 +671,7 @@ const Pagamento = () => {
       sessionStorage.removeItem("pendingPaymentPlan");
       sessionStorage.removeItem("postRegisterRedirect");
       sessionStorage.setItem("paymentCompleted", "true");
+      activatePro();
       try { await refreshUser(); } catch { /* ignora */ }
       navigate("/pagamento-sucesso", { state: { plan, method } });
     };
@@ -785,6 +786,7 @@ const Pagamento = () => {
         sessionStorage.removeItem("pendingPaymentPlan");
         sessionStorage.removeItem("postRegisterRedirect");
         sessionStorage.setItem("paymentCompleted", "true");
+        activatePro();
         try { await refreshUser(); } catch { /* ignora */ }
         navigate("/pagamento-sucesso", { state: { plan, method } });
         return;
@@ -809,6 +811,7 @@ const Pagamento = () => {
           sessionStorage.removeItem("pendingPaymentPlan");
           sessionStorage.removeItem("postRegisterRedirect");
           sessionStorage.setItem("paymentCompleted", "true");
+          activatePro();
           navigate("/pagamento-sucesso", { state: { plan, method } });
           return;
         }
