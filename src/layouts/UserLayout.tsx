@@ -88,7 +88,8 @@ function Header() {
 }
 
 export default function UserLayout() {
-  const { show, complete, skip } = useUserTutorial();
+  const { user } = useAuth();
+  const { show, complete, skip } = useUserTutorial(user?.id);
 
   return (
     <SidebarProvider className="block">

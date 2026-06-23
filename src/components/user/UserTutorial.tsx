@@ -8,7 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const STORAGE_KEY = "user:tutorial:completed";
+const storageKey = (userId?: string) =>
+  userId ? `user:tutorial:completed:${userId}` : "user:tutorial:completed";
 
 interface TutorialStep {
   id: string;
@@ -411,17 +412,18 @@ const STEPS: TutorialStep[] = [
 
 /* ── Hook ─────────────────────────────────────────────────── */
 
-export function useUserTutorial() {
+export function useUserTutorial(userId?: string) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const done = localStorage.getItem(STORAGE_KEY);
+    if (!userId) return;
+    const done = localStorage.getItem(storageKey(userId));
     if (!done) setShow(true);
-  }, []);
+  }, [userId]);
 
-  const complete = () => { localStorage.setItem(STORAGE_KEY, "true"); setShow(false); };
-  const skip = () => { localStorage.setItem(STORAGE_KEY, "true"); setShow(false); };
-  const reset = () => { localStorage.removeItem(STORAGE_KEY); setShow(true); };
+  const complete = () => { localStorage.setItem(storageKey(userId), "true"); setShow(false); };
+  const skip = () => { localStorage.setItem(storageKey(userId), "true"); setShow(false); };
+  const reset = () => { localStorage.removeItem(storageKey(userId)); setShow(true); };
 
   return { show, complete, skip, reset };
 }
