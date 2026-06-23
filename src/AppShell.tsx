@@ -115,7 +115,7 @@ function DashboardRoute({ children }: { children: React.ReactNode }) {
     console.log("[UserRoute] plan ainda free mas paymentCompleted=true — aguardando atualização, acesso liberado");
   } else {
     console.warn("[UserRoute] ⚠️ plan free sem paymentCompleted — redirecionando para pagamento");
-    return <Navigate to="/pagamento?plan=pro-monthly" replace />;
+    return <Navigate to="/pagamento?plan=pro-annual" replace />;
   }
 
   return <>{children}</>;
@@ -139,8 +139,8 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
     }
     // Free user logging in → go directly to payment (same flow as registration)
     if (user?.plan === "free") {
-      sessionStorage.setItem("pendingPaymentPlan", "pro-monthly");
-      return <Navigate to="/pagamento?plan=pro-monthly" replace />;
+      sessionStorage.setItem("pendingPaymentPlan", "pro-annual");
+      return <Navigate to="/pagamento?plan=pro-annual" replace />;
     }
     return <Navigate to="/dashboard" replace />;
   }
