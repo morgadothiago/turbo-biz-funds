@@ -45,6 +45,8 @@ const SettingsPage = memo(() => {
 
   // modals
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCancelPlanDialog, setShowCancelPlanDialog] = useState(false);
+  const [isSendingCancelEmail, setIsSendingCancelEmail] = useState(false);
   const plan = user?.plan ?? "free";
   const planConfig = PLAN_CONFIG[plan];
 
@@ -312,6 +314,17 @@ const SettingsPage = memo(() => {
             <Download className="w-4 h-4 text-muted-foreground" />
           </Button>
 
+          {plan === "pro" && (
+            <Button
+              variant="outline"
+              className="w-full justify-between border-orange-200 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:border-orange-900/50 dark:text-orange-400"
+              onClick={() => setShowCancelPlanDialog(true)}
+            >
+              <span>Cancelar Assinatura</span>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          )}
+
           <Button
             variant="outline"
             className="w-full justify-between border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-900/50 dark:text-red-400"
@@ -332,6 +345,46 @@ const SettingsPage = memo(() => {
         <LogOut className="w-4 h-4" />
         Sair da conta
       </Button>
+
+      {/* ── Cancel Plan Dialog ── */}
+      <AlertDialog open={showCancelPlanDialog} onOpenChange={setShowCancelPlanDialog}>
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-md sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar assinatura Pro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ao confirmar, um email de solicitação de cancelamento e estorno será enviado para nossa equipe. Você continuará com acesso até a análise da solicitação.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSendingCancelEmail}>Voltar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+              disabled={isSendingCancelEmail}
+              onClick={(e) => {
+                e.preventDefault();
+                setIsSendingCancelEmail(true);
+                const recipient = import.meta.env.VITE_CANCELLATION_EMAIL as string;
+                const subject = encodeURIComponent(`Cancelamento de Assinatura Pro - ${user?.name}`);
+                const body = encodeURIComponent(
+                  `Olá,\n\nSolicito o cancelamento da minha assinatura Pro e o estorno do valor pago.\n\n` +
+                  `Nome: ${user?.name ?? "—"}\n` +
+                  `Email: ${user?.email ?? "—"}\n` +
+                  `Telefone: ${user?.phone ?? "—"}\n` +
+                  `ID da conta: ${user?.id ?? "—"}\n\n` +
+                  `Data da solicitação: ${new Date().toLocaleString("pt-BR")}\n\n` +
+                  `Por favor, realize o estorno do valor e confirme o cancelamento.\n\nAtenciosamente,\n${user?.name}`
+                );
+                window.open(`mailto:${recipient}?subject=${subject}&body=${body}`);
+                toast.success("Email de cancelamento aberto. Envie para concluir a solicitação.");
+                setIsSendingCancelEmail(false);
+                setShowCancelPlanDialog(false);
+              }}
+            >
+              Solicitar cancelamento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* ── Delete Dialog ── */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
