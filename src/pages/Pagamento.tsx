@@ -867,12 +867,17 @@ const Pagamento = () => {
             <button
               type="button"
               onClick={() => {
-                const fromRegister = !!sessionStorage.getItem("pendingPaymentPlan");
+                const pendingPlan = sessionStorage.getItem("pendingPaymentPlan");
+                const fromFreshRegister = !!sessionStorage.getItem("postRegisterRedirect");
                 sessionStorage.removeItem("pendingPaymentPlan");
                 sessionStorage.removeItem("postRegisterRedirect");
-                if (fromRegister) {
+                if (pendingPlan && fromFreshRegister) {
+                  // Veio do fluxo de cadastro novo — faz logout e volta para cadastro
                   logout();
                   navigate("/cadastro", { replace: true });
+                } else if (pendingPlan) {
+                  // Veio do login como free — vai para login
+                  navigate("/login", { replace: true });
                 } else {
                   navigate("/");
                 }

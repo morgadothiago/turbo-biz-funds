@@ -137,6 +137,11 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
       sessionStorage.removeItem("postRegisterRedirect");
       return <Navigate to={pending} replace />;
     }
+    // Free user logging in → go directly to payment (same flow as registration)
+    if (user?.plan === "free") {
+      sessionStorage.setItem("pendingPaymentPlan", "pro-monthly");
+      return <Navigate to="/pagamento?plan=pro-monthly" replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 
