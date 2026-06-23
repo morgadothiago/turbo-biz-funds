@@ -72,7 +72,8 @@ async function fetchAndMergeMe(base: User): Promise<User> {
       name: (d.name as string) || base.name,
       phone: (d.phone as string) || base.phone || undefined,
       cpf: (d.cpf as string) || base.cpf || undefined,
-      plan: (["free", "pro", "business"].includes(d.plan as string) ? d.plan : base.plan) as UserPlan,
+      // Don't downgrade plan: if base has paid plan but backend still says "free" (webhook delay), keep paid
+      plan: (base.plan !== "free" && d.plan === "free" ? base.plan : (["free", "pro", "business"].includes(d.plan as string) ? d.plan : base.plan)) as UserPlan,
     };
   } catch {
     return base;
@@ -113,6 +114,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("[Auth] Usuário:", user);
 
       storage.setToken(token);
+      // Preserve paid plan from localStorage — backend may not have updated it yet (webhook delay)
+      const savedUser = storage.getUser();
+      if (savedUser?.id === user.id && savedUser.plan !== "free") {
+        user.plan = savedUser.plan;
+      }
       const enriched = await fetchAndMergeMe(user);
       storage.setUser(enriched);
       setUser(enriched);
