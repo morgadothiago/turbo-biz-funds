@@ -101,18 +101,20 @@ function DashboardRoute({ children }: { children: React.ReactNode }) {
   // Bloqueia acesso ao dashboard enquanto pagamento pendente
   const pendingPlan = sessionStorage.getItem("pendingPaymentPlan");
   if (pendingPlan) {
+    console.log("[UserRoute] pendingPaymentPlan encontrado — redirecionando para /pagamento:", pendingPlan);
     return <Navigate to={`/pagamento?plan=${pendingPlan}`} replace />;
   }
 
   // Somente planos pagos acessam o dashboard
   const justPaid = sessionStorage.getItem("paymentCompleted");
+  console.log("[UserRoute] plan:", user?.plan, "| justPaid:", justPaid, "| isAuthenticated:", isAuthenticated);
   if (user?.plan !== "free") {
-    // Plan confirmed paid — clear flag if present
+    console.log("[UserRoute] ✅ plano pago confirmado — acesso liberado");
     if (justPaid) sessionStorage.removeItem("paymentCompleted");
   } else if (justPaid) {
-    // Plan still "free" but payment just completed — refreshUser API in-flight, hold
-    // (flag stays until plan updates)
+    console.log("[UserRoute] plan ainda free mas paymentCompleted=true — aguardando atualização, acesso liberado");
   } else {
+    console.warn("[UserRoute] ⚠️ plan free sem paymentCompleted — redirecionando para pagamento");
     return <Navigate to="/pagamento?plan=pro-monthly" replace />;
   }
 

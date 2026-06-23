@@ -629,11 +629,12 @@ const Pagamento = () => {
     setPixApproved(false);
     setPixIntentFailed(false);
     setIsCreatingIntent(true);
+    console.log("[PIX] Criando intent — plan:", apiPlanId);
     api
       .post<{ data: PaymentIntent }>(apiEndpoints.payments.intent, { plan: apiPlanId, method: "pix" })
       .then((res) => {
         const raw = (res as any).data ?? res as any;
-        console.log("[Pagamento] PIX intent raw response:", raw);
+        console.log("[PIX intent] resposta bruta completa:", JSON.stringify(res, null, 2));
         const normalized: PaymentIntent = {
           paymentId: raw.paymentId ?? raw.id ?? "",
           method: "pix",
@@ -648,10 +649,17 @@ const Pagamento = () => {
               (raw.expiresAt ? Math.max(0, Math.floor((new Date(raw.expiresAt).getTime() - Date.now()) / 1000)) : 15 * 60),
           },
         };
-        console.log("[Pagamento] PIX intent normalizado:", normalized);
+        console.log("[PIX intent] paymentId:", normalized.paymentId);
+        console.log("[PIX intent] temQRCode:", !!normalized.pix?.qrCodeBase64, "| temCodigo:", !!normalized.pix?.qrCodeText);
+        console.log("[PIX intent] expiresInSeconds:", normalized.pix?.expiresInSeconds);
+        if (!normalized.paymentId) console.error("[PIX intent] ⚠️ paymentId vazio! raw:", raw);
         setIntent(normalized);
       })
-      .catch(() => setPixIntentFailed(true))
+      .catch((err) => {
+        console.error("[PIX intent] ERRO ao criar intent:", err);
+        console.error("[PIX intent] status HTTP:", err?.status, "| mensagem:", err?.message, "| code:", err?.code);
+        setPixIntentFailed(true);
+      })
       .finally(() => setIsCreatingIntent(false));
   };
 
@@ -667,48 +675,63 @@ const Pagamento = () => {
     const TERMINAL_STATUSES = ["expired", "cancelled", "declined", "failed", "EXPIRED", "CANCELLED", "DECLINED", "FAILED"];
 
     const handleApproved = async () => {
+      console.log("[PIX] ✅ PAGAMENTO APROVADO — ativando plano pro");
       setPixApproved(true);
       sessionStorage.removeItem("pendingPaymentPlan");
       sessionStorage.removeItem("postRegisterRedirect");
       sessionStorage.setItem("paymentCompleted", "true");
       activatePro();
-      try { await refreshUser(); } catch { /* ignora */ }
+      console.log("[PIX] activatePro() chamado — plan forçado para pro no contexto");
+      try {
+        await refreshUser();
+        console.log("[PIX] refreshUser() concluído");
+      } catch (e) {
+        console.warn("[PIX] refreshUser() falhou (ignorado):", e);
+      }
+      console.log("[PIX] navegando para /pagamento-sucesso");
       navigate("/pagamento-sucesso", { state: { plan, method } });
     };
 
+    let pollCount = 0;
     const timer = setInterval(async () => {
+      pollCount++;
       try {
         // 1. Verifica status do pagamento
         const res = await api.get<{ data: { status: string } }>(apiEndpoints.payments.status(intent.paymentId));
         const raw = (res as any);
         const status = (raw.data?.status ?? raw.status ?? raw.data?.payment_status ?? raw.payment_status ?? "") as string;
-        console.log("[PIX polling] payment status:", status, "| raw:", raw);
+        console.log(`[PIX polling #${pollCount}] paymentId: ${intent.paymentId} | status: "${status}" | raw:`, raw);
 
         if (APPROVED_STATUSES.includes(status)) {
+          console.log("[PIX polling] status aprovado detectado:", status);
           clearInterval(timer);
           handleApproved();
           return;
         }
         if (TERMINAL_STATUSES.includes(status)) {
+          console.warn("[PIX polling] status terminal detectado:", status);
           clearInterval(timer);
           return;
         }
+        console.log("[PIX polling] status não reconhecido:", status, "— verificando /v1/users/me como fallback");
 
         // 2. Fallback: se status não reconhecido, verifica se plano já mudou para pro
         try {
           const meRes = await api.get<{ data: { plan?: string } }>("/v1/users/me");
           const meRaw = (meRes as any);
           const userPlan = meRaw.data?.plan ?? meRaw.plan ?? "";
-          console.log("[PIX polling] user plan:", userPlan);
+          console.log(`[PIX polling #${pollCount}] /v1/users/me plan:`, userPlan);
           if (userPlan && userPlan !== "free") {
+            console.log("[PIX polling] plan atualizado via /v1/users/me:", userPlan);
             clearInterval(timer);
             handleApproved();
           }
-        } catch {
-          // ignora erro no fallback
+        } catch (e) {
+          console.warn("[PIX polling] erro no fallback /v1/users/me:", e);
         }
       } catch (err) {
-        console.warn("[PIX polling] erro ao verificar status:", err);
+        console.error(`[PIX polling #${pollCount}] ERRO na chamada de status:`, err);
+        console.error("[PIX polling] status HTTP:", (err as any)?.status, "| msg:", (err as any)?.message);
       }
     }, 5000);
     return () => clearInterval(timer);
@@ -775,11 +798,13 @@ const Pagamento = () => {
     setIsCheckingStatus(true);
     const APPROVED_STATUSES = ["approved", "paid", "confirmed", "completed", "active", "APPROVED", "PAID", "CONFIRMED"];
     const TERMINAL_STATUSES = ["expired", "cancelled", "declined", "failed"];
+    console.log("[PIX manual] verificando status — paymentId:", intent.paymentId);
     try {
       const res = await api.get<{ data: { status: string } }>(apiEndpoints.payments.status(intent.paymentId));
       const raw = res as any;
       const status = (raw.data?.status ?? raw.status ?? raw.data?.payment_status ?? raw.payment_status ?? "") as string;
-      console.log("[PIX check manual] status:", status, "| raw:", raw);
+      console.log("[PIX manual] resposta bruta:", JSON.stringify(raw, null, 2));
+      console.log("[PIX manual] status extraído:", status);
 
       if (APPROVED_STATUSES.includes(status)) {
         setPixApproved(true);
