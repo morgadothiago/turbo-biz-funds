@@ -99,19 +99,20 @@ const RecorrenciasPage = memo(() => {
       toast.error("Preencha categoria, valor e data de início");
       return;
     }
+    const rawAmount = Number(form.amount);
     const payload: RecurrencePayload = {
       categoryId: form.categoryId,
       type: form.type,
       amount: isInstallment
-        ? (parseBR(form.amount) * (1 + acrescimo / 100)) / installments
-        : parseBR(form.amount),
+        ? (rawAmount * (1 + acrescimo / 100)) / installments
+        : rawAmount,
       description: form.description?.trim() || undefined,
       frequency: isInstallment ? "monthly" : form.frequency,
-      startDate: new Date(form.startDate).toISOString(),
+      startDate: `${form.startDate}T00:00:00.000Z`,
       endDate: isInstallment
-        ? new Date(calcEndDate(form.startDate, installments)).toISOString()
+        ? `${calcEndDate(form.startDate, installments)}T00:00:00.000Z`
         : form.endDate
-        ? new Date(form.endDate).toISOString()
+        ? `${form.endDate}T00:00:00.000Z`
         : undefined,
     };
     createRecurrence.mutate(payload, {
@@ -129,7 +130,11 @@ const RecorrenciasPage = memo(() => {
         setAcrescimo(0);
         setForm({ ...defaultForm(), amount: "" } as RecurrencePayload & { amount: string });
       },
-      onError: () => toast.error("Erro ao criar recorrência"),
+      onError: (error: unknown) => {
+        const msg = (error as { message?: string })?.message;
+        toast.error(msg ? `Erro: ${msg}` : "Erro ao criar recorrência");
+        console.error("[handleCreate] erro:", error);
+      },
     });
   };
 
@@ -473,7 +478,7 @@ const RecorrenciasPage = memo(() => {
                           </SelectTrigger>
                           <SelectContent>
                             {[2,3,4,5,6,7,8,9,10,11,12,18,24,36,48,60].map((n) => {
-                              const amt = parseBR(form.amount);
+                              const amt = Number(form.amount);
                               const total = amt * (1 + acrescimo / 100);
                               const parcel = amt > 0
                                 ? `${fmtBRL(total / n)} - ${n}x`
@@ -501,17 +506,17 @@ const RecorrenciasPage = memo(() => {
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">%</span>
                           </div>
-                          {acrescimo > 0 && parseBR(form.amount) > 0 && (
+                          {acrescimo > 0 && Number(form.amount) > 0 && (
                             <p className="text-xs text-amber-600 font-medium">
-                              +{fmtBRL(parseBR(form.amount) * acrescimo / 100)} de juros
+                              +{fmtBRL(Number(form.amount) * acrescimo / 100)} de juros
                             </p>
                           )}
                         </div>
                       )}
                     </div>
 
-                    {parseBR(form.amount) > 0 && (() => {
-                      const totalComAcrescimo = parseBR(form.amount) * (1 + acrescimo / 100);
+                    {Number(form.amount) > 0 && (() => {
+                      const totalComAcrescimo = Number(form.amount) * (1 + acrescimo / 100);
                       const parcelAmt = totalComAcrescimo / installments;
                       return (
                       <div className="space-y-2">
@@ -538,7 +543,7 @@ const RecorrenciasPage = memo(() => {
                               {Array.from({ length: installments }, (_, i) => {
                                 const d = new Date(form.startDate || new Date());
                                 d.setMonth(d.getMonth() + i);
-                                const baseAmt = parseBR(form.amount) / installments;
+                                const baseAmt = Number(form.amount) / installments;
                                 const jurosAmt = baseAmt * (acrescimo / 100);
                                 return (
                                   <tr key={i} className="bg-background hover:bg-muted/30 transition-colors">

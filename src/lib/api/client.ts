@@ -61,12 +61,31 @@ function createApiClient(): AxiosInstance {
 }
 
 function createPublicApiClient(): AxiosInstance {
-  return axios.create({
+  const instance = axios.create({
     baseURL: API_BASE_URL,
     headers: {
       "Content-Type": "application/json",
     },
   });
+
+  instance.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError<{ message?: string; code?: string; errors?: Record<string, string[]> }>) => {
+      const status = error.response?.status;
+      const data = error.response?.data;
+      const message = data?.message || error.message || "Erro desconhecido";
+      const code = data?.code;
+      const apiError: ApiError & { errors?: Record<string, string[]> } = {
+        message,
+        status: status ?? 0,
+        code,
+        errors: data?.errors,
+      };
+      return Promise.reject(apiError);
+    }
+  );
+
+  return instance;
 }
 
 export const http = createApiClient();

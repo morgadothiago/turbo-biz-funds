@@ -75,7 +75,7 @@ export default defineConfig(({ mode }) => ({
         // JS chunks NÃO são precacheados nem cacheados pelo SW.
         // Motivo: chunks têm hash no nome + Cache-Control: immutable no HTTP.
         // SW cacheando JS impedia reload automático de pegar chunks novos após deploy.
-        globPatterns: ['**/*.{html,css,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{css,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 300 * 1024,
         runtimeCaching: [
           {

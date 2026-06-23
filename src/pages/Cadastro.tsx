@@ -220,14 +220,54 @@ const Cadastro = () => {
     } catch (err: unknown) {
       sessionStorage.removeItem("postRegisterRedirect");
       sessionStorage.removeItem("pendingPaymentPlan");
-      const apiError = err as { message?: string; status?: number };
-      if (apiError?.status === 409) {
-        toast.error("Este email já está cadastrado. Redirecionando para o login...", { duration: 3000 });
-        setTimeout(() => navigate("/login", { replace: true }), 2000);
-      } else if (apiError?.status === 422) {
-        toast.error(apiError.message ?? "Dados inválidos. Verifique o formulário.");
+
+      type ApiErr = { message?: string; status?: number; code?: string; errors?: Record<string, string[]> };
+      const apiError = err as ApiErr;
+      const msg = apiError?.message ?? "";
+      const status = apiError?.status ?? 0;
+
+      if (status === 409) {
+        const isPhone = /phone|telefone|celular/i.test(msg) || apiError?.code === "PHONE_ALREADY_EXISTS";
+        const isEmail = /email/i.test(msg) || apiError?.code === "EMAIL_ALREADY_EXISTS";
+
+        if (isPhone) {
+          toast.error("Este telefone já está cadastrado. Use outro número ou faça login.", { duration: 4000 });
+          setErrors((prev) => ({ ...prev, phone: "Telefone já cadastrado" }));
+          setStep(1);
+        } else if (isEmail) {
+          toast.error("Este email já está cadastrado. Redirecionando para o login...", { duration: 3000 });
+          setTimeout(() => navigate("/login", { replace: true }), 2000);
+        } else {
+          // Conflito genérico — trata os dois campos
+          toast.error(msg || "Dados já cadastrados. Verifique email e telefone ou faça login.", { duration: 4000 });
+          setTimeout(() => navigate("/login", { replace: true }), 3000);
+        }
+      } else if (status === 422 || status === 400) {
+        // Erros de validação por campo vindos do backend
+        const fieldErrors = apiError?.errors;
+        if (fieldErrors) {
+          const mapped: FormErrors = {};
+          if (fieldErrors.email)    mapped.email    = fieldErrors.email[0];
+          if (fieldErrors.phone)    mapped.phone    = fieldErrors.phone[0];
+          if (fieldErrors.cpf)      mapped.cpf      = fieldErrors.cpf[0];
+          if (fieldErrors.name)     mapped.name     = fieldErrors.name[0];
+          if (fieldErrors.password) mapped.password = fieldErrors.password[0];
+          if (Object.keys(mapped).length > 0) {
+            setErrors(mapped);
+            setStep(1);
+            toast.error("Corrija os campos destacados e tente novamente.");
+          } else {
+            toast.error(msg || "Dados inválidos. Verifique o formulário.");
+          }
+        } else {
+          toast.error(msg || "Dados inválidos. Verifique o formulário.");
+        }
+      } else if (status === 429) {
+        toast.error("Muitas tentativas. Aguarde alguns minutos e tente novamente.", { duration: 5000 });
+      } else if (status === 0 || status >= 500) {
+        toast.error("Serviço indisponível no momento. Tente novamente em alguns instantes.", { duration: 4000 });
       } else {
-        toast.error(apiError?.message ?? "Erro ao criar conta. Tente novamente.");
+        toast.error(msg || "Erro ao criar conta. Tente novamente.");
       }
     } finally {
       setIsLoading(false);
