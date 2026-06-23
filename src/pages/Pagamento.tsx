@@ -589,7 +589,7 @@ function PixForm({
 const Pagamento = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const plan = (location.state as { plan?: string })?.plan ?? new URLSearchParams(location.search).get("plan") ?? "pro";
 
   // Mapeia IDs de UI para IDs que a API reconhece
@@ -663,22 +663,51 @@ const Pagamento = () => {
   // Auto-polling PIX a cada 5s enquanto pendente
   useEffect(() => {
     if (method !== "pix" || !intent || pixApproved) return;
+    const APPROVED_STATUSES = ["approved", "paid", "confirmed", "completed", "active", "APPROVED", "PAID", "CONFIRMED"];
+    const TERMINAL_STATUSES = ["expired", "cancelled", "declined", "failed", "EXPIRED", "CANCELLED", "DECLINED", "FAILED"];
+
+    const handleApproved = async () => {
+      setPixApproved(true);
+      sessionStorage.removeItem("pendingPaymentPlan");
+      sessionStorage.removeItem("postRegisterRedirect");
+      sessionStorage.setItem("paymentCompleted", "true");
+      try { await refreshUser(); } catch { /* ignora */ }
+      navigate("/pagamento-sucesso", { state: { plan, method } });
+    };
+
     const timer = setInterval(async () => {
       try {
+        // 1. Verifica status do pagamento
         const res = await api.get<{ data: { status: string } }>(apiEndpoints.payments.status(intent.paymentId));
-        const status = (res as any).data?.status ?? (res as any).status;
-        if (status === "approved") {
-          setPixApproved(true);
+        const raw = (res as any);
+        const status = (raw.data?.status ?? raw.status ?? raw.data?.payment_status ?? raw.payment_status ?? "") as string;
+        console.log("[PIX polling] payment status:", status, "| raw:", raw);
+
+        if (APPROVED_STATUSES.includes(status)) {
           clearInterval(timer);
-          sessionStorage.removeItem("pendingPaymentPlan");
-          sessionStorage.removeItem("postRegisterRedirect");
-          sessionStorage.setItem("paymentCompleted", "true");
-          navigate("/pagamento-sucesso", { state: { plan, method } });
-        } else if (status === "expired" || status === "cancelled" || status === "declined") {
-          clearInterval(timer);
+          handleApproved();
+          return;
         }
-      } catch {
-        // ignora erros de polling silenciosamente
+        if (TERMINAL_STATUSES.includes(status)) {
+          clearInterval(timer);
+          return;
+        }
+
+        // 2. Fallback: se status não reconhecido, verifica se plano já mudou para pro
+        try {
+          const meRes = await api.get<{ data: { plan?: string } }>("/v1/users/me");
+          const meRaw = (meRes as any);
+          const userPlan = meRaw.data?.plan ?? meRaw.plan ?? "";
+          console.log("[PIX polling] user plan:", userPlan);
+          if (userPlan && userPlan !== "free") {
+            clearInterval(timer);
+            handleApproved();
+          }
+        } catch {
+          // ignora erro no fallback
+        }
+      } catch (err) {
+        console.warn("[PIX polling] erro ao verificar status:", err);
       }
     }, 5000);
     return () => clearInterval(timer);
@@ -743,24 +772,49 @@ const Pagamento = () => {
   const handlePixStatusCheck = async () => {
     if (!intent) return;
     setIsCheckingStatus(true);
+    const APPROVED_STATUSES = ["approved", "paid", "confirmed", "completed", "active", "APPROVED", "PAID", "CONFIRMED"];
+    const TERMINAL_STATUSES = ["expired", "cancelled", "declined", "failed"];
     try {
       const res = await api.get<{ data: { status: string } }>(apiEndpoints.payments.status(intent.paymentId));
-      const status = ((res as any).data?.status ?? (res as any).status) as string;
-      if (status === "approved") {
+      const raw = res as any;
+      const status = (raw.data?.status ?? raw.status ?? raw.data?.payment_status ?? raw.payment_status ?? "") as string;
+      console.log("[PIX check manual] status:", status, "| raw:", raw);
+
+      if (APPROVED_STATUSES.includes(status)) {
         setPixApproved(true);
         sessionStorage.removeItem("pendingPaymentPlan");
         sessionStorage.removeItem("postRegisterRedirect");
         sessionStorage.setItem("paymentCompleted", "true");
+        try { await refreshUser(); } catch { /* ignora */ }
         navigate("/pagamento-sucesso", { state: { plan, method } });
-      } else if (status === "expired") {
-        toast.error("QR Code expirado. Volte e tente novamente.");
-      } else if (status === "declined") {
-        toast.error("Pagamento recusado. Tente com outro método.");
-      } else if (status === "cancelled") {
-        toast.error("Pagamento cancelado.");
-      } else {
-        toast.info("Pagamento ainda não identificado. Aguarde e tente novamente.");
+        return;
       }
+
+      if (TERMINAL_STATUSES.includes(status.toLowerCase())) {
+        if (status.toLowerCase() === "expired") toast.error("QR Code expirado. Volte e tente novamente.");
+        else if (status.toLowerCase() === "declined") toast.error("Pagamento recusado. Tente com outro método.");
+        else if (status.toLowerCase() === "cancelled") toast.error("Pagamento cancelado.");
+        else toast.error("Pagamento não processado. Tente novamente.");
+        return;
+      }
+
+      // Fallback: status desconhecido — verifica se plano já foi atualizado no backend
+      try {
+        const meRes = await api.get<{ data: { plan?: string } }>("/v1/users/me");
+        const meRaw = (meRes as any);
+        const userPlan = meRaw.data?.plan ?? meRaw.plan ?? "";
+        console.log("[PIX check manual] user plan:", userPlan);
+        if (userPlan && userPlan !== "free") {
+          setPixApproved(true);
+          sessionStorage.removeItem("pendingPaymentPlan");
+          sessionStorage.removeItem("postRegisterRedirect");
+          sessionStorage.setItem("paymentCompleted", "true");
+          navigate("/pagamento-sucesso", { state: { plan, method } });
+          return;
+        }
+      } catch { /* ignora */ }
+
+      toast.info("Pagamento ainda não identificado. Aguarde e tente novamente.");
     } catch {
       toast.error("Erro ao verificar pagamento. Tente novamente.");
     } finally {

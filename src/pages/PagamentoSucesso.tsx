@@ -25,7 +25,7 @@ const PagamentoSucesso = () => {
     "pro";
   const planLabel = PLAN_LABELS[plan] ?? "Pro";
   const hasInit = useRef(false);
-  const { refreshUser, user } = useAuth();
+  const { refreshUser, user, logout } = useAuth();
   const [seconds, setSeconds] = useState(REDIRECT_SECONDS);
   const [visible, setVisible] = useState(false);
   const planConfirmed = user?.plan !== "free";
@@ -59,12 +59,13 @@ const PagamentoSucesso = () => {
 
   useEffect(() => {
     if (seconds <= 0) {
-      navigate("/dashboard", { replace: true });
+      logout();
+      navigate("/login", { replace: true });
       return;
     }
     const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
     return () => clearTimeout(t);
-  }, [seconds, navigate]);
+  }, [seconds, navigate, logout]);
 
   const circumference = 2 * Math.PI * 26;
   const progress = (seconds / REDIRECT_SECONDS) * circumference;
@@ -202,7 +203,7 @@ const PagamentoSucesso = () => {
 
             {/* CTA with countdown */}
             <button
-              onClick={() => navigate("/dashboard", { replace: true })}
+              onClick={() => { logout(); navigate("/login", { replace: true }); }}
               className="w-full h-12 flex items-center justify-center gap-3 rounded-xl font-semibold text-white text-sm transition-all active:scale-[.98]"
               style={{
                 background: "linear-gradient(135deg,#059669,#10b981)",
