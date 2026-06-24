@@ -7,7 +7,6 @@ import { lazyWithRetry } from "@/lib/lazyWithRetry";
 // Lazy load components below the fold for better performance
 const Problem = lazyWithRetry(() => import("@/components/landing/Problem"));
 const HowItWorks = lazyWithRetry(() => import("@/components/landing/HowItWorks"));
-const WhatsAppConnect = lazyWithRetry(() => import("@/components/landing/WhatsAppConnect"));
 const Testimonials = lazyWithRetry(() => import("@/components/landing/Testimonials"));
 const Pricing = lazyWithRetry(() => import("@/components/landing/Pricing"));
 const FAQ = lazyWithRetry(() => import("@/components/landing/FAQ"));
@@ -75,10 +74,6 @@ const Index = () => {
 
         <LazySection height={600}>
           <HowItWorks />
-        </LazySection>
-
-        <LazySection height={600}>
-          <WhatsAppConnect />
         </LazySection>
 
         <LazySection height={700}>

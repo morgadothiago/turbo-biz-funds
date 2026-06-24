@@ -1,6 +1,104 @@
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import { Table2, Brain, CreditCard, HelpCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n-provider";
+
+// ── Animated WhatsApp Chat ──────────────────────────────────────────────────
+const CHAT_MESSAGES = [
+  { id: 1, from: "user", text: "Gastei R$ 89,90 no supermercado 🛒", time: "09:14" },
+  { id: 2, from: "bot",  text: "✅ Registrado!\nSupermercado — R$ 89,90\nCategoria: Alimentação", time: "09:14" },
+  { id: 3, from: "user", text: "Qual meu saldo esse mês?", time: "09:15" },
+  { id: 4, from: "bot",  text: "💰 Saldo atual: R$ 1.840,00\n📉 Gastos: R$ 1.260,00\n🎯 Meta: R$ 3.000,00", time: "09:15" },
+  { id: 5, from: "user", text: "Recebi meu salário R$ 4.500,00 🎉", time: "09:16" },
+  { id: 6, from: "bot",  text: "🎉 Receita registrada!\nR$ 4.500,00 — Salário\nNovo saldo: R$ 6.340,00 💚", time: "09:16" },
+];
+
+function TypingDots() {
+  return (
+    <div className="flex justify-start">
+      <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-none shadow-sm">
+        <div className="flex gap-1 items-center h-4">
+          {[0,1,2].map(i => (
+            <span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: `${i*0.15}s` }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChatAnimation() {
+  const [visible, setVisible] = useState<number[]>([]);
+  const [typing, setTyping] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const wait = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+
+    async function run() {
+      while (!cancelled) {
+        setVisible([]); setTyping(false);
+        await wait(500);
+        for (const msg of CHAT_MESSAGES) {
+          if (cancelled) return;
+          if (msg.from === "bot") { setTyping(true); await wait(900); if (cancelled) return; setTyping(false); }
+          setVisible(p => [...p, msg.id]);
+          await wait(1500);
+        }
+        await wait(3000);
+      }
+    }
+    run();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-2.5 justify-end min-h-full">
+      {CHAT_MESSAGES.filter(m => visible.includes(m.id)).map(msg => (
+        <div key={msg.id} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"} animate-fadeIn`}>
+          <div className={`px-3 py-2 rounded-2xl shadow-sm max-w-[80%] text-[13px] leading-snug text-gray-800
+            ${msg.from === "user" ? "bg-[#DCF8C6] rounded-tr-none" : "bg-white rounded-tl-none"}`}>
+            <p className="whitespace-pre-line">{msg.text}</p>
+            <span className="text-[10px] text-gray-400 block text-right mt-0.5">
+              {msg.time}{msg.from === "user" ? " ✓✓" : ""}
+            </span>
+          </div>
+        </div>
+      ))}
+      {typing && <TypingDots />}
+    </div>
+  );
+}
+
+function PhoneMockup() {
+  return (
+    <div className="relative mx-auto w-[280px] sm:w-[300px]">
+      {/* Glow */}
+      <div className="absolute -inset-4 bg-[#25D366]/20 rounded-[3rem] blur-2xl" />
+      {/* Phone frame */}
+      <div className="relative z-10 bg-[#111827] rounded-[2.5rem] p-2 shadow-2xl ring-1 ring-white/10">
+        <div className="rounded-[2rem] overflow-hidden bg-[#ECE5DD]" style={{ height: 520 }}>
+          {/* Header */}
+          <div className="bg-[#075E54] px-4 py-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#25D366] flex items-center justify-center text-white font-bold text-sm shrink-0">DC</div>
+            <div>
+              <p className="text-white font-semibold text-sm leading-none">DoutorCash IA</p>
+              <p className="text-white/70 text-xs mt-0.5">online agora</p>
+            </div>
+          </div>
+          {/* Messages */}
+          <div className="flex flex-col justify-end p-3 overflow-hidden" style={{ height: 432 }}>
+            <ChatAnimation />
+          </div>
+        </div>
+      </div>
+      {/* Floating badge */}
+      <div className="absolute -bottom-3 -right-3 bg-[#25D366] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg z-20 flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+        Ao vivo
+      </div>
+    </div>
+  );
+}
 
 const Problem = memo(() => {
   const { t, locale } = useI18n();
@@ -112,28 +210,34 @@ const Problem = memo(() => {
       {/* Nova faixa intermediária - Sua vida organizada sem esforço */}
       <div className="mb-16">
         <div className="bg-white/10 backdrop-blur-sm rounded-3xl mx-4 md:mx-8 p-8 md:p-12 border border-white/15">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-              {t("landing", "organizedLifeTitle")}
-            </h2>
-            <p className="text-base md:text-lg text-white/80 mb-6">
-              {t("landing", "organizedLifeSubtitle")}
-            </p>
-            <p className="text-lg md:text-xl font-semibold text-[#E5E7EB]">
-              {t("landing", "organizedLifeClosing")}
-            </p>
-          </div>
-          
-          {/* Imagem do wireframe */}
-          <div className="mt-8 max-w-4xl mx-auto">
-            <img
-              src="/wirefrane.png"
-              alt="Demo do aplicativo"
-              className="rounded-xl w-full h-auto"
-              style={{ maxHeight: '500px', objectFit: 'contain' }}
-              loading="lazy"
-              decoding="async"
-            />
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            {/* Text */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-sm font-medium mb-5">
+                <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse" />
+                WhatsApp integrado
+              </div>
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
+                {t("landing", "organizedLifeTitle")}
+              </h2>
+              <p className="text-base md:text-lg text-white/70 mb-4">
+                {t("landing", "organizedLifeSubtitle")}
+              </p>
+              <p className="text-lg md:text-xl font-semibold text-white/90">
+                {t("landing", "organizedLifeClosing")}
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 lg:justify-start justify-center">
+                {["Registre gastos por texto", "Consulte saldo na hora", "Receba relatórios automáticos"].map(f => (
+                  <div key={f} className="flex items-center gap-2 text-sm text-white/70">
+                    <span className="text-[#25D366]">✓</span> {f}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Phone */}
+            <div className="shrink-0">
+              <PhoneMockup />
+            </div>
           </div>
         </div>
       </div>
