@@ -925,7 +925,9 @@ const Pagamento = () => {
                   ) : (
                     <div className="flex items-baseline gap-1 mb-2">
                       <span className="text-xl sm:text-3xl font-bold text-green-400">{toDisplay(effectivePrice)}</span>
-                      <span className="text-sm text-[#94A3B8]">{effectivePeriod}</span>
+                      {!(isAnnualPlan && method === "pix") && (
+                        <span className="text-sm text-[#94A3B8]">{effectivePeriod}</span>
+                      )}
                     </div>
                   )}
                   {isAnnualPlan && method === "pix" && (
