@@ -745,7 +745,9 @@ const Pagamento = () => {
           failed:      "Falha no processamento. Tente novamente ou use o Pix.",
           cancelled:   "Pagamento cancelado. Tente novamente.",
         };
-        setCardError(statusMsgMap[confirmStatus] ?? `Pagamento não confirmado (status: ${confirmStatus}). Tente novamente.`);
+        const msg = statusMsgMap[confirmStatus] ?? `Pagamento não confirmado (status: ${confirmStatus}). Tente novamente.`;
+        setCardError(msg);
+        toast.error(msg, { duration: 6000 });
         return;
       }
 
@@ -758,15 +760,17 @@ const Pagamento = () => {
     } catch (err: unknown) {
       const e = err as { message?: string; status?: number; code?: string; response?: { data?: unknown } };
       let msg: string;
-      if (e?.code === "CARD_DECLINED") msg = "Cartão recusado pela operadora. Verifique os dados ou use outro cartão.";
-      else if (e?.code === "INSUFFICIENT_FUNDS") msg = "Saldo insuficiente. Use outro cartão ou pague via Pix.";
-      else if (e?.code === "INVALID_CARD") msg = "Dados do cartão inválidos. Verifique número, validade e CVV.";
-      else if (e?.code === "EXPIRED_CARD") msg = "Cartão vencido. Use outro cartão.";
-      else if (e?.code === "ServiceUnavailableException" || e?.status === 503) msg = "Serviço indisponível no momento. Tente novamente em alguns minutos ou use o Pix.";
-      else if (e?.status === 402) msg = e.message ?? "Pagamento recusado pela operadora.";
-      else if (e?.status === 422) msg = e.message ?? "Dados de pagamento inválidos. Verifique as informações.";
-      else msg = e?.message ?? "Erro ao processar pagamento. Tente novamente.";
+      let toastIcon: string | undefined;
+      if (e?.code === "CARD_DECLINED") { msg = "Cartão recusado pela operadora. Verifique os dados ou use outro cartão."; toastIcon = "💳"; }
+      else if (e?.code === "INSUFFICIENT_FUNDS") { msg = "Saldo insuficiente. Use outro cartão ou pague via Pix."; toastIcon = "💸"; }
+      else if (e?.code === "INVALID_CARD") { msg = "Dados do cartão inválidos. Verifique número, validade e CVV."; toastIcon = "❌"; }
+      else if (e?.code === "EXPIRED_CARD") { msg = "Cartão vencido. Use outro cartão."; toastIcon = "⏱️"; }
+      else if (e?.code === "ServiceUnavailableException" || e?.status === 503) { msg = "Serviço indisponível. Tente em alguns minutos ou use o Pix."; toastIcon = "⚠️"; }
+      else if (e?.status === 402) { msg = e.message ?? "Pagamento recusado pela operadora."; toastIcon = "💳"; }
+      else if (e?.status === 422) { msg = e.message ?? "Dados de pagamento inválidos. Verifique as informações."; toastIcon = "❌"; }
+      else { msg = e?.message ?? "Erro ao processar pagamento. Tente novamente."; toastIcon = "⚠️"; }
       setCardError(msg);
+      toast.error(`${toastIcon} ${msg}`, { duration: 7000 });
     } finally {
       setIsConfirming(false);
     }
