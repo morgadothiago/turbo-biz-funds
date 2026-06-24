@@ -30,7 +30,6 @@ async function fetchGoals(): Promise<Goal[]> {
     return raw.map((g: any, i: number) => mapGoal(g, i));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error("[fetchGoals] Erro:", error);
     if (error?.status === 404 || error?.status === 500) {
       return [];
     }
@@ -69,8 +68,6 @@ export function useCreateGoal() {
         target_date: payload.deadline,
         goal_category: payload.category || "Geral",
       };
-      
-      console.log("[useCreateGoal] Enviando payload:", JSON.stringify(backendPayload));
       
       const res = await api.post<ApiItemResponse<Goal>>(apiEndpoints.goals.create, backendPayload);
       if (res?.data) res.data = mapGoal(res.data);

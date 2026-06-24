@@ -6,15 +6,6 @@ import "./index.css";
 
 inject();
 
-if (import.meta.env.DEV) {
-  window.addEventListener("error", (event) => {
-    console.error("Global error:", event.error);
-  });
-
-  window.addEventListener("unhandledrejection", (event) => {
-    console.error("Unhandled promise rejection:", event.reason);
-  });
-}
 
 const rootElement = document.getElementById("root");
 

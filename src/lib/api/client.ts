@@ -5,9 +5,6 @@ import { storage } from "../storage";
 // Em produção: VITE_API_URL deve ser a URL completa da API
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
-if (import.meta.env.PROD && !API_BASE_URL) {
-  console.warn("[config] VITE_API_URL não definida em produção. As chamadas de API usarão URL relativa.");
-}
 
 export interface ApiError {
   message: string;

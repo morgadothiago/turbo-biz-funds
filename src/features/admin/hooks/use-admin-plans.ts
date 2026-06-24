@@ -67,7 +67,6 @@ async function fetchAdminPlans(): Promise<ApiAdminPlansResponse> {
   const res = await api.get<ApiAdminPlansResponse | AdminPlan[]>(apiEndpoints.admin.plans);
   // API may return a flat array or { data: [], subscriptions: [] }
   const raw: any[] = Array.isArray(res) ? res : ((res as any)?.data ?? []);
-  console.log("[fetchAdminPlans] raw response sample:", raw[0]);
   const plans: AdminPlan[] = raw.map((p: any) => ({
     ...p,
     id: resolveId(p),
@@ -117,7 +116,6 @@ export function useCreatePlan() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreatePlanPayload) => {
-      console.log("[useCreatePlan] payload:", JSON.stringify(payload, null, 2));
       return api.post(apiEndpoints.admin.plans, payload);
     },
     onSuccess: () => {

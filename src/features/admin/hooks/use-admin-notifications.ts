@@ -76,14 +76,6 @@ async function fetchActivity(): Promise<AdminNotification[]> {
       api.get(apiEndpoints.admin.subscriptions),
     ]);
 
-    // Log individual API errors for debugging
-    if (usersRes.status === 'rejected') {
-      console.error('[useAdminNotifications] Users API failed:', usersRes.reason);
-    }
-    if (subsRes.status === 'rejected') {
-      console.error('[useAdminNotifications] Subscriptions API failed:', subsRes.reason);
-    }
-
     const notifications: AdminNotification[] = [];
     let idx = 0;
 
@@ -128,10 +120,8 @@ async function fetchActivity(): Promise<AdminNotification[]> {
         });
       });
 
-    console.log("[useAdminNotifications] fetched:", notifications.length, "notifications (seen:", seenIds.size, "cleared:", clearedIds.size, ")");
     return notifications;
-  } catch (error) {
-    console.error("[useAdminNotifications] Error:", error);
+  } catch {
     return [];
   }
 }

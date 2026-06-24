@@ -27,19 +27,8 @@ export function preloadAuthPages() {
 export function initializePerformanceMonitoring() {
   if (typeof window !== 'undefined' && 'PerformanceObserver' in window) {
     const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (entry.entryType === 'largest-contentful-paint') {
-          console.log(`LCP: ${entry.startTime.toFixed(2)}ms`);
-        }
-        if (entry.entryType === 'first-input') {
-          console.log(`FID: ${entry.startTime.toFixed(2)}ms`);
-        }
-        if (entry.entryType === 'layout-shift') {
-          const layoutShiftEntry = entry as PerformanceEntry & { hadRecentInput: boolean; value: number };
-          if (!layoutShiftEntry.hadRecentInput) {
-            console.log(`CLS: ${layoutShiftEntry.value.toFixed(4)}`);
-          }
-        }
+      for (const _entry of list.getEntries()) {
+        // performance entries collected silently
       }
     });
 
@@ -57,24 +46,7 @@ interface WebVitalsMetric {
   id: string;
 }
 
-export function reportWebVitals(metric: WebVitalsMetric) {
-  switch (metric.name) {
-    case 'FCP':
-      console.log(`FCP: ${metric.value}`);
-      break;
-    case 'LCP':
-      console.log(`LCP: ${metric.value}`);
-      break;
-    case 'FID':
-      console.log(`FID: ${metric.value}`);
-      break;
-    case 'CLS':
-      console.log(`CLS: ${metric.value}`);
-      break;
-    case 'TTFB':
-      console.log(`TTFB: ${metric.value}`);
-      break;
-  }
+export function reportWebVitals(_metric: WebVitalsMetric) {
 }
 
 export function optimizeImages() {

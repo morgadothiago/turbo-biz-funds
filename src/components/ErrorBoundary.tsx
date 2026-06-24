@@ -20,11 +20,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    if (import.meta.env.DEV) {
-      console.error("ErrorBoundary caught an error:", error, errorInfo);
-    }
-    // Em produção: enviar para serviço de monitoramento (ex: Sentry)
+  public componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
   }
 
   private handleReset = () => {

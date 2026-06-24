@@ -35,7 +35,6 @@ async function fetchCards(): Promise<CreditCard[]> {
     return raw.map((r: any) => mapCard(r));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error("[fetchCards] Erro:", error);
     if (error?.status === 404 || error?.status === 500) {
       return [];
     }

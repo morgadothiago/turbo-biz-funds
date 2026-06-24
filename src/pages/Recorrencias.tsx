@@ -133,7 +133,6 @@ const RecorrenciasPage = memo(() => {
       onError: (error: unknown) => {
         const msg = (error as { message?: string })?.message;
         toast.error(msg ? `Erro: ${msg}` : "Erro ao criar recorrência");
-        console.error("[handleCreate] erro:", error);
       },
     });
   };

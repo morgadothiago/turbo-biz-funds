@@ -72,8 +72,7 @@ const PLAN_COLORS = ["#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ef4444"];
 interface ApiAdminPlanSummary { id: string; name: string; subscribers: number }
 
 async function fetchAdminDashboard(): Promise<AdminDashboardData> {
-  try {
-    const [statsRes, plansRes, usersRes, subscriptionsRes] = await Promise.allSettled([
+  const [statsRes, plansRes, usersRes, subscriptionsRes] = await Promise.allSettled([
       api.get<any>(apiEndpoints.admin.stats),
       api.get<{ data: ApiAdminPlanSummary[] } | ApiAdminPlanSummary[]>(apiEndpoints.admin.plans),
       api.get<{ data: any[] } | any[]>(`${apiEndpoints.admin.users}?limit=5`),
@@ -189,10 +188,6 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
       recentActivity,
       partialErrors,
     };
-  } catch (error) {
-    console.error("Erro no fetchAdminDashboard:", error);
-    throw error;
-  }
 }
 
 export function useAdminDashboard() {

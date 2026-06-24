@@ -103,7 +103,6 @@ const GoalsPage = memo(() => {
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (error: any) => {
-          console.error("[Goals] Erro ao criar meta:", error);
           // Se for 422, mostra mensagem de validação
           if (error?.status === 422) {
             const code = error?.code;

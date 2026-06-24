@@ -47,7 +47,7 @@ export const storage: StorageUtils = {
     try {
       localStorage.setItem(STORAGE_KEYS.TOKEN, token);
     } catch {
-      if (import.meta.env.DEV) console.error("Erro ao salvar token");
+      // ignore
     }
   },
 
@@ -55,7 +55,7 @@ export const storage: StorageUtils = {
     try {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
     } catch {
-      if (import.meta.env.DEV) console.error("Erro ao remover token");
+      // ignore
     }
   },
 
@@ -72,7 +72,7 @@ export const storage: StorageUtils = {
     try {
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
     } catch {
-      if (import.meta.env.DEV) console.error("Erro ao salvar usuário");
+      // ignore
     }
   },
 
@@ -80,7 +80,7 @@ export const storage: StorageUtils = {
     try {
       localStorage.removeItem(STORAGE_KEYS.USER);
     } catch {
-      if (import.meta.env.DEV) console.error("Erro ao remover usuário");
+      // ignore
     }
   },
 
@@ -89,7 +89,7 @@ export const storage: StorageUtils = {
       localStorage.clear();
       sessionStorage.clear();
     } catch {
-      if (import.meta.env.DEV) console.error("Erro ao limpar storage");
+      // ignore
     }
   },
 };

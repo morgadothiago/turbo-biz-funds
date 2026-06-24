@@ -109,10 +109,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const claims = decodeJwt(token);
       const user = userFromClaims(claims, email);
 
-      console.log("[Auth] Resposta da API (login):", response);
-      console.log("[Auth] Claims do JWT:", claims);
-      console.log("[Auth] Usuário:", user);
-
       storage.setToken(token);
       // Preserve paid plan from localStorage — backend may not have updated it yet (webhook delay)
       const savedUser = storage.getUser();
@@ -136,7 +132,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const raw = response as unknown as Record<string, unknown>;
     const nested = (raw.data ?? {}) as Record<string, unknown>;
     const token = (raw.accessToken ?? raw.token ?? nested.accessToken ?? nested.token) as string | undefined;
-    console.log("[Auth] Resposta da API (cadastro):", response);
     if (token) {
       const claims = decodeJwt(token);
       const user = userFromClaims(claims, payload.email);
@@ -145,8 +140,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user.name = (userData.name as string) || payload.name;
       if (payload.phone) user.phone = payload.phone;
       if (payload.cpf) user.cpf = payload.cpf;
-      console.log("[Auth] Claims do JWT (cadastro):", claims);
-      console.log("[Auth] Usuário (cadastro):", user);
       storage.setToken(token);
       const enriched = await fetchAndMergeMe(user);
       storage.setUser(enriched);

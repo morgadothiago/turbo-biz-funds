@@ -25,7 +25,6 @@ async function fetchActiveRecurrences(): Promise<Recurrence[]> {
     return raw.map((r: any) => mapRecurrence(r));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error("[fetchActiveRecurrences] Erro:", error);
     if (error?.status === 404 || error?.status === 500) {
       return [];
     }
@@ -63,8 +62,6 @@ export function useCreateRecurrence() {
         startDate: payload.startDate,
         endDate: payload.endDate || null,
       };
-      
-      console.log("[useCreateRecurrence] Enviando payload:", JSON.stringify(backendPayload));
       
       const res = await api.post<ApiItemResponse<Recurrence>>(apiEndpoints.recurrences.create, backendPayload);
       return res;
