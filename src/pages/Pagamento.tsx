@@ -752,6 +752,8 @@ const Pagamento = () => {
       sessionStorage.removeItem("pendingPaymentPlan");
       sessionStorage.removeItem("postRegisterRedirect");
       sessionStorage.setItem("paymentCompleted", "true");
+      activatePro();
+      try { await refreshUser(); } catch { /* ignora */ }
       navigate("/pagamento-sucesso", { state: { plan, method } });
     } catch (err: unknown) {
       const e = err as { message?: string; status?: number; code?: string; response?: { data?: unknown } };
