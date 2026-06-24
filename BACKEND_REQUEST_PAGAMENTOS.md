@@ -164,6 +164,5 @@ async getPaymentStatus(paymentId: string) {
 ---
 
 ## Usuários que já pagaram e precisam de correção manual no banco
-| Usuário | ID | Ação |
-|---|---|---|
-| Larissa | `b47aa460-1259-484b-b006-07295ac489b9` | Setar `plan = "pro"` |
+
+Ver lista no canal interno — não registrar dados pessoais em arquivos do repositório.

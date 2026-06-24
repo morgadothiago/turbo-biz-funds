@@ -70,7 +70,9 @@ export const storage: StorageUtils = {
 
   setUser: (user: User): void => {
     try {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      // Strip sensitive fields before persisting (LGPD)
+      const { cpf: _cpf, ...safeUser } = user;
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(safeUser));
     } catch {
       // ignore
     }
@@ -86,7 +88,8 @@ export const storage: StorageUtils = {
 
   clear: (): void => {
     try {
-      localStorage.clear();
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
       sessionStorage.clear();
     } catch {
       // ignore

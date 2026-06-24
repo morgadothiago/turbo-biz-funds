@@ -123,5 +123,4 @@ GET /v1/users/me → plan: "free"   ← nunca muda
 - [ ] `getPaymentStatus()` consulta `efi.pixDetailCharge({ txid })` quando status é "pending"
 - [ ] Quando `situacao === "CONCLUIDA"`: atualiza `payment.status = "approved"` + `user.plan = "pro"`
 - [ ] `GET /v1/users/me` lê `plan` do banco (não do JWT)
-- [ ] Corrigir manualmente no banco os usuários que já pagaram:
-  - Larissa: userId `b47aa460-1259-484b-b006-07295ac489b9` → `plan = "pro"`
+- [ ] Corrigir manualmente no banco os usuários que já pagaram (ver lista no canal interno)
