@@ -1,6 +1,90 @@
 import { MessageCircle, Image, Mic, FileText, CheckCircle2, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReveal } from "@/hooks/use-reveal";
+import { useState, useEffect } from "react";
+
+const MESSAGES = [
+  { id: 1, from: "user",  text: "Gastei R$ 89,90 no supermercado hoje 🛒", time: "09:14" },
+  { id: 2, from: "bot",   text: "✅ Registrado! Supermercado — R$ 89,90 na categoria Alimentação.", time: "09:14" },
+  { id: 3, from: "user",  text: "Qual meu saldo esse mês?", time: "09:15" },
+  { id: 4, from: "bot",   text: "💰 Saldo atual: R$ 1.840,00\n📉 Gastos: R$ 1.260,00\n🎯 Meta mensal: R$ 3.000,00", time: "09:15" },
+  { id: 5, from: "user",  text: "Recebi meu salário de R$ 4.500,00 hoje", time: "09:16" },
+  { id: 6, from: "bot",   text: "🎉 Receita registrada! R$ 4.500,00 — Salário.\nNovo saldo: R$ 6.340,00 💚", time: "09:16" },
+];
+
+const TYPING_DELAY = 900;
+const MESSAGE_DELAY = 1400;
+const RESTART_DELAY = 3000;
+
+function TypingIndicator() {
+  return (
+    <div className="flex justify-start">
+      <div className="bg-white px-4 py-3 rounded-lg rounded-tl-none shadow-sm">
+        <div className="flex gap-1 items-center h-4">
+          {[0, 1, 2].map((i) => (
+            <span key={i} className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WhatsAppChat() {
+  const [visible, setVisible] = useState<number[]>([]);
+  const [typing, setTyping] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function run() {
+      while (!cancelled) {
+        setVisible([]);
+        setTyping(false);
+        await delay(600);
+
+        for (const msg of MESSAGES) {
+          if (cancelled) return;
+          if (msg.from === "bot") {
+            setTyping(true);
+            await delay(TYPING_DELAY);
+            if (cancelled) return;
+            setTyping(false);
+          }
+          setVisible((prev) => [...prev, msg.id]);
+          await delay(MESSAGE_DELAY);
+        }
+
+        await delay(RESTART_DELAY);
+      }
+    }
+
+    run();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div className="flex-1 p-3 space-y-2.5 overflow-hidden flex flex-col justify-end">
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "20px 20px" }}
+      />
+      {MESSAGES.filter((m) => visible.includes(m.id)).map((msg) => (
+        <div key={msg.id} className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"} animate-fadeIn`}>
+          <div className={`px-3 py-2 rounded-lg shadow-sm max-w-[82%] text-sm text-gray-800 ${msg.from === "user" ? "bg-[#DCF8C6] rounded-tr-none" : "bg-white rounded-tl-none"}`}>
+            <p className="whitespace-pre-line leading-snug">{msg.text}</p>
+            <span className="text-[10px] text-gray-400 block text-right mt-1">{msg.time} {msg.from === "user" ? "✓✓" : ""}</span>
+          </div>
+        </div>
+      ))}
+      {typing && <TypingIndicator />}
+    </div>
+  );
+}
+
+function delay(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
 const WhatsAppConnect = () => {
   const contentRef = useReveal();
@@ -72,64 +156,17 @@ const WhatsAppConnect = () => {
                     </div>
                   </div>
 
-                  {/* Chat Messages */}
-                  <div className="flex-1 p-4 space-y-4 overflow-hidden relative">
-                    {/* Background Pattern Overlay */}
-                    <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
-                      style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-
-                    <div className="flex justify-end">
-                      <div className="bg-[#DCF8C6] p-3 rounded-lg rounded-tr-none shadow-sm max-w-[85%] text-sm text-gray-800">
-                        <p className="mb-2">Pode cadastrar este almoço?</p>
-                        <div className="relative h-40 w-48 bg-white border border-gray-200 rounded-sm shadow-inner overflow-hidden flex flex-col p-2">
-                          <div className="w-12 h-1 invisible" /> {/* Spacer */}
-                          <div className="flex flex-col gap-1.5">
-                            <div className="h-2 w-3/4 bg-gray-100 rounded" />
-                            <div className="h-2 w-1/2 bg-gray-100 rounded" />
-                            <div className="mt-2 h-0.5 w-full bg-gray-50 bg-dashed" />
-                            <div className="flex justify-between mt-1">
-                              <div className="h-2 w-1/3 bg-gray-200 rounded" />
-                              <div className="h-2 w-1/4 bg-gray-200 rounded" />
-                            </div>
-                            <div className="flex justify-between">
-                              <div className="h-2 w-1/2 bg-gray-100 rounded" />
-                              <div className="h-2 w-1/4 bg-gray-100 rounded" />
-                            </div>
-                            <div className="mt-4 flex justify-between items-center border-t border-gray-100 pt-2">
-                              <div className="h-3 w-1/3 bg-gray-300 rounded" />
-                              <div className="h-4 w-1/2 bg-primary/20 rounded" />
-                            </div>
-                          </div>
-                          {/* Receipt "jagged" bottom effect */}
-                          <div className="absolute bottom-0 left-0 right-0 h-2 bg-[linear-gradient(45deg,transparent_75%,#fff_75%),linear-gradient(-45deg,transparent_75%,#fff_75%)] bg-[length:10px_10px]" />
-                        </div>
-                        <span className="text-[10px] text-gray-500 block text-right mt-2">12:30 ✓✓</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-start">
-                      <div className="bg-white p-3 rounded-lg rounded-tl-none shadow-sm max-w-[85%] text-sm text-gray-800">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Mic className="w-4 h-4 text-gray-500" />
-                          <span className="text-xs text-gray-500">Áudio recebido (0:15)</span>
-                        </div>
-                        <p>Entendido! Almoço de R$ 45,90 no Restaurante Central cadastrado.</p>
-                        <span className="text-[10px] text-gray-500 block text-right mt-1">12:30</span>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-start">
-                      <div className="bg-white p-3 rounded-lg rounded-tl-none shadow-sm max-w-[85%] text-sm text-gray-800">
-                        <p className="font-medium text-success mb-1">Relatório Diário 📊</p>
-                        <p>Seu saldo atual é de <span className="font-bold">R$ 1.250,00</span>.</p>
-                        <span className="text-[10px] text-gray-500 block text-right mt-1">18:00</span>
-                      </div>
-                    </div>
+                  {/* Animated Chat */}
+                  <div className="flex-1 relative overflow-hidden flex flex-col justify-end pb-2">
+                    <WhatsAppChat />
                   </div>
 
-                  {/* Floating Action Button mimic */}
-                  <div className="absolute bottom-4 right-4 w-12 h-12 bg-[#25D366] rounded-full shadow-lg flex items-center justify-center text-white z-20">
-                    <Mic className="w-6 h-6" />
+                  {/* Input bar */}
+                  <div className="bg-[#F0F0F0] px-3 py-2 flex items-center gap-2 border-t border-gray-200">
+                    <div className="flex-1 bg-white rounded-full px-3 py-1.5 text-xs text-gray-400">Mensagem</div>
+                    <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center shrink-0">
+                      <Mic className="w-4 h-4 text-white" />
+                    </div>
                   </div>
                 </div>
               </div>

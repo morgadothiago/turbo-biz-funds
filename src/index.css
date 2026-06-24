@@ -264,4 +264,6 @@ input.auth-input:-webkit-autofill:active {
   .animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
   .animate-float { animation: float 4s ease-in-out infinite; }
   .animate-spin-slow { animation: spin 30s linear infinite; }
+  .animate-fadeIn { animation: fadeIn 0.35s ease-out both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 }
