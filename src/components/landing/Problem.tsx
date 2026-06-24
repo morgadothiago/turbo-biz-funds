@@ -208,28 +208,29 @@ const Problem = memo(() => {
   return (
     <section className="py-16 md:py-24 bg-transparent">
       {/* Nova faixa intermediária - Sua vida organizada sem esforço */}
-      <div className="mb-16">
-        <div className="bg-white/10 backdrop-blur-sm rounded-3xl mx-4 md:mx-8 p-8 md:p-12 border border-white/15">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
+      <div className="mb-20">
+        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.03] backdrop-blur-sm rounded-3xl mx-4 md:mx-8 p-10 md:p-16 border border-white/10 shadow-2xl shadow-black/30">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
             {/* Text */}
             <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-sm font-medium mb-5">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-sm font-semibold mb-6">
                 <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse" />
                 WhatsApp integrado
               </div>
-              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
+              <h2 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight tracking-tight">
                 {t("landing", "organizedLifeTitle")}
               </h2>
-              <p className="text-base md:text-lg text-white/70 mb-4">
+              <p className="text-base md:text-lg text-white/60 mb-4 leading-relaxed">
                 {t("landing", "organizedLifeSubtitle")}
               </p>
-              <p className="text-lg md:text-xl font-semibold text-white/90">
+              <p className="text-lg md:text-xl font-semibold text-white/85">
                 {t("landing", "organizedLifeClosing")}
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 lg:justify-start justify-center">
-                {["Registre gastos por texto", "Consulte saldo na hora", "Receba relatórios automáticos"].map(f => (
-                  <div key={f} className="flex items-center gap-2 text-sm text-white/70">
-                    <span className="text-[#25D366]">✓</span> {f}
+              <div className="mt-8 flex flex-col gap-3 lg:items-start items-center">
+                {["Registre gastos por texto, áudio ou foto", "Consulte saldo e metas na hora", "Receba relatórios automáticos todo mês"].map(f => (
+                  <div key={f} className="flex items-center gap-3 text-sm text-white/70">
+                    <span className="w-5 h-5 rounded-full bg-[#25D366]/20 border border-[#25D366]/40 flex items-center justify-center text-[#25D366] text-xs font-bold shrink-0">✓</span>
+                    {f}
                   </div>
                 ))}
               </div>
@@ -244,13 +245,13 @@ const Problem = memo(() => {
 
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-[#E5E7EB] text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-[#E5E7EB] text-sm font-semibold mb-5 uppercase tracking-widest">
             {t("landing", "problemSubtitle")}
           </span>
-          <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6">
+          <h2 className="text-2xl md:text-4xl font-black text-white mb-4 md:mb-6 tracking-tight">
             {t("landing", "problemTitle")}
           </h2>
-          <p className="text-base md:text-lg text-white/60">
+          <p className="text-base md:text-lg text-white/50">
             {t("landing", "problemDescription")}
           </p>
         </div>

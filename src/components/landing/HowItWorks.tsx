@@ -100,27 +100,23 @@ DashboardCard.displayName = "DashboardCard";
 
 const HowItWorks = memo(() => {
   return (
-    <section id="como-funciona" className="py-16 md:py-24 bg-[#0B1F3A]">
+    <section id="como-funciona" className="py-16 md:py-24" style={{ background: "linear-gradient(to bottom, #030712, #0B1F3A 30%, #0B1F3A 70%, #030712)" }}>
       <div className="container mx-auto px-4">
-        {/* Section header — animate-fade-in-up quando carrega (lazy, já está no viewport) */}
-        <div className="max-w-3xl mx-auto text-center mb-12 animate-fade-in-up">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-blue-300 text-sm font-medium mb-4 uppercase tracking-wide">
+        <div className="max-w-3xl mx-auto text-center mb-14">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-blue-300 text-sm font-semibold mb-5 uppercase tracking-widest">
             Como funciona
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
             Simples como mandar uma mensagem
           </h2>
-          <p className="text-lg text-white/60">
+          <p className="text-lg text-white/50">
             Você conversa, o sistema organiza. Sem planilhas, sem complicação.
           </p>
         </div>
 
         {/* 3-card container */}
-        <div
-          className="max-w-5xl mx-auto animate-fade-in-up"
-          style={{ animationDelay: "0.1s" }}
-        >
-          <div className="border-2 border-[#1B4DBF]/40 border-dashed rounded-3xl p-6 md:p-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white/[0.04] backdrop-blur-sm border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl shadow-black/40">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <RegistroCard />
               <FormatosCard />
@@ -130,12 +126,9 @@ const HowItWorks = memo(() => {
         </div>
 
         {/* CTA button */}
-        <div
-          className="flex justify-center mt-10 animate-fade-in-up"
-          style={{ animationDelay: "0.2s" }}
-        >
+        <div className="flex justify-center mt-10">
           <Button
-            className="bg-[#1B4DBF] hover:bg-[#2a5dd4] text-white font-bold text-base px-8 py-4 rounded-full h-auto shadow-lg shadow-[#1B4DBF]/40 transition-all duration-200"
+            className="bg-[#1B4DBF] hover:bg-[#2a5dd4] hover:scale-105 text-white font-bold text-base px-10 py-4 rounded-full h-auto shadow-xl shadow-[#1B4DBF]/40 transition-all duration-200 active:scale-[0.98]"
             asChild
           >
             <Link to="/cadastro">

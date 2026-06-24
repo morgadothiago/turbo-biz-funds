@@ -138,12 +138,12 @@ const Testimonials = memo(() => {
 
   const TestimonialCard = memo(({ testimonial }: { testimonial: typeof TESTIMONIALS[number] }) => {
     return (
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/15 hover:shadow-lg transition-all duration-300">
-        <div className="mb-6">
-          <Quote className="w-10 h-10 text-white/20" />
+      <div className="bg-white/[0.06] backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/[0.10] hover:border-white/20 hover:shadow-xl hover:shadow-black/20 transition-all duration-300">
+        <div className="mb-5">
+          <Quote className="w-8 h-8 text-[#1B4DBF]/60" />
         </div>
 
-        <div className="flex gap-1 mb-6">
+        <div className="flex gap-1 mb-5">
           {[...Array(testimonial.rating)].map((_, i) => (
             <Star
               key={i}
@@ -152,12 +152,12 @@ const Testimonials = memo(() => {
           ))}
         </div>
 
-        <p className="text-white/70 leading-relaxed mb-8 italic">
+        <p className="text-white/75 leading-relaxed mb-8 italic text-[15px]">
           "{testimonial.content}"
         </p>
 
         <div className="flex items-center gap-4 mt-auto">
-          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 bg-white/10">
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#25D366]/40 ring-2 ring-[#25D366]/10 bg-white/10">
             <img
               src={testimonial.image}
               alt={testimonial.name}
@@ -190,13 +190,13 @@ const Testimonials = memo(() => {
     <section id="depoimentos" className="py-24 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-[#E5E7EB] text-sm font-medium mb-4">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-[#E5E7EB] text-sm font-semibold mb-5 uppercase tracking-widest">
             {t("landing", "testimonialsBadge")}
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl md:text-5xl font-black text-white mb-5 tracking-tight">
             {t("landing", "testimonialsTitle")}
           </h2>
-          <p className="text-lg text-white/60">
+          <p className="text-lg text-white/50">
             {t("landing", "testimonialsSubtitle")}
           </p>
         </div>
