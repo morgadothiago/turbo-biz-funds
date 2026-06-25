@@ -1,31 +1,85 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { storage } from "../storage";
 
-// Em dev: VITE_API_URL vazio → URL relativa → proxy do Vite encaminha para a API real (sem CORS)
-// Em produção: VITE_API_URL deve ser a URL completa da API
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
-
 
 export interface ApiError {
   message: string;
   status: number;
   code?: string;
+  errors?: Record<string, string[]> | string[];
+  details?: unknown;
+}
+
+// Extrai erro de qualquer shape de resposta do backend:
+// { message, code }
+// { error: "string" }
+// { error: { message, code } }
+// { errors: { field: [msgs] } }
+// { errors: ["msg1", "msg2"] }
+function extractApiError(error: AxiosError): ApiError {
+  // Sem resposta = rede / timeout / offline
+  if (!error.response) {
+    if (error.code === "ECONNABORTED" || error.message.toLowerCase().includes("timeout")) {
+      return { message: "Tempo de conexão esgotado. Verifique sua internet.", status: 0, code: "TIMEOUT" };
+    }
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      return { message: "Sem conexão com a internet.", status: 0, code: "OFFLINE" };
+    }
+    return { message: "Sem resposta do servidor. Tente novamente.", status: 0, code: "NETWORK_ERROR" };
+  }
+
+  const status = error.response.status;
+  const data = error.response.data as Record<string, unknown> | null | undefined;
+
+  if (!data) {
+    return { message: `Erro ${status}`, status };
+  }
+
+  // ── Extrai message ────────────────────────────────────────────────────────
+  const message: string =
+    (typeof data.message === "string" && data.message) ||
+    (typeof data.msg === "string" && data.msg) ||
+    (typeof data.error === "string" && data.error) ||
+    (typeof (data.error as Record<string, unknown>)?.message === "string"
+      ? ((data.error as Record<string, unknown>).message as string)
+      : "") ||
+    (Array.isArray(data.errors) && typeof data.errors[0] === "string"
+      ? (data.errors as string[]).join(". ")
+      : "") ||
+    error.message ||
+    "Erro desconhecido";
+
+  // ── Extrai code ───────────────────────────────────────────────────────────
+  const code: string | undefined =
+    (typeof data.code === "string" ? data.code : undefined) ||
+    (typeof data.errorCode === "string" ? data.errorCode : undefined) ||
+    (typeof (data.error as Record<string, unknown>)?.code === "string"
+      ? ((data.error as Record<string, unknown>).code as string)
+      : undefined);
+
+  // ── Extrai field-level errors (validação) ─────────────────────────────────
+  const errors: Record<string, string[]> | string[] | undefined =
+    !Array.isArray(data.errors) && typeof data.errors === "object" && data.errors !== null
+      ? (data.errors as Record<string, string[]>)
+      : Array.isArray(data.errors)
+      ? (data.errors as string[])
+      : undefined;
+
+  return { message, status, code, errors, details: data };
 }
 
 function createApiClient(): AxiosInstance {
   const instance = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
+    timeout: 30000,
   });
 
   instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const token = storage.getToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+      if (token) config.headers.Authorization = `Bearer ${token}`;
       return config;
     },
     (error) => Promise.reject(error)
@@ -33,23 +87,17 @@ function createApiClient(): AxiosInstance {
 
   instance.interceptors.response.use(
     (response) => response,
-    (error: AxiosError<{ message?: string; code?: string }>) => {
-      const status = error.response?.status;
-      const message =
-        error.response?.data?.message || error.message || "Erro desconhecido";
-      const code = error.response?.data?.code;
+    (error: AxiosError) => {
+      const apiError = extractApiError(error);
 
       const isAuthEndpoint = error.config?.url?.startsWith("/v1/auth/");
-      // Não força logout durante o fluxo de pagamento: o token pode expirar
-      // enquanto o usuário demora a pagar o Pix, e o polling de status/plano
-      // não deve te chutar pra /login no meio da confirmação.
-      const isPaymentFlow = window.location.pathname.startsWith("/pagamento");
-      if (status === 401 && !isAuthEndpoint && !isPaymentFlow) {
+      const isPaymentFlow = typeof window !== "undefined" && window.location.pathname.startsWith("/pagamento");
+
+      if (apiError.status === 401 && !isAuthEndpoint && !isPaymentFlow) {
         storage.clear();
         window.dispatchEvent(new CustomEvent("auth:session-expired"));
       }
 
-      const apiError: ApiError = { message, status: status ?? 0, code };
       return Promise.reject(apiError);
     }
   );
@@ -60,26 +108,13 @@ function createApiClient(): AxiosInstance {
 function createPublicApiClient(): AxiosInstance {
   const instance = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
+    timeout: 30000,
   });
 
   instance.interceptors.response.use(
     (response) => response,
-    (error: AxiosError<{ message?: string; code?: string; errors?: Record<string, string[]> }>) => {
-      const status = error.response?.status;
-      const data = error.response?.data;
-      const message = data?.message || error.message || "Erro desconhecido";
-      const code = data?.code;
-      const apiError: ApiError & { errors?: Record<string, string[]> } = {
-        message,
-        status: status ?? 0,
-        code,
-        errors: data?.errors,
-      };
-      return Promise.reject(apiError);
-    }
+    (error: AxiosError) => Promise.reject(extractApiError(error))
   );
 
   return instance;
