@@ -737,6 +737,7 @@ const Pagamento = () => {
       // Rejeita status não-aprovado mesmo que backend retorne 2xx
       const confirmData = (confirmRes as any)?.data ?? confirmRes as any;
       const confirmStatus = confirmData?.status as string | undefined;
+      const confirmMessage = confirmData?.message as string | undefined;
       if (confirmStatus && confirmStatus !== "approved" && confirmStatus !== "authorized") {
         const statusMsgMap: Record<string, string> = {
           declined:    "Cartão recusado pela operadora. Verifique os dados ou use outro cartão.",
@@ -745,9 +746,12 @@ const Pagamento = () => {
           failed:      "Falha no processamento. Tente novamente ou use o Pix.",
           cancelled:   "Pagamento cancelado. Tente novamente.",
         };
-        const msg = statusMsgMap[confirmStatus] ?? `Pagamento não confirmado (status: ${confirmStatus}). Tente novamente.`;
+        const friendlyMsg = statusMsgMap[confirmStatus] ?? `Pagamento não confirmado (status: ${confirmStatus}). Tente novamente.`;
+        // Inclui mensagem original do backend se existir e for diferente
+        const detail = confirmMessage && confirmMessage !== friendlyMsg ? ` (${confirmMessage})` : "";
+        const msg = friendlyMsg + detail;
         setCardError(msg);
-        toast.error(msg, { duration: 6000 });
+        toast.error(msg, { duration: 8000 });
         return;
       }
 
@@ -761,16 +765,34 @@ const Pagamento = () => {
       const e = err as { message?: string; status?: number; code?: string; response?: { data?: unknown } };
       let msg: string;
       let toastIcon: string | undefined;
-      if (e?.code === "CARD_DECLINED") { msg = "Cartão recusado pela operadora. Verifique os dados ou use outro cartão."; toastIcon = "💳"; }
-      else if (e?.code === "INSUFFICIENT_FUNDS") { msg = "Saldo insuficiente. Use outro cartão ou pague via Pix."; toastIcon = "💸"; }
-      else if (e?.code === "INVALID_CARD") { msg = "Dados do cartão inválidos. Verifique número, validade e CVV."; toastIcon = "❌"; }
-      else if (e?.code === "EXPIRED_CARD") { msg = "Cartão vencido. Use outro cartão."; toastIcon = "⏱️"; }
-      else if (e?.code === "ServiceUnavailableException" || e?.status === 503) { msg = "Serviço indisponível. Tente em alguns minutos ou use o Pix."; toastIcon = "⚠️"; }
-      else if (e?.status === 402) { msg = e.message ?? "Pagamento recusado pela operadora."; toastIcon = "💳"; }
-      else if (e?.status === 422) { msg = e.message ?? "Dados de pagamento inválidos. Verifique as informações."; toastIcon = "❌"; }
-      else { msg = e?.message ?? "Erro ao processar pagamento. Tente novamente."; toastIcon = "⚠️"; }
+
+      const rawMsg = e?.message ?? "";
+      const rawCode = e?.code ?? "";
+
+      // Checar código explícito do backend
+      if (rawCode === "CARD_DECLINED" || rawMsg.toLowerCase().includes("declin")) {
+        msg = "Cartão recusado pela operadora. Verifique os dados ou use outro cartão."; toastIcon = "💳";
+      } else if (rawCode === "INSUFFICIENT_FUNDS" || rawMsg.toLowerCase().includes("insufficient") || rawMsg.toLowerCase().includes("saldo")) {
+        msg = "Saldo insuficiente. Use outro cartão ou pague via Pix."; toastIcon = "💸";
+      } else if (rawCode === "INVALID_CARD" || rawMsg.toLowerCase().includes("invalid card") || rawMsg.toLowerCase().includes("cartão inválido")) {
+        msg = "Dados do cartão inválidos. Verifique número, validade e CVV."; toastIcon = "❌";
+      } else if (rawCode === "EXPIRED_CARD" || rawMsg.toLowerCase().includes("expired") || rawMsg.toLowerCase().includes("vencid")) {
+        msg = "Cartão vencido. Use outro cartão."; toastIcon = "⏱️";
+      } else if (rawCode === "ServiceUnavailableException" || e?.status === 503) {
+        msg = "Serviço indisponível. Tente em alguns minutos ou use o Pix."; toastIcon = "⚠️";
+      } else if (e?.status === 402) {
+        msg = rawMsg || "Pagamento recusado pela operadora."; toastIcon = "💳";
+      } else if (e?.status === 422) {
+        msg = rawMsg || "Dados de pagamento inválidos. Verifique as informações."; toastIcon = "❌";
+      } else if (e?.status === 404 || rawMsg.includes("user_not_found")) {
+        msg = "Erro interno: usuário não encontrado. Contate o suporte."; toastIcon = "❌";
+      } else {
+        // Mostrar mensagem real do backend se houver, senão fallback
+        msg = rawMsg || "Erro ao processar pagamento. Tente novamente."; toastIcon = "⚠️";
+      }
+
       setCardError(msg);
-      toast.error(`${toastIcon} ${msg}`, { duration: 7000 });
+      toast.error(`${toastIcon} ${msg}`, { duration: 8000 });
     } finally {
       setIsConfirming(false);
     }
