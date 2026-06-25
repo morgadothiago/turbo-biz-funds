@@ -50,7 +50,7 @@ function Header() {
           <MobileSidebarTrigger />
         </div>
         <div className="min-w-0">
-          <h1 className="text-[15px] font-bold text-gray-900 truncate leading-tight">
+          <h1 className="text-[15px] lg:text-base xl:text-lg font-bold text-gray-900 truncate leading-tight">
             {page.title}
           </h1>
           {page.subtitle && (
@@ -96,11 +96,11 @@ export default function UserLayout() {
       {show && <UserTutorial onComplete={complete} onSkip={skip} />}
 
       <div
-        className="h-screen flex p-2 sm:p-3 gap-2 sm:gap-3 overflow-hidden"
+        className="h-screen flex p-2 sm:p-3 lg:p-4 gap-2 sm:gap-3 lg:gap-4 overflow-hidden"
         style={{ background: "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)" }}
       >
         {/* Desktop sidebar flutuante */}
-        <aside className="hidden lg:flex w-[260px] shrink-0">
+        <aside className="hidden lg:flex w-[260px] xl:w-[280px] shrink-0">
           <UserSidebarContent />
         </aside>
 

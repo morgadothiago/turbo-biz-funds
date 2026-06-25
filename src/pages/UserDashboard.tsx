@@ -15,23 +15,23 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const DashboardSkeleton = () => (
-  <div className="p-4 sm:p-5 lg:p-7 space-y-5">
+  <div className="p-4 sm:p-5 lg:p-6 xl:p-8 space-y-4 lg:space-y-5">
     <div className="space-y-1.5">
       <Skeleton className="h-7 w-44" />
       <Skeleton className="h-4 w-64" />
     </div>
-    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-      {[1, 2, 3, 4].map((i) => (
+    <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
+      {[1, 2, 3].map((i) => (
         <Skeleton key={i} className="h-[110px] rounded-2xl" />
       ))}
     </div>
-    <div className="grid gap-4 lg:grid-cols-7">
-      <Skeleton className="h-72 lg:col-span-4 rounded-2xl" />
-      <Skeleton className="h-72 lg:col-span-3 rounded-2xl" />
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <Skeleton className="h-64 md:col-span-1 lg:col-span-4 rounded-2xl" />
+      <Skeleton className="h-64 md:col-span-1 lg:col-span-3 rounded-2xl" />
     </div>
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Skeleton className="h-72 rounded-2xl" />
-      <Skeleton className="h-72 rounded-2xl" />
+    <div className="grid gap-4 md:grid-cols-2">
+      <Skeleton className="h-64 rounded-2xl" />
+      <Skeleton className="h-64 rounded-2xl" />
     </div>
   </div>
 );
@@ -63,43 +63,42 @@ const UserDashboard = memo(() => {
   }
 
   return (
-    <div className="p-4 sm:p-5 lg:p-7 space-y-5">
+    <div className="p-4 sm:p-5 lg:p-6 xl:p-8 space-y-4 lg:space-y-5">
       {/* Greeting */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+        <h2 className="text-xl sm:text-2xl lg:text-2xl xl:text-3xl font-bold text-foreground tracking-tight">
           Olá, {firstName}! 👋
         </h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <p className="text-sm lg:text-[15px] text-muted-foreground mt-0.5">
           Aqui está o resumo das suas finanças deste mês
         </p>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+      {/* Stat cards — 2 cols mobile, 3 cols sm+ */}
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
         {dashboardData.stats.map((stat) => (
           <StatCard key={stat.id} stat={stat} />
         ))}
       </div>
 
-      {/* Charts */}
-      <div className="grid gap-4 lg:grid-cols-7">
-        <div className="lg:col-span-4">
+      {/* Charts — stack on mobile, side by side on md+ */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="md:col-span-1 lg:col-span-4">
           <ExpenseChart data={dashboardData.expensesByDay} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="md:col-span-1 lg:col-span-3">
           <CategoryChart data={dashboardData.categoryExpenses} />
         </div>
       </div>
 
-      {/* Recurrences by category */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      {/* Recurrences */}
+      <div className="grid gap-4 md:grid-cols-2">
         <RecurrenceChart />
         <MonthComparisonChart />
       </div>
 
-
       {/* Transactions + Goals */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <TransactionList transactions={dashboardData.recentTransactions} />
         <GoalsProgress goals={dashboardData.goals} />
       </div>
