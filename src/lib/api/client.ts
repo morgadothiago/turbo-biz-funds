@@ -38,6 +38,7 @@ function extractApiError(error: AxiosError): ApiError {
 
   // ── Extrai message ────────────────────────────────────────────────────────
   const message: string =
+    (typeof data.failureReason === "string" && data.failureReason) ||
     (typeof data.message === "string" && data.message) ||
     (typeof data.msg === "string" && data.msg) ||
     (typeof data.error === "string" && data.error) ||

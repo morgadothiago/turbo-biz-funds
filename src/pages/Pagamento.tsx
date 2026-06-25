@@ -737,7 +737,8 @@ const Pagamento = () => {
       // Rejeita status não-aprovado mesmo que backend retorne 2xx
       const confirmData = (confirmRes as any)?.data ?? confirmRes as any;
       const confirmStatus = confirmData?.status as string | undefined;
-      const confirmMessage = confirmData?.message as string | undefined;
+      // Backend envia o motivo do erro no campo failureReason
+      const failureReason = (confirmData?.failureReason ?? confirmData?.message ?? "") as string;
       if (confirmStatus && confirmStatus !== "approved" && confirmStatus !== "authorized") {
         const statusMsgMap: Record<string, string> = {
           declined:    "Cartão recusado pela operadora. Verifique os dados ou use outro cartão.",
@@ -747,8 +748,7 @@ const Pagamento = () => {
           cancelled:   "Pagamento cancelado. Tente novamente.",
         };
         const friendlyMsg = statusMsgMap[confirmStatus] ?? `Pagamento não confirmado (status: ${confirmStatus}). Tente novamente.`;
-        // Inclui mensagem original do backend se existir e for diferente
-        const detail = confirmMessage && confirmMessage !== friendlyMsg ? ` (${confirmMessage})` : "";
+        const detail = failureReason && failureReason !== friendlyMsg ? ` (${failureReason})` : "";
         const msg = friendlyMsg + detail;
         setCardError(msg);
         toast.error(msg, { duration: 8000 });
@@ -762,11 +762,12 @@ const Pagamento = () => {
       try { await refreshUser(); } catch { /* ignora */ }
       navigate("/pagamento-sucesso", { state: { plan, method } });
     } catch (err: unknown) {
-      const e = err as { message?: string; status?: number; code?: string; response?: { data?: unknown } };
+      const e = err as { message?: string; status?: number; code?: string; failureReason?: string; details?: Record<string, unknown> };
       let msg: string;
       let toastIcon: string | undefined;
 
-      const rawMsg = e?.message ?? "";
+      // Backend pode enviar failureReason no body (via details) ou diretamente no erro
+      const rawMsg = e?.failureReason || (e?.details?.failureReason as string) || e?.message || "";
       const rawCode = e?.code ?? "";
 
       // Checar código explícito do backend
