@@ -110,6 +110,11 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Offset para navbar fixa (h-16 = 64px + folga) */
+  [id] {
+    scroll-margin-top: 80px;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
