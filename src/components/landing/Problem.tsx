@@ -79,7 +79,9 @@ function PhoneMockup() {
         <div className="rounded-[2rem] overflow-hidden bg-[#ECE5DD]" style={{ height: 520 }}>
           {/* Header */}
           <div className="bg-[#075E54] px-4 py-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#25D366] flex items-center justify-center text-white font-bold text-sm shrink-0">DC</div>
+            <div className="w-9 h-9 rounded-full bg-white overflow-hidden flex items-center justify-center shrink-0">
+              <img src="/logoweb.png" alt="DoutorCash" className="w-full h-full object-contain" />
+            </div>
             <div>
               <p className="text-white font-semibold text-sm leading-none">DoutorCash IA</p>
               <p className="text-white/70 text-xs mt-0.5">online agora</p>
