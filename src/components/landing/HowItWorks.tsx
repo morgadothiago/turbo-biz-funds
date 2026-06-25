@@ -43,12 +43,6 @@ const FormatosCard = memo(() => (
         <span className="text-sm text-gray-700 font-medium">Áudio</span>
       </div>
       <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2">
-        <span className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-base flex-shrink-0">
-          📷
-        </span>
-        <span className="text-sm text-gray-700 font-medium">Foto</span>
-      </div>
-      <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-3 py-2">
         <span className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-base flex-shrink-0">
           ✍️
         </span>

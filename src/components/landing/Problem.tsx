@@ -230,7 +230,7 @@ const Problem = memo(() => {
                 {t("landing", "organizedLifeClosing")}
               </p>
               <div className="mt-8 flex flex-col gap-3 lg:items-start items-center">
-                {["Registre gastos por texto, áudio ou foto", "Consulte saldo e metas na hora", "Receba relatórios automáticos todo mês"].map(f => (
+                {["Registre gastos por texto ou áudio", "Consulte saldo e metas na hora", "Receba relatórios automáticos todo mês"].map(f => (
                   <div key={f} className="flex items-center gap-3 text-sm text-white/70">
                     <span className="w-5 h-5 rounded-full bg-[#25D366]/20 border border-[#25D366]/40 flex items-center justify-center text-[#25D366] text-xs font-bold shrink-0">✓</span>
                     {f}

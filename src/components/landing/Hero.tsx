@@ -175,7 +175,7 @@ const Hero = memo(() => {
           >
             Tenha um assistente financeiro trabalhando 24 horas para você.
             <br className="hidden md:block" />
-            Mande áudio, foto ou texto. Seu assistente financeiro resolve tudo pra você.
+            Mande áudio ou texto. Seu assistente financeiro resolve tudo pra você.
           </p>
 
           {/* CTA row */}

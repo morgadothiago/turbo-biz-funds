@@ -17,7 +17,7 @@ const FAQ = memo(() => {
     },
     {
       question: "Como funciona na prática?",
-      answer: "Super simples: você manda uma mensagem no WhatsApp dizendo 'gastei 50 no mercado', ou manda a foto do comprovante, ou até um áudio. O Assistente Financeiro entende, categoriza e salva pra você. Depois é só acessar o dashboard ou perguntar 'quanto gastei esse mês?' no próprio WhatsApp.",
+      answer: "Super simples: você manda uma mensagem no WhatsApp dizendo 'gastei 50 no mercado', ou até um áudio. O Assistente Financeiro entende, categoriza e salva pra você. Depois é só acessar o dashboard ou perguntar 'quanto gastei esse mês?' no próprio WhatsApp.",
     },
     {
       question: "Funciona com conta conjunta / casal?",
@@ -50,7 +50,7 @@ const FAQ = memo(() => {
     },
     {
       question: "How does it work in practice?",
-      answer: "Super simple: you send a WhatsApp message saying 'spent 50 at the market', or send a photo of the receipt, or even a voice note. The Financial Assistant understands, categorizes and saves it for you. Then just access the dashboard or ask 'how much did I spend this month?' on WhatsApp.",
+      answer: "Super simple: you send a WhatsApp message saying 'spent 50 at the market', or even a voice note. The Financial Assistant understands, categorizes and saves it for you. Then just access the dashboard or ask 'how much did I spend this month?' on WhatsApp.",
     },
     {
       question: "Does it work with joint account / couple?",
@@ -83,7 +83,7 @@ const FAQ = memo(() => {
     },
     {
       question: "¿Cómo funciona en la práctica?",
-      answer: "Súper simple: mandas un mensaje por WhatsApp diciendo 'gasté 50 en el mercado', o mandas la foto del recibo, o incluso un audio. La IA entiende, categoriza y guarda para ti. Luego solo accede al dashboard o pregunta 'cuánto gasté este mes?' en WhatsApp.",
+      answer: "Súper simple: mandas un mensaje por WhatsApp diciendo 'gasté 50 en el mercado', o incluso un audio. La IA entiende, categoriza y guarda para ti. Luego solo accede al dashboard o pregunta 'cuánto gasté este mes?' en WhatsApp.",
     },
     {
       question: "¿Funciona con cuenta conjunta / pareja?",

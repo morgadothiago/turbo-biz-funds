@@ -25,7 +25,7 @@ const Testimonials = memo(() => {
       role: "Mãe de 2 filhos, Rio de Janeiro",
       image: "/assets/images/avatar_female_2.png",
       rating: 5,
-      content: "Com criança pequena não tenho tempo pra nada. Mando foto da nota do mercado e pronto, tá registrado. Simples assim. Recomendo pra todas as mães!",
+      content: "Com criança pequena não tenho tempo pra nada. Mando um áudio rápido no WhatsApp e pronto, tá registrado. Simples assim. Recomendo pra todas as mães!",
     },
     {
       name: "Pedro Costa",
@@ -68,7 +68,7 @@ const Testimonials = memo(() => {
       role: "Mom of 2, Rio de Janeiro",
       image: "/assets/images/avatar_female_2.png",
       rating: 5,
-      content: "With little kids I don't have time for anything. I send a photo of the grocery receipt and that's it, it's recorded. Simple as that. I recommend it to all moms!",
+      content: "With little kids I don't have time for anything. I send a quick voice note on WhatsApp and that's it, it's recorded. Simple as that. I recommend it to all moms!",
     },
     {
       name: "Pedro Costa",
@@ -111,7 +111,7 @@ const Testimonials = memo(() => {
       role: "Madre de 2 hijos, Río de Janeiro",
       image: "/assets/images/avatar_female_2.png",
       rating: 5,
-      content: "Con niños pequeños no tengo tiempo para nada. Mando foto del ticket del supermercado y listo, está registrado. Así de simple. Lo recomiendo a todas las mamás!",
+      content: "Con niños pequeños no tengo tiempo para nada. Mando un audio rápido por WhatsApp y listo, está registrado. Así de simple. Lo recomiendo a todas las mamás!",
     },
     {
       name: "Pedro Costa",
