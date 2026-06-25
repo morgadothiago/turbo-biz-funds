@@ -117,7 +117,7 @@ const HowItWorks = memo(() => {
         {/* 3-card container */}
         <div className="max-w-5xl mx-auto">
           <div className="bg-white/[0.04] backdrop-blur-sm border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl shadow-black/40">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <RegistroCard />
               <FormatosCard />
               <DashboardCard />

@@ -118,7 +118,7 @@ const FAQ = memo(() => {
           <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-[#E5E7EB] text-sm font-medium mb-4">
             {t("landing", "faqBadge")}
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6 tracking-tight">
             {t("landing", "faqTitle")}
           </h2>
           <p className="text-lg text-white/60">

@@ -150,10 +150,10 @@ const Hero = memo(() => {
       style={{ background: "transparent" }}
     >
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center pt-16 pb-24 sm:pb-44">
+        <div className="max-w-4xl mx-auto text-center pt-16 pb-24 sm:pb-40 lg:pb-52">
           {/* Headline */}
           <h1
-            className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight mb-5"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight mb-5"
             style={{
               ...fadeUp,
               animationDelay: "0s",
@@ -170,7 +170,7 @@ const Hero = memo(() => {
 
           {/* Subtitle */}
           <p
-            className="text-base md:text-lg text-[#94A3B8] max-w-xl mx-auto mb-10 leading-relaxed"
+            className="text-base md:text-lg lg:text-xl text-[#94A3B8] max-w-xl lg:max-w-2xl mx-auto mb-10 leading-relaxed"
             style={{ ...fadeUp, animationDelay: "0.12s" }}
           >
             Tenha um assistente financeiro trabalhando 24 horas para você.

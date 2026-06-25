@@ -29,7 +29,7 @@ const Pricing = memo(() => {
         </div>
 
         {/* Card */}
-        <div className="max-w-sm mx-auto">
+        <div className="max-w-sm sm:max-w-md mx-auto">
           <div
             className="relative rounded-3xl shadow-2xl p-8"
             style={{
@@ -144,7 +144,7 @@ const Pricing = memo(() => {
             </Link>
 
             {/* Trust row */}
-            <div className="flex items-center justify-center gap-5 mt-5">
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-5">
               {TRUST.map(({ icon: Icon, label }, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-xs text-white/40">
                   <Icon className="w-3.5 h-3.5" />

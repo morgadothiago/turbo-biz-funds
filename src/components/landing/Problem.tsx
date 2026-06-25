@@ -71,7 +71,7 @@ function ChatAnimation() {
 
 function PhoneMockup() {
   return (
-    <div className="relative mx-auto w-[280px] sm:w-[300px]">
+    <div className="relative mx-auto w-[240px] sm:w-[270px] md:w-[290px] lg:w-[300px]">
       {/* Glow */}
       <div className="absolute -inset-4 bg-[#25D366]/20 rounded-[3rem] blur-2xl" />
       {/* Phone frame */}
@@ -209,8 +209,9 @@ const Problem = memo(() => {
     <section className="py-16 md:py-24 bg-transparent">
       {/* Nova faixa intermediária - Sua vida organizada sem esforço */}
       <div className="mb-20">
-        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.03] backdrop-blur-sm rounded-3xl mx-4 md:mx-8 p-10 md:p-16 border border-white/10 shadow-2xl shadow-black/30">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.03] backdrop-blur-sm rounded-3xl p-8 sm:p-12 lg:p-16 border border-white/10 shadow-2xl shadow-black/30">
+          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
             {/* Text */}
             <div className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366]/15 border border-[#25D366]/30 text-[#25D366] text-sm font-semibold mb-6">
@@ -236,10 +237,11 @@ const Problem = memo(() => {
               </div>
             </div>
             {/* Phone */}
-            <div className="shrink-0">
+            <div className="shrink-0 mt-4 lg:mt-0">
               <PhoneMockup />
             </div>
           </div>
+        </div>
         </div>
       </div>
 
