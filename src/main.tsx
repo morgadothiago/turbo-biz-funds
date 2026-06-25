@@ -6,6 +6,21 @@ import "./index.css";
 
 inject();
 
+// Auto-reload on chunk load failure caused by new deploys
+window.addEventListener("unhandledrejection", (event) => {
+  const msg = event.reason?.message ?? "";
+  if (
+    msg.includes("Failed to fetch dynamically imported module") ||
+    msg.includes("Importing a module script failed") ||
+    msg.includes("error loading dynamically imported module")
+  ) {
+    const lastReload = parseInt(sessionStorage.getItem("chunk_reload_ts") || "0");
+    if (Date.now() - lastReload > 8000) {
+      sessionStorage.setItem("chunk_reload_ts", Date.now().toString());
+      window.location.reload();
+    }
+  }
+});
 
 const rootElement = document.getElementById("root");
 

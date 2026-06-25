@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import { Loader2 } from "lucide-react";
@@ -7,8 +7,9 @@ import { analytics } from "./lib/analytics";
 import { I18nProvider } from "./lib/i18n-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
+import { lazyWithRetry } from "./lib/lazyWithRetry";
 
-const AppShell = lazy(() => import("./AppShell"));
+const AppShell = lazyWithRetry(() => import("./AppShell"));
 
 function createQueryClient() {
   return new QueryClient({
