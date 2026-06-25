@@ -43,7 +43,7 @@ function Header() {
   };
 
   return (
-    <header className="rounded-2xl bg-white flex items-center justify-between px-4 py-3 gap-4 shadow-sm shrink-0">
+    <header className="rounded-2xl bg-white border border-[#e2e8f5] flex items-center justify-between px-4 py-3 gap-4 shadow-sm shrink-0">
       {/* Left: mobile trigger + page title */}
       <div className="flex items-center gap-3 min-w-0">
         <div className="lg:hidden shrink-0">
@@ -108,8 +108,8 @@ export default function UserLayout() {
         <div className="flex-1 flex flex-col gap-2 sm:gap-3 min-w-0 overflow-hidden">
           <Header />
 
-          {/* Card branco principal com scroll */}
-          <div className="flex-1 min-h-0 overflow-auto rounded-2xl bg-white">
+          {/* Card principal com scroll */}
+          <div className="flex-1 min-h-0 overflow-auto rounded-2xl bg-[#f4f6fb]">
             <Outlet />
           </div>
         </div>

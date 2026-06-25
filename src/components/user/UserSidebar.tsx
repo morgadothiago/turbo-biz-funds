@@ -150,7 +150,12 @@ function SidebarInner({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#1a3799] px-4 py-5 gap-0 rounded-r-3xl">
+    <div className="flex flex-col h-full px-4 py-5 gap-0 rounded-r-3xl relative overflow-hidden"
+      style={{ background: "linear-gradient(165deg, #1e45b5 0%, #1a3799 40%, #0f2260 100%)" }}
+    >
+      {/* subtle top-right glow */}
+      <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: "#4a7fff", transform: "translate(40%, -40%)" }} />
       {/* Logo */}
       <div className="mb-5">
         <SidebarLogo />
