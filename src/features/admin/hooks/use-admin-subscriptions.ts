@@ -12,6 +12,7 @@ export interface AdminSubscription {
   startDate: string;
   nextBilling: string;
   paymentMethod: string;
+  paymentMethodLabel: string;
   autoRenew: boolean;
 }
 
@@ -23,6 +24,28 @@ interface ApiAdminSubscriptionsResponse {
     trial: number;
     overdue: number;
   };
+}
+
+const PAYMENT_METHOD_MAP: Record<string, string> = {
+  pix: "PIX",
+  PIX: "PIX",
+  credit_card: "Cartão de Crédito",
+  creditcard: "Cartão de Crédito",
+  credit: "Cartão de Crédito",
+  card: "Cartão de Crédito",
+  cartao: "Cartão de Crédito",
+  cartão: "Cartão de Crédito",
+  debit_card: "Cartão de Débito",
+  boleto: "Boleto",
+};
+
+// Backend pode enviar amount em centavos (ex: 2990) ou reais (ex: 29.90)
+// Se for inteiro >= 100, assume centavos e divide por 100
+function normalizeAmount(raw: unknown): number {
+  const n = Number(raw);
+  if (!raw || isNaN(n)) return 0;
+  if (Number.isInteger(n) && n >= 100) return n / 100;
+  return n;
 }
 
 const STATUS_MAP: Record<string, string> = {
@@ -56,12 +79,13 @@ async function fetchAdminSubscriptions(): Promise<ApiAdminSubscriptionsResponse>
         avatar: displayName.slice(0, 2).toUpperCase(),
       },
       plan: s.plan ?? s.planName ?? s.planId ?? "N/A",
-      amount: s.amount ?? 0,
+      amount: normalizeAmount(s.amount ?? s.price ?? s.planPrice),
       interval: s.interval ?? "monthly",
       status: STATUS_MAP[s.status] ?? s.status ?? "N/A",
       startDate: s.startDate ?? s.createdAt ?? "",
       nextBilling: s.nextBilling ?? s.nextBillingAt ?? "",
-      paymentMethod: s.paymentMethod ?? "N/A",
+      paymentMethod: s.paymentMethod ?? s.payment_method ?? s.method ?? "",
+      paymentMethodLabel: PAYMENT_METHOD_MAP[s.paymentMethod ?? s.payment_method ?? s.method ?? ""] ?? (s.paymentMethod ? s.paymentMethod : "—"),
       autoRenew: s.autoRenew ?? false,
     };
   });

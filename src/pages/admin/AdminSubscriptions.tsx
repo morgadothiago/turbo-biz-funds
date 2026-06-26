@@ -263,6 +263,7 @@ export default function AdminSubscriptions() {
                 <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Cliente</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Plano</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Valor</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Pagamento</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Status</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Próxima cobrança</TableHead>
                 <TableHead className="w-12"></TableHead>
@@ -298,6 +299,27 @@ export default function AdminSubscriptions() {
                       </span>
                       {sub.amount > 0 && (
                         <span className="text-xs text-muted-foreground ml-1">/mês</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {sub.paymentMethod ? (
+                        <div className="flex items-center gap-1.5">
+                          {sub.paymentMethod.toLowerCase().includes("pix") ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-500/10 text-green-600 text-xs font-semibold border border-green-200">
+                              <CreditCard className="h-3 w-3" />
+                              PIX
+                            </span>
+                          ) : sub.paymentMethod.toLowerCase().includes("card") || sub.paymentMethod.toLowerCase().includes("credit") || sub.paymentMethod.toLowerCase().includes("cart") ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 text-xs font-semibold border border-blue-200">
+                              <CreditCard className="h-3 w-3" />
+                              Cartão
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">{sub.paymentMethodLabel}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </TableCell>
                     <TableCell>
