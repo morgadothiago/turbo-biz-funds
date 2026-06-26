@@ -1,6 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { AdminTutorial, useAdminTutorial } from "@/components/admin/AdminTutorial";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebarContent, AdminMobileTrigger } from "@/components/admin/AdminSidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -196,7 +195,7 @@ export default function AdminLayout() {
   const { show, complete, skip } = useAdminTutorial();
 
   return (
-    <SidebarProvider className="block">
+    <>
       <div
         className="h-screen flex p-3 gap-3 overflow-hidden"
         style={{ background: "radial-gradient(ellipse 80% 80% at 90% 70%, #2b00ff 0%, #08086e 30%, #06091c 62%)" }}
@@ -218,6 +217,6 @@ export default function AdminLayout() {
       </div>
 
       {show && <AdminTutorial onComplete={complete} onSkip={skip} />}
-    </SidebarProvider>
+    </>
   );
 }
