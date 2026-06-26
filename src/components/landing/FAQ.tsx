@@ -20,10 +20,6 @@ const FAQ = memo(() => {
       answer: "Super simples: você manda uma mensagem no WhatsApp dizendo 'gastei 50 no mercado', ou até um áudio. O Assistente Financeiro entende, categoriza e salva pra você. Depois é só acessar o dashboard ou perguntar 'quanto gastei esse mês?' no próprio WhatsApp.",
     },
     {
-      question: "Serve para empresa?",
-      answer: "Não, nosso foco é 100% em finanças pessoais. Criamos uma experiência pensada para pessoas que querem organização simples, não para empresas que precisam de contabilidade ou ERP.",
-    },
-    {
       question: "Meus dados estão seguros?",
       answer: "Sim! Usamos criptografia de ponta a ponta e servidores seguros. Seus dados financeiros nunca são compartilhados com terceiros. Você pode exportar ou deletar tudo a qualquer momento.",
     },
@@ -37,10 +33,6 @@ const FAQ = memo(() => {
       answer: "Super simple: you send a WhatsApp message saying 'spent 50 at the market', or even a voice note. The Financial Assistant understands, categorizes and saves it for you. Then just access the dashboard or ask 'how much did I spend this month?' on WhatsApp.",
     },
     {
-      question: "Does it work for companies?",
-      answer: "No, our focus is 100% on personal finances. We created an experience designed for people who want simple organization, not for companies that need accounting or ERP.",
-    },
-    {
       question: "Is my data secure?",
       answer: "Yes! We use end-to-end encryption and secure servers. Your financial data is never shared with third parties. You can export or delete everything at any time.",
     },
@@ -52,10 +44,6 @@ const FAQ = memo(() => {
     {
       question: "¿Cómo funciona en la práctica?",
       answer: "Súper simple: mandas un mensaje por WhatsApp diciendo 'gasté 50 en el mercado', o incluso un audio. La IA entiende, categoriza y guarda para ti. Luego solo accede al dashboard o pregunta 'cuánto gasté este mes?' en WhatsApp.",
-    },
-    {
-      question: "¿Sirve para empresa?",
-      answer: "No, nuestro enfoque es 100% en finanzas personales. Creamos una experiencia pensada para personas que quieren organización simple, no para empresas que necesitan contabilidad o ERP.",
     },
     {
       question: "¿Mis datos están seguros?",
