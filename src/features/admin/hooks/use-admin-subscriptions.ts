@@ -71,21 +71,45 @@ async function fetchAdminSubscriptions(): Promise<ApiAdminSubscriptionsResponse>
   const raw: any[] = Array.isArray(res) ? res : (res?.data ?? []);
   const data: AdminSubscription[] = raw.map((s: any) => {
     const displayName = s.user?.name ?? s.userName ?? s.name ?? "N/A";
+
+    // Amount: tenta raíz → nested plan → nested payment → nested planDetails
+    const rawAmount =
+      s.amount ??
+      s.price ??
+      s.planPrice ??
+      s.plan?.price ??
+      s.plan?.amount ??
+      s.planDetails?.price ??
+      s.planDetails?.amount ??
+      s.payment?.amount ??
+      s.lastPayment?.amount ??
+      0;
+
+    // PaymentMethod: tenta raíz → nested payment → nested lastPayment
+    const rawMethod =
+      s.paymentMethod ??
+      s.payment_method ??
+      s.method ??
+      s.payment?.method ??
+      s.payment?.paymentMethod ??
+      s.payment?.payment_method ??
+      s.lastPayment?.method ??
+      s.lastPayment?.paymentMethod ??
+      "";
+
     return {
       id: s.id ?? "",
-      user: s.user ?? {
-        name: displayName,
-        email: s.user?.email ?? s.userEmail ?? s.email ?? "N/A",
-        avatar: displayName.slice(0, 2).toUpperCase(),
-      },
-      plan: s.plan ?? s.planName ?? s.planId ?? "N/A",
-      amount: normalizeAmount(s.amount ?? s.price ?? s.planPrice),
+      user: s.user
+        ? { name: s.user.name ?? displayName, email: s.user.email ?? "N/A", avatar: (s.user.name ?? displayName).slice(0, 2).toUpperCase() }
+        : { name: displayName, email: s.userEmail ?? s.email ?? "N/A", avatar: displayName.slice(0, 2).toUpperCase() },
+      plan: (typeof s.plan === "string" ? s.plan : s.plan?.name ?? s.plan?.id ?? s.planName ?? s.planId) ?? "N/A",
+      amount: normalizeAmount(rawAmount),
       interval: s.interval ?? "monthly",
       status: STATUS_MAP[s.status] ?? s.status ?? "N/A",
       startDate: s.startDate ?? s.createdAt ?? "",
       nextBilling: s.nextBilling ?? s.nextBillingAt ?? "",
-      paymentMethod: s.paymentMethod ?? s.payment_method ?? s.method ?? "",
-      paymentMethodLabel: PAYMENT_METHOD_MAP[s.paymentMethod ?? s.payment_method ?? s.method ?? ""] ?? (s.paymentMethod ? s.paymentMethod : "—"),
+      paymentMethod: rawMethod,
+      paymentMethodLabel: PAYMENT_METHOD_MAP[rawMethod] ?? (rawMethod || "—"),
       autoRenew: s.autoRenew ?? false,
     };
   });
