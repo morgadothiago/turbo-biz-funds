@@ -133,8 +133,8 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
         bgColor: "bg-primary/10",
       },
       {
-        title: "Clientes Pagos",
-        value: Number(paidUsers).toLocaleString("pt-BR"),
+        title: "Clientes Ativos",
+        value: Number(s.activeUsers ?? s.activeClients ?? activeUsersCount).toLocaleString("pt-BR"),
         change: "",
         trend: "up",
         icon: Sparkles,
@@ -166,7 +166,13 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
 
     // Processa clientes recentes da API
     const usersData = extractData<{ data: any[] } | any[]>(usersRes);
-    const recentClients: AdminRecentClient[] = ((usersData?.data ?? usersData ?? []) as any[]).map((u: any) => ({
+    const allUsers: any[] = (usersData?.data ?? usersData ?? []) as any[];
+    // Conta usuários ativos a partir da lista real (API stats não retorna esse campo)
+    const activeUsersCount = allUsers.filter((u: any) =>
+      u.status === "active" || u.status === "ativo"
+    ).length;
+
+    const recentClients: AdminRecentClient[] = allUsers.map((u: any) => ({
       name: u.name || u.email || "Usuário",
       email: u.email || "",
       plan: u.plan || "free",
