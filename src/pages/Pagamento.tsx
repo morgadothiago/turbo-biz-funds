@@ -198,6 +198,7 @@ function CardForm({
   installmentOptions,
   holderDocument,
   onInstallmentsChange,
+  defaultInstallments = 12,
 }: {
   isLoading: boolean;
   onSubmit: (data: { paymentToken: string; holderName: string; installments: number; cpf: string }) => void;
@@ -205,13 +206,14 @@ function CardForm({
   installmentOptions: number[];
   holderDocument?: string;
   onInstallmentsChange?: (n: number) => void;
+  defaultInstallments?: number;
 }) {
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [cpf, setCpf] = useState(holderDocument ?? "");
-  const [installments, setInstallments] = useState(1);
+  const [installments, setInstallments] = useState(defaultInstallments);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [brand, setBrand] = useState<CardBrand>(null);
   const [tokenizing, setTokenizing] = useState(false);
@@ -602,20 +604,14 @@ const Pagamento = () => {
     features: [],
   };
 
-  const isAnnualPlan = plan.includes("annual") || plan.includes("anual") || planInfo.period === "/ano";
-  const installmentOptions = isAnnualPlan ? INSTALLMENTS_ANNUAL : INSTALLMENTS_MONTHLY;
+  // Único plano: Pro — PIX R$ 99,90 | Cartão 12x de R$ 12,90 (R$ 154,80 total)
+  const installmentOptions = INSTALLMENTS_ANNUAL; // sempre até 12x
 
   const [method, setMethod] = useState<PaymentMethod>("pix");
   const [selectedInstallments, setSelectedInstallments] = useState(1);
 
-  // Planos anuais têm preço fixo (PIX desconto vs cartão); mensais usam preço real da API
-  const monthlyPrice = typeof planInfo.price === "number"
-    ? planInfo.price
-    : parseFloat(String(planInfo.price).replace(/[^\d.]/g, "")) || 29.9;
-  const effectivePrice = isAnnualPlan
-    ? method === "pix" ? 99.9 : 154.8
-    : monthlyPrice;
-  const effectivePeriod = isAnnualPlan ? "/ano" : "/mês";
+  const effectivePrice = method === "pix" ? 99.9 : 154.8;
+  const effectivePeriod = "/ano";
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [pixIntentFailed, setPixIntentFailed] = useState(false);
@@ -1020,7 +1016,7 @@ const Pagamento = () => {
                   </svg>
                   Pix
                 </button>
-                <button type="button" onClick={() => setMethod("cartao")} className={METHOD_BTN(method === "cartao")}>
+                <button type="button" onClick={() => { setMethod("cartao"); setSelectedInstallments(12); setCardError(null); }} className={METHOD_BTN(method === "cartao")}>
                   <CreditCard className="w-4 h-4" />
                   Cartão de Crédito
                 </button>
@@ -1028,7 +1024,7 @@ const Pagamento = () => {
 
               {method === "cartao" ? (
                 <>
-                  <CardForm isLoading={isConfirming} onSubmit={handleCardSubmit} planInfo={{ ...planInfo, price: effectivePrice }} installmentOptions={installmentOptions} holderDocument={user?.cpf} onInstallmentsChange={setSelectedInstallments} />
+                  <CardForm isLoading={isConfirming} onSubmit={handleCardSubmit} planInfo={{ ...planInfo, price: effectivePrice }} installmentOptions={installmentOptions} holderDocument={user?.cpf} onInstallmentsChange={setSelectedInstallments} defaultInstallments={12} />
                   {cardError && (
                     <div className="mt-4 flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
                       <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
