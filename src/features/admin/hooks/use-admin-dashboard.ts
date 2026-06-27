@@ -90,10 +90,21 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
 
     const statsData = extractData<any>(statsRes);
     const s = statsData?.data ?? statsData ?? {};
-    
+
+    // API retorna: totalRevenue, newUsers, conversionRate, revenueGrowth, usersGrowth, paidUsers
+    // Aliases para compatibilidade:
+    const mrr         = s.mrr         ?? s.totalRevenue ?? 0;
+    const totalUsers  = s.totalClients ?? s.totalUsers  ?? s.newUsers ?? 0;
+    const paidUsers   = s.paidUsers    ?? s.activeClients ?? s.activeUsers ?? 0;
+    const convRate    = s.conversionRate ?? 0;
+    const convDisplay = typeof convRate === "number" ? `${convRate.toFixed(1)}%` : String(convRate);
+    const mrrDisplay  = typeof mrr === "number"
+      ? `R$ ${(mrr).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+      : "R$ 0";
+
     const plansData = extractData<{ data: ApiAdminPlanSummary[] } | ApiAdminPlanSummary[]>(plansRes);
     const plans: ApiAdminPlanSummary[] = (plansData?.data ?? plansData ?? []) as ApiAdminPlanSummary[];
-    
+
     const planDistribution: AdminPlanDistribution[] = plans
       .filter((p: any) => p.subscribers > 0)
       .map((p: any, i: number) => ({
@@ -105,26 +116,26 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
     const stats: AdminStat[] = [
       {
         title: "Receita Mensal (MRR)",
-        value: typeof s.mrr === "number" ? `R$ ${s.mrr.toLocaleString("pt-BR")}` : "R$ 0",
-        change: s.mrrChange ?? "0%",
-        trend: s.mrrTrend ?? "up",
+        value: mrrDisplay,
+        change: `${s.revenueGrowth ?? s.mrrChange ?? 0}%`,
+        trend: (s.revenueGrowth ?? 0) >= 0 ? "up" : "down",
         icon: DollarSign,
         color: "text-success",
         bgColor: "bg-success/10",
       },
       {
         title: "Total de Clientes",
-        value: Number(s.totalClients ?? s.totalUsers ?? 0).toLocaleString("pt-BR"),
-        change: s.clientsChange ?? "0%",
-        trend: "up",
+        value: Number(totalUsers).toLocaleString("pt-BR"),
+        change: `${s.usersGrowth ?? s.clientsChange ?? 0}%`,
+        trend: (s.usersGrowth ?? 0) >= 0 ? "up" : "down",
         icon: Users,
         color: "text-primary",
         bgColor: "bg-primary/10",
       },
       {
-        title: "Clientes Ativos",
-        value: Number(s.activeClients ?? s.activeUsers ?? 0).toLocaleString("pt-BR"),
-        change: s.activeChange ?? "0%",
+        title: "Clientes Pagos",
+        value: Number(paidUsers).toLocaleString("pt-BR"),
+        change: "",
         trend: "up",
         icon: Sparkles,
         color: "text-accent",
@@ -132,25 +143,25 @@ async function fetchAdminDashboard(): Promise<AdminDashboardData> {
       },
       {
         title: "Taxa de Conversão",
-        value: s.conversionRate ?? "0%",
-        change: s.conversionChange ?? "0%",
-        trend: s.conversionTrend ?? "up",
+        value: convDisplay,
+        change: `${s.conversionGrowth ?? s.conversionChange ?? 0}%`,
+        trend: (s.conversionGrowth ?? 0) >= 0 ? "up" : "down",
         icon: TrendingUp,
         color: "text-warning",
         bgColor: "bg-warning/10",
       },
     ];
 
-    // Deriva dados de receita a partir do MRR dos planos (dados reais da API)
-    const totalMRR = plans.reduce((sum, plan) => sum + (plan.mrr || 0), 0);
-    const totalSubscribers = plans.reduce((sum, plan) => sum + (plan.subscribers || 0), 0);
-    
-    // Cria dados mensais baseados no MRR atual (enquanto endpoint /v1/admin/revenue não existe)
+    // MRR real dos planos
+    const totalMRR = plans.reduce((sum: number, plan: any) => sum + (plan.mrr || 0), 0);
+    const totalSubscribers = plans.reduce((sum: number, plan: any) => sum + (plan.subscribers || 0), 0);
+
+    // 6 meses simulados baseados no MRR real atual
     const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
     const receitaData: AdminRevenuePoint[] = meses.map((month, i) => ({
       month,
-      receita: Math.round(totalMRR * (0.8 + i * 0.04)), // Simula crescimento baseado no MRR real
-      clientes: Math.round(totalSubscribers * (0.8 + i * 0.05)), // Simula crescimento de usuários
+      receita: Math.round(totalMRR * (0.7 + i * 0.06) * 100) / 100,
+      clientes: Math.max(1, Math.round(totalSubscribers * (0.7 + i * 0.06))),
     }));
 
     // Processa clientes recentes da API
