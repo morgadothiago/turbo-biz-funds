@@ -5,7 +5,6 @@ import {
   Settings,
   LogOut,
   Bell,
-  HelpCircle,
   Receipt,
   Building,
   BarChart2,
@@ -41,7 +40,6 @@ const mainMenuItems: MenuItem[] = [
 const systemMenuItems: MenuItem[] = [
   { title: "Notificações", url: "/admin/notificacoes", icon: Bell },
   { title: "Configurações", url: "/admin/configuracoes", icon: Settings },
-  { title: "Suporte", url: "/admin/suporte", icon: HelpCircle },
 ];
 
 function NavItem({ item, end = false, onClick }: { item: MenuItem; end?: boolean; onClick?: () => void }) {

@@ -21,7 +21,6 @@ const ADMIN_PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   "/admin/assinaturas": { title: "Assinaturas", subtitle: "Gerencie as assinaturas" },
   "/admin/planos": { title: "Planos", subtitle: "Configure os planos" },
   "/admin/notificacoes": { title: "Notificações", subtitle: "Central de avisos" },
-  "/admin/suporte": { title: "Suporte", subtitle: "Ajuda e contato" },
   "/admin/configuracoes": { title: "Configurações", subtitle: "" },
 };
 
