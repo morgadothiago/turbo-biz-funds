@@ -608,10 +608,13 @@ const Pagamento = () => {
   const [method, setMethod] = useState<PaymentMethod>("pix");
   const [selectedInstallments, setSelectedInstallments] = useState(1);
 
-  // Preços hardcoded — ignora valor retornado pela API (pode estar desatualizado)
+  // Planos anuais têm preço fixo (PIX desconto vs cartão); mensais usam preço real da API
+  const monthlyPrice = typeof planInfo.price === "number"
+    ? planInfo.price
+    : parseFloat(String(planInfo.price).replace(/[^\d.]/g, "")) || 29.9;
   const effectivePrice = isAnnualPlan
     ? method === "pix" ? 99.9 : 154.8
-    : 99.9;
+    : monthlyPrice;
   const effectivePeriod = isAnnualPlan ? "/ano" : "/mês";
   const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
