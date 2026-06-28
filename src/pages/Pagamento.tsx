@@ -942,7 +942,7 @@ const Pagamento = () => {
                       Selecionado
                     </span>
                   </div>
-                  {isAnnualPlan && method === "cartao" ? (
+                  {method === "cartao" ? (
                     <div className="mb-2">
                       <div className="flex items-baseline gap-1">
                         <span className="text-xl sm:text-3xl font-bold text-green-400">12x de R$12,90</span>
@@ -953,12 +953,10 @@ const Pagamento = () => {
                   ) : (
                     <div className="flex items-baseline gap-1 mb-2">
                       <span className="text-xl sm:text-3xl font-bold text-green-400">{toDisplay(effectivePrice)}</span>
-                      {!(isAnnualPlan && method === "pix") && (
-                        <span className="text-sm text-[#94A3B8]">{effectivePeriod}</span>
-                      )}
+                      <span className="text-sm text-[#94A3B8]">{effectivePeriod}</span>
                     </div>
                   )}
-                  {isAnnualPlan && method === "pix" && (
+                  {method === "pix" && (
                     <p className="text-xs text-[#E5E7EB]/80 mb-1">À vista no PIX</p>
                   )}
                   <p className="text-xs text-[#94A3B8] mb-3">{planInfo.description}</p>
